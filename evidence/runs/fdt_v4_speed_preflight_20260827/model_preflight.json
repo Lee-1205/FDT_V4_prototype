@@ -1,0 +1,9 @@
+{
+  "model_type": "fdt_v4",
+  "parameter_count": 424474072,
+  "parameter_class": "426M",
+  "vocab_size": 24576,
+  "pad_token_id": 0,
+  "eos_token_id": 2,
+  "meta_device": true
+}

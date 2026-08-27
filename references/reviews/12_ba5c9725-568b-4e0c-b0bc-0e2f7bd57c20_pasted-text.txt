@@ -1,0 +1,1041 @@
+# FDT NEXT-GENERATION — FINAL VERIFICATION / AUDIT PROMPT
+
+현재 private GitHub repository에 구현된 차세대 FDT 전체를 마지막으로 검수하라.
+
+이 작업의 목적은 새로운 기능을 추가하는 것이 아니라,
+
+1. 구현이 설계 의도대로 되었는지
+2. 기존 FDT 핵심 구조가 손상되지 않았는지
+3. Exact Memory가 실제로 lossless identity channel로 작동하는지
+4. 자유 생성 반복 붕괴가 개선되었는지
+5. RoPE/장문 컨텍스트가 실제로 정상 작동하는지
+6. incremental FDT의 장문 decode cost 특성이 유지되는지
+7. GPU 성능 측정이 실제 현재 연구 장비에서 재검증되었는지
+8. 평가와 결과가 재현 가능한지
+
+를 엄격하게 확인하는 것이다.
+
+절대로 결과를 좋게 보이도록 기준을 바꾸지 말고,
+실패하면 실패로 보고하라.
+
+현재 repository는 PRIVATE 상태를 유지한다.
+visibility를 변경하거나 public release를 만들지 마라.
+
+============================================================
+0. 절대 원칙
+============================================================
+
+현재 FDT의 핵심 정체성은 유지되어야 한다.
+
+기본 구조:
+
+- causal language model
+- local causal attention
+- local window W=64
+- fuzzy semantic anchors
+- 256 anchors / anchor layer
+- router_dim=256
+- top-k=8
+- cosine membership
+- temperature=0.25
+- 격층 fuzzy-anchor 구조
+- incremental anchor numerator/mass state
+- SwiGLU
+- RMSNorm
+- tied embedding / LM head
+
+이번 버전에서 허용된 주요 변경은:
+
+- learned absolute positional embedding -> RoPE
+- Exact Episodic Memory
+- Exact-Need / Copy mechanism
+- Copy Cursor
+- repetition/generated stability 개선
+- EOS/loop objective 개선
+- long-context support
+- runtime/kernel optimization
+
+다음은 이번 검증 과정에서 새로 도입하지 마라:
+
+- adaptive top-k
+- hierarchical anchor routing
+- anchor 수 변경
+- router_dim 변경
+- 새로운 MoE 구조
+- fuzzy semantic routing의 의미 변경
+- 별도의 독립 specialist 모델
+- 임의의 모델 축소
+
+특히 FDT를 dense Transformer처럼 바꾸는 방식으로 문제를 해결하지 마라.
+
+============================================================
+1. Git / Repository 상태부터 고정
+============================================================
+
+검증 시작 전에 다음을 저장하라.
+
+- git commit SHA
+- branch
+- git status
+- 모든 config hash
+- Python version
+- PyTorch version
+- CUDA version
+- GPU 이름
+- GPU compute capability
+- system RAM
+- OS
+- tokenizer hash
+- checkpoint SHA-256
+- model parameter count
+
+working tree가 dirty라면 무엇이 변경됐는지 기록하라.
+
+검증 도중 코드가 수정된다면:
+
+1. 수정 이유 기록
+2. 별도 commit
+3. 수정 전/후 결과 모두 보존
+
+을 수행한다.
+
+기존 결과를 덮어쓰지 마라.
+
+결과 디렉터리는 immutable하게 관리한다.
+
+예:
+
+artifacts/final_audit/<timestamp>_<commit>/
+
+============================================================
+2. 구조 검증
+============================================================
+
+실제 source code를 읽어서 현재 모델 구조를 자동 추출하라.
+
+문서만 믿지 마라.
+
+다음을 확인한다.
+
+- hidden dimension
+- layer count
+- attention head count
+- local window
+- anchor layer indices
+- anchor count
+- top-k
+- router dimension
+- cosine routing 여부
+- temperature
+- SwiGLU
+- RMSNorm
+- dropout
+- embedding/head tying
+- position mechanism
+- Exact Memory configuration
+- exact chunk size
+- candidate cap
+- exact reranker dimension
+- copy mechanism
+- repetition configuration
+
+문서와 코드가 다르면 CODE가 실제 구현이며,
+문서 불일치로 별도 FAIL/WARNING을 기록한다.
+
+특히 기존 fuzzy routing 핵심 설정이
+의도치 않게 바뀌지 않았는지 확인한다.
+
+============================================================
+3. RoPE 검증
+============================================================
+
+기존 learned absolute positional embedding이 실제로 제거되었는지 확인하라.
+
+RoPE는 우선 local attention의 Q/K에 적용되어야 한다.
+
+확인할 것:
+
+- Q/K rotary 적용
+- position offset이 incremental decode에서도 올바름
+- cache decode position과 full recompute position이 동일
+- chunk/stateful processing에서 position reset이 발생하지 않음
+- fuzzy anchor router에 의도치 않은 RoPE rotation이 직접 적용되지 않음
+- 2K를 넘는 position index가 정상적으로 처리됨
+
+다음 context에서 smoke/integrity test:
+
+512
+1024
+2048
+4096
+8192
+
+가능하면:
+
+16384
+
+단, 16K가 현재 하드웨어 한계로 불가능하면 OOM을 숨기지 말고
+정확한 peak VRAM과 실패 위치를 기록한다.
+
+RoPE를 사용한다고 해서
+"훈련 길이를 넘어도 무조건 일반화한다"고 가정하지 마라.
+
+2K / 4K / 8K / 16K에서 실제 성능을 각각 측정한다.
+
+============================================================
+4. Fuzzy Semantic Memory 검증
+============================================================
+
+기존 FDT semantic state가 유지되어야 한다.
+
+각 anchor layer에 대해 다음을 검사:
+
+- numerator
+- mass
+- update ordering
+- causal prefix exclusion
+- long summary
+- recent summary
+- recency weighting
+- selected anchor membership
+- top-k sparsity
+- cache state consistency
+
+미래 token이 anchor state에 유입되는 causal leakage가 없어야 한다.
+
+random small model에서:
+
+full recompute
+
+vs
+
+incremental cached decode
+
+를 비교한다.
+
+FP32 integrity test를 canonical reference로 사용한다.
+
+logit max absolute error,
+token agreement,
+anchor-state agreement를 기록한다.
+
+BF16 결과는 별도로 측정하되
+FP32 결과와 혼동하지 않는다.
+
+============================================================
+5. Exact Episodic Memory는 필수 기능이다
+============================================================
+
+Exact Memory는 optional gimmick이 아니다.
+
+FDT의 fuzzy semantic state가 의미적 관계를 담당하고,
+
+Exact Memory가
+
+- 숫자
+- arbitrary alphanumeric sequence
+- UUID-like sequence
+- hash-like sequence
+- identifiers
+- quoted values
+- JSON scalar values
+- code identifiers/signatures
+- 의미가 거의 없는 문자열
+
+의 정확한 identity를 보존하도록 설계되었다.
+
+원칙:
+
+Meaning = Fuzzy
+Identity = Exact
+
+구현이 이 원칙과 일치하는지 검사하라.
+
+============================================================
+6. Exact Memory 내부 구조 검증
+============================================================
+
+Exact Memory가 raw token ID를 lossless하게 저장하는지 확인한다.
+
+검사:
+
+- token append
+- position/span metadata
+- chunk boundary
+- anchor index/posting
+- candidate retrieval
+- reranker
+- exact-need gate
+- copy distribution
+- copy cursor
+- cursor termination
+- generation 복귀
+
+Exact Memory가 hidden representation만 저장하고
+원래 token identity를 버리는 방식이면 FAIL이다.
+
+Exact Memory search가 매 decode마다
+전체 context O(N)을 scan하는 구조이면 FAIL/WARNING이다.
+
+기존 fuzzy top-k routing을 1차 index로 재사용하는 것이 기본 설계다.
+
+candidate chunk 수에는 bounded cap이 있어야 한다.
+
+============================================================
+7. Copy Cursor 검증
+============================================================
+
+한 번 exact span을 찾은 뒤
+매 token마다 전체 retrieval을 다시 수행해서는 안 된다.
+
+예:
+
+source_start
+source_end
+cursor
+
+를 유지하면서 연속 copy가 가능해야 한다.
+
+다음 문자열을 포함한 deterministic tests를 만든다.
+
+4 chars
+8 chars
+16 chars
+32 chars
+64 chars
+
+각각:
+
+digits
+alphanumeric
+hex
+UUID-like
+mixed identifier
+repeated-character sequence
+
+예:
+
+1111222233334444
+
+처럼 정상적인 반복이 identity에 포함되는 경우도 반드시 테스트한다.
+
+Copy Mode에서 repetition penalty 때문에
+정답 token이 억제되어서는 안 된다.
+
+============================================================
+8. Exact-copy Evaluation Matrix
+============================================================
+
+각 길이에 대해 최소한 다음을 기록한다.
+
+4 / 8 / 16 / 32 / 64
+
+그리고 target 위치:
+
+context front
+context middle
+context end
+
+distractor 수:
+
+0
+1
+4
+16
+
+각 test에서:
+
+- whole-sequence exact
+- character accuracy
+- token accuracy
+- edit distance
+- first divergence
+- teacher-forced gold token rank
+- teacher-forced gold probability
+- free-generation result
+- Exact Memory retrieval success
+- Copy Gate activation
+- candidate chunk count
+
+를 기록한다.
+
+이 평가를 통해 다음을 분리해야 한다.
+
+A.
+representation 단계에서 이미 gold token을 모르는가
+
+B.
+gold token은 알고 있지만 free-running generation에서
+trajectory가 붕괴하는가
+
+C.
+Exact Memory retrieval은 성공했지만
+copy/output controller가 실패하는가
+
+이 세 문제를 하나로 묶지 마라.
+
+============================================================
+9. Repetition / Exposure Bias 검증
+============================================================
+
+기존의 핵심 이상 현상:
+
+teacher-forced 성능이 좋은 영역에서도
+free generation loop가 심하게 발생할 수 있었다.
+
+따라서 teacher-forced PPL 하나로 모델을 평가하지 마라.
+
+필수 측정:
+
+- teacher-forced PPL
+- BPB
+- free-generation trigram repetition
+- loop-free rate
+- first loop position
+- generated length
+- EOS rate
+- premature EOS rate
+- free-run exact
+- recovery after first error
+
+Python
+TinyStories/narrative
+FineWeb/general text
+retrieval
+JSON
+
+을 각각 분리한다.
+
+============================================================
+10. repetition penalty 검증
+============================================================
+
+기본 repetition scope는
+
+generated
+
+여야 한다.
+
+prompt token까지 penalty를 적용해서
+retrieval/exact-copy를 깨뜨리지 않는지 확인한다.
+
+다음 조건을 비교:
+
+penalty = 1.00
+1.05
+1.10
+1.15
+
+scope = generated
+
+그리고 reference로 scope=all도 한 번 비교한다.
+
+각 조건에 대해:
+
+- repetition
+- retrieval exact
+- Exact Memory copy
+- JSON exact
+- Python validity
+- natural generation
+
+을 기록한다.
+
+Copy Cursor 활성화 중에는
+copy token이 repetition penalty에 의해 억제되지 않는지 확인한다.
+
+============================================================
+11. EOS / training-objective 검증
+============================================================
+
+기존 학습 계보에는 이미 EOS supervision이 존재했다.
+
+따라서 단순히 EOS weight를 무작정 크게 올렸다고
+개선으로 판정하지 마라.
+
+EOS weight sweep이 구현되었다면:
+
+2.0
+2.5
+3.0
+
+등 실제 config를 기준으로 비교한다.
+
+측정:
+
+- normal EOS
+- premature EOS
+- loop-free
+- retrieval exact
+- JSON exact
+- Python completion
+- sequence length
+
+loop 해결 대신 모델이 너무 빨리 종료되는 경우 FAIL이다.
+
+============================================================
+12. Self-generated-prefix / Free-run Stability
+============================================================
+
+구현되었다면 다음을 검증한다.
+
+모델 자신의 출력 일부가 prefix에 섞였을 때도
+정상적인 trajectory로 복귀할 수 있는가?
+
+teacher-forced prefix와
+corrupted/model-generated prefix를 비교한다.
+
+예:
+
+gold prefix
+vs
+1-token deviation
+vs
+2-token deviation
+vs
+short model-generated prefix
+
+이후:
+
+- gold continuation probability
+- recovery rate
+- loop incidence
+
+를 기록한다.
+
+scheduled sampling이 있다면
+별도 ablation으로 취급한다.
+
+다른 stability training과 효과를 섞지 마라.
+
+============================================================
+13. Python 96 / 192 설정 불일치 해결
+============================================================
+
+과거 문서에는:
+
+code completion cap = 96
+
+이라는 기록이 있었고,
+다른 권고 문서에는 Python generation 192 token 언급이 있었다.
+
+이를 추측으로 해결하지 마라.
+
+실제 repository와 historical configs/logs를 조사해서 다음을 분리하라.
+
+- training completion cap
+- evaluation max_new_tokens
+- runtime max_new_tokens
+
+무엇이 96이고 무엇이 192였는지
+FINAL REPORT에 명시한다.
+
+근거를 찾을 수 없다면 UNKNOWN으로 기록한다.
+
+============================================================
+14. Long Context Functional Evaluation
+============================================================
+
+속도만 측정하지 마라.
+
+2K
+4K
+8K
+가능하면 16K
+
+에서 다음을 검사한다.
+
+- passkey retrieval
+- exact identifier retrieval
+- distractor retrieval
+- state retention
+- repeated entity/value consistency
+- long generation repetition
+- anchor routing stability
+- Exact Memory correctness
+- cache/full consistency
+
+거리별 평가:
+
+~128
+~512
+~1400
+~3000
+~6000
+가능하면 ~12000
+
+============================================================
+15. 성능 측정은 반드시 현재 실제 주 연구 GPU에서 새로 한다
+============================================================
+
+과거 GTX 16xx/Turing 계열 검수 환경에서 나온:
+
+- absolute ms/token
+- effective bandwidth
+- CPU dispatch share
+- CUDA share
+- 2x optimization estimate
+
+등을 현재 GPU의 사실처럼 재사용하지 마라.
+
+과거 수치는 historical reference일 뿐이다.
+
+현재 머신의 GPU를 자동 탐지하고
+모든 profiler 결과를 새로 측정하라.
+
+다음을 기록:
+
+GPU name
+VRAM
+compute capability
+driver
+CUDA
+PyTorch
+
+============================================================
+16. Performance Profiling
+============================================================
+
+prefill과 decode를 분리한다.
+
+context:
+
+512
+1K
+2K
+4K
+8K
+가능하면 16K
+
+에서:
+
+- prefill total ms
+- prefill tok/s
+- decode ms/token
+- decode tok/s
+- peak allocated VRAM
+- peak reserved VRAM
+- CUDA kernel count
+- ATen op count
+- CPU self time
+- CUDA self time
+- H2D / D2D copy
+- GEMM/GEMV time
+- router time
+- top-k time
+- anchor read/update time
+- Exact Memory retrieval time
+- copy mode time
+
+을 측정한다.
+
+특히 다음 질문에 답하라.
+
+Does decode latency remain approximately context-independent?
+
+단순한 한 점의 속도 비교가 아니라:
+
+T_decode(N)
+
+의 slope를 계산하라.
+
+512 -> 1K -> 2K -> 4K -> 8K
+
+에서 변화율을 보고한다.
+
+============================================================
+17. Optimization A/B
+============================================================
+
+다음 구현을 단계별로 비교한다.
+
+A. eager baseline
+B. scatter_add_ optimization
+C. torch.compile
+D. CUDA Graphs
+E. custom Triton/CUDA가 있다면 추가
+
+모든 것을 한꺼번에 켠 결과 하나만 보고하지 마라.
+
+각 단계의 incremental effect를 기록한다.
+
+중요:
+
+속도를 위해
+
+256 anchors
+top-k 8
+router_dim 256
+
+을 줄이면 별도 architecture experiment가 되므로
+이번 optimization 결과와 섞지 않는다.
+
+============================================================
+18. Dense Transformer 비교
+============================================================
+
+가능하면 동일 조건 dense control을 실행한다.
+
+조건:
+
+- same tokenizer
+- same dtype
+- same hardware
+- similar parameter count
+- same context
+- optimized attention implementation 사용 가능하면 사용
+- SDPA/FlashAttention 여부 기록
+
+비교:
+
+prefill
+decode
+VRAM
+BPB
+free generation
+long-context retrieval
+
+단,
+
+현재 FDT가 충분히 학습되지 않았다면
+"FDT가 Transformer보다 품질이 우수하다"고 주장하지 않는다.
+
+또한 과거 dense 2048 결과가 VRAM cliff였던 사실을 숨기지 않는다.
+
+============================================================
+19. FDT compute claim 검증
+============================================================
+
+다음 주장을 별도로 구분한다.
+
+A. algorithmic interaction/state scaling
+B. real GPU wall-clock
+
+FDT의 intended long-context shape:
+
+O(N(W+K))
+
+은 interaction/state access 관점의 가설이다.
+
+전체 모델 FLOPs가 O(72N)이라는 식으로 과장하지 마라.
+
+router가 256 anchors를 scoring하는 비용,
+MLP,
+projection,
+kernel overhead도 별도로 존재한다.
+
+============================================================
+20. 450M 모델 크기 해석
+============================================================
+
+기존 Transformer scaling law의
+20 tokens/parameter 값을 FDT의 절대 최적점처럼 사용하지 마라.
+
+현재 메인 FDT 크기를
+임의로 100M대로 축소하지 않는다.
+
+작은 모델이 존재한다면:
+
+small model
+= architecture smoke / ablation / fast experiment
+
+main ~426-450M
+= main research scale
+
+로 역할을 분리한다.
+
+모델 규모 자체의 최적성은
+별도 scaling experiment 없이는 주장하지 않는다.
+
+============================================================
+21. Evaluation Hygiene
+============================================================
+
+모든 평가 결과에 다음을 저장한다.
+
+- git commit
+- checkpoint hash
+- tokenizer hash
+- data manifest/hash
+- evaluator version/hash
+- device
+- dtype
+- GPU
+- torch version
+- CUDA
+- seed
+- temperature
+- top-p
+- top-k
+- repetition penalty
+- repetition scope
+- max_new_tokens
+- stop rules
+- context length
+- exact-memory config
+- RoPE config
+
+평가가 development set이면
+sealed holdout이라고 부르지 않는다.
+
+기존 development set을 반복 사용한 결과를
+final generalization proof라고 부르지 않는다.
+
+============================================================
+22. GitHub 연구 기록
+============================================================
+
+현재 repository는 PRIVATE 상태를 유지한다.
+
+다음을 갱신한다.
+
+docs/ARCHITECTURE.md
+docs/EXACT_MEMORY.md
+docs/LONG_CONTEXT.md
+docs/RESEARCH_LOG.md
+docs/ROADMAP.md
+
+experiments registry가 있다면
+이번 final audit도 하나의 experiment로 등록한다.
+
+가능하면 최종 결과를 PR 형식으로 정리한다.
+
+PR 제목 예:
+
+[AUDIT] Final validation of next-generation FDT
+
+본문에는:
+
+Hypothesis
+Architecture changes
+Unchanged core
+Evaluation conditions
+Results
+Failures
+Known limitations
+Decision
+
+을 포함한다.
+
+============================================================
+23. Regression Tests
+============================================================
+
+최소 다음 automated tests를 추가/실행한다.
+
+- model build
+- parameter count
+- causal attention
+- RoPE offset
+- cache/full recompute
+- anchor top-k invariant
+- anchor membership sum
+- anchor state update
+- no future leakage
+- Exact Memory append/read
+- exact chunk boundary
+- exact candidate retrieval
+- copy cursor
+- repeated-character exact copy
+- repetition/generated scope
+- copy-mode repetition exemption
+- EOS
+- JSON parse
+- Python parse/compile
+- 8K smoke test
+
+CI에서 가능한 작은 model test와
+실제 main checkpoint test를 구분한다.
+
+============================================================
+24. Final PASS / FAIL 기준
+============================================================
+
+최종 결과를 억지로 하나의 점수로 합치지 마라.
+
+다음 축별로 판정한다.
+
+ARCHITECTURE
+EXACT MEMORY
+GENERATION STABILITY
+LONG CONTEXT
+INFERENCE INTEGRITY
+PERFORMANCE
+QUALITY
+REPRODUCIBILITY
+
+각각:
+
+PASS
+PARTIAL
+FAIL
+NOT TESTED
+
+중 하나로 표시한다.
+
+Global PASS를 주려면 최소한:
+
+1. 구조 regression 없음
+2. cache/full causal integrity 정상
+3. Exact Memory deterministic tests 정상
+4. 8K context 실제 실행 성공
+5. exact identity가 기존보다 명확히 개선
+6. repetition이 기존보다 개선되고 exact-copy를 깨뜨리지 않음
+7. long-context에서 catastrophic state failure 없음
+8. profiler가 현재 실제 GPU에서 재측정됨
+9. 평가 조건이 모두 기록됨
+10. 모든 결과가 현재 git commit으로 재현 가능
+
+해야 한다.
+
+하나라도 근거가 없으면 추정하지 마라.
+
+============================================================
+25. 최종 보고서 형식
+============================================================
+
+FINAL_AUDIT.md를 생성한다.
+
+순서:
+
+# FDT Final Audit
+
+## 1. Executive Verdict
+
+## 2. Exact Repository State
+
+## 3. Final Architecture
+
+## 4. Changes From Previous Pure-FDT
+
+## 5. RoPE Verification
+
+## 6. Fuzzy Semantic Memory Verification
+
+## 7. Exact Episodic Memory Verification
+
+## 8. Exact-Copy Matrix
+
+## 9. Generation / Loop Analysis
+
+## 10. EOS / Exposure Analysis
+
+## 11. Long-Context Results
+
+## 12. Incremental Cache Integrity
+
+## 13. GPU Profile on Current Hardware
+
+## 14. Optimization A/B Results
+
+## 15. Dense Control Comparison
+
+## 16. Quality / BPB Results
+
+## 17. Regression Tests
+
+## 18. Reproducibility
+
+## 19. Remaining Failures
+
+## 20. Final Decision
+
+## 21. Recommended Next Experiment
+
+표와 raw JSON/CSV도 함께 저장한다.
+
+============================================================
+26. 가장 중요한 해석 원칙
+============================================================
+
+다음 네 문제를 절대 하나로 합치지 마라.
+
+1. semantic representation failure
+2. exact identity failure
+3. free-generation trajectory failure
+4. systems/kernel inefficiency
+
+각 문제는 다른 원인을 가질 수 있다.
+
+또한 다음 두 memory를 혼동하지 마라.
+
+Fuzzy Semantic Memory:
+의미, 관계, 일반화, 압축
+
+Exact Episodic Memory:
+숫자, 식별자, raw identity, lossless copy
+
+최종적으로 다음 질문에 답해야 한다.
+
+A.
+FDT의 fuzzy semantic architecture는 정상적으로 유지되었는가?
+
+B.
+Exact Memory는 의미 없는 정보의 정확한 identity를 실제로 보존하는가?
+
+C.
+teacher forcing에서만 좋은 모델이 아니라
+free-running generation에서도 trajectory를 유지할 수 있는가?
+
+D.
+8K 이상에서도 FDT incremental state가 정확히 유지되는가?
+
+E.
+context가 증가해도 decode latency의 증가율이 낮은가?
+
+F.
+그 장점이 현재 실제 연구 GPU에서도 측정되는가?
+
+G.
+성능 개선이 architecture change 때문인지
+runtime optimization 때문인지 구분할 수 있는가?
+
+H.
+다른 사람이 private repository access만 있으면
+동일 commit에서 실험을 재현할 수 있는가?
+
+이 질문에 근거로 답하지 못하면
+"검증 완료"라고 선언하지 마라.
+
+============================================================
+27. 작업 종료 조건
+============================================================
+
+모든 검증이 끝나면:
+
+1. FINAL_AUDIT.md
+2. machine-readable results JSON
+3. benchmark CSV
+4. exact-copy matrix CSV
+5. profiler summary
+6. failed-test list
+7. git commit/hash manifest
+
+를 생성한다.
+
+그리고 마지막 콘솔 출력은 반드시 다음 형식으로 한다.
+
+FINAL VERDICT: PASS / PARTIAL / FAIL
+
+Architecture:
+Exact Memory:
+Generation Stability:
+Long Context:
+Inference Integrity:
+Performance:
+Quality:
+Reproducibility:
+
+Critical Failures:
+- ...
+
+Remaining Research Questions:
+- ...
+
+Recommended Next Action:
+...
+
+검증 과정에서 새로운 문제를 발견했다면
+숨기지 말고 Critical Failures 또는 Remaining Research Questions에 기록한다.
+
+현재 private repository의 visibility는 변경하지 않는다.

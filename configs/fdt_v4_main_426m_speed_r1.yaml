@@ -1,0 +1,137 @@
+stage: fdt_v4_main_426m_curriculum
+conversational_sft: false
+
+data:
+  tokenizer_dir: tokenizers/fdt_v3_bpe_24k
+  tokenizer_json: tokenizers/fdt_v3_bpe_24k/tokenizer.json
+  tokenizer_json_sha256: 4FADE0C72E8673BA1E4319C8821593BB5E62A8C27792E2412DE3BDC52D232862
+  natural_lm_dir: prepared_data/fdt_v4_curriculum_v4/natural
+  factual_dir: prepared_data/fdt_v4_curriculum_v4/factual
+  exact_copy_dir: prepared_data/fdt_v4_curriculum_v4/exact_copy
+  generated_prefix_dir: prepared_data/fdt_v4_curriculum_v4/generated_prefix
+  long_context_dir: prepared_data/fdt_v4_curriculum_v4/long_context
+  validation_dir: prepared_data/fdt_v4_curriculum_v4/validation
+  split: train
+  validation_split: validation
+
+model:
+  model_type: fdt_v4
+  vocab_size: 24576
+  pad_token_id: 0
+  eos_token_id: 2
+  dim: 1216
+  n_layers: 20
+  n_heads: 19
+  mlp_ratio: 4
+  max_seq_len: 16384
+  dropout: 0.0
+  tie_embeddings: true
+  use_rope: true
+  local_attention_window: 64
+  anchor_layer_indices: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18]
+  num_anchors: 256
+  top_k: 8
+  router_dim: 256
+  anchor_layer_pattern: explicit
+  anchor_scan_chunk_size: 64
+  aggregation_impl: sparse_chunked_scan
+  routing_type: cosine
+  routing_backend: matmul
+  cosine_temperature: 0.25
+  enable_anchor_metrics: true
+  compute_anchor_metrics_every: 32
+  enable_diagnostics: false
+  use_cached_normalized_anchors: true
+  use_incremental_anchor_state: true
+  detach_diagnostics: true
+  exact_memory_enabled: true
+  exact_memory_mode: copy
+  exact_memory_full_scan_fallback: true
+  exact_memory_candidate_cap: 16
+  exact_memory_fallback_margin: 0.0
+  exact_memory_copy_cursor: true
+  exact_memory_commit_threshold: 0.5
+  exact_pointer_dim: 64
+  exact_pointer_window: 64
+  exact_pointer_chunk_size: 32
+  exact_pointer_chunk_anchors: 4
+  exact_pointer_candidate_chunks: 4
+  exact_pointer_gate_weight: 0.25
+  exact_pointer_anchor_bias_init: 2.0
+  generation_repetition_scope: generated
+  generation_ngram_order: 3
+  generation_ngram_penalty: 8.0
+  generation_ngram_window: 96
+  generation_ngram_hard_block_after: 2
+
+train:
+  output_dir: runs/fdt_v4_main_426m
+  parent_checkpoint: runs/fdt_v3_capability_completion_v20_balanced_scale_t1_20260816_r2/latest.pt
+  target_additional_tokens: 1000000000
+  batch_size: 1
+  grad_accum_steps: 8
+  learning_rate: 0.0000000025
+  exact_pointer_learning_rate: 0.0001
+  exact_pointer_weight_decay: 0.0
+  exact_pointer_grad_clip: 1.0
+  detach_exact_hidden: true
+  weight_decay: 0.01
+  grad_clip: 0.7
+  precision: bf16_autocast_fp32_master
+  seed: 20260823
+  log_every: 10
+  gradient_probe_every: 0
+  initial_recovery_step: 25
+  recovery_every_steps: 250
+  model_checkpoint_every_tokens: 100000000
+  min_free_gib: 10.0
+  source_batch_fractions:
+    natural: 0.58
+    factual: 0.40
+    long_context: 0.02
+  require_long_context_curriculum: true
+  long_context_min_sequence_length: 8192
+  long_context_require_8k_bucket: true
+  long_context_require_16k_shard: true
+  base_lm_weight: 1.0
+  eos_loss_weight: 2.0
+  exact_copy_weight: 0.10
+  exact_batch_every_steps: 1
+  generated_prefix_recovery_weight: 0.01
+  generated_prefix_unlikelihood_weight: 0.01
+  generated_prefix_ramp_start: 0.02
+  generated_prefix_ramp_end: 0.20
+  require_generated_prefix_recovery: true
+  generated_prefix_min_step: 1000
+  generated_prefix_every_steps: 16
+  stop_on_overfit: true
+  overfit_validation_checks: 3
+  overfit_relative_regression: 0.01
+  overfit_min_train_improvement: 0.005
+  max_restarts: 0
+  activation_checkpointing: true
+  activation_checkpointing_min_sequence_length: 8192
+  lm_loss_checkpointing_min_sequence_length: 8192
+  short_sequence_batch_size: 1
+  short_sequence_max_length: 512
+  lm_loss_sequence_chunk_size: 256
+  memory_bounded_streaming: true
+  dead_anchor_fraction_limit: 0.01
+  routing_safety_window_steps: 25
+  require_routing_diagnostics: true
+  validation_every_steps: 250
+  validation_batches: 8
+  overfit_gate_version: fixed_validation_v2
+
+safety:
+  stop_file: STOP_REQUESTED
+  require_c_drive: true
+  no_gpu_in_tests: true
+
+terra:
+  handoff_path: terra_handoff.json
+  evaluator: scripts/terra_fdt_v4_evaluator.py
+  tensor_dataset: prepared_data/fdt_v4_curriculum_v4/validation/shards/validation/shard_00000.pt
+  tensor_dataset_sha256: E044E8B8D2382825994A1115FC95A5553ADF556DE503CB4DBA83BFC6CDC1FFE6
+  repetition_tensor_dataset: prepared_data/fdt_v4_curriculum_v4/validation/shards/validation/shard_00000.pt
+  repetition_tensor_dataset_sha256: E044E8B8D2382825994A1115FC95A5553ADF556DE503CB4DBA83BFC6CDC1FFE6

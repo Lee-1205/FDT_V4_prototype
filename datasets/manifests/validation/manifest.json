@@ -1,0 +1,15 @@
+{
+  "name": "validation",
+  "schema_version": "fdt_v4_curriculum_source_manifest_v1",
+  "shards": [
+    {
+      "file": "shards\\validation\\shard_00000.pt",
+      "rows": 800,
+      "sha256": "E044E8B8D2382825994A1115FC95A5553ADF556DE503CB4DBA83BFC6CDC1FFE6",
+      "tokens": 103989
+    }
+  ],
+  "source_directory": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\prepared_data\\fdt_v4_contract_sources_v3_20260826\\validation",
+  "source_manifest_sha256": "DFE8CFDF076D57083ABA56D9763D3132935FC7B230A7235628083051A7C985CF",
+  "split": "validation"
+}

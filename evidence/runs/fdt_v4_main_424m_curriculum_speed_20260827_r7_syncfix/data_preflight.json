@@ -1,0 +1,156 @@
+{
+  "contract": "fdt_v4_main_426m_v2",
+  "sources": {
+    "natural": {
+      "directory": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\prepared_data\\fdt_v4_curriculum_v4\\natural",
+      "split": "train",
+      "manifest_sha256": "019BD947BB7461668654B58DA49A0DD56F6266D4D2DD4B975B4BDA2C4C92FDB5",
+      "shards": [
+        {
+          "path": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\prepared_data\\fdt_v4_curriculum_v4\\natural\\shards\\train\\shard_00000.pt",
+          "sha256": "D1096C5AF243DD4D68CA120472DF21C228EEDB3A85F8979316484B678B5DFAA4",
+          "rows": 20000,
+          "sequence_length": 512,
+          "fields": [
+            "attention_mask",
+            "input_ids",
+            "labels"
+          ],
+          "exact_label_contract": false,
+          "generated_prefix_contract": false
+        }
+      ],
+      "shard_count": 1,
+      "label_contract": "explicit_labels"
+    },
+    "factual": {
+      "directory": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\prepared_data\\fdt_v4_curriculum_v4\\factual",
+      "split": "train",
+      "manifest_sha256": "A7FD154E9481D57B21C9ED92066FD46FEAA448E1FFE0BC4FB8BDB1B3C7CFD7F8",
+      "shards": [
+        {
+          "path": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\prepared_data\\fdt_v4_curriculum_v4\\factual\\shards\\train\\shard_00000.pt",
+          "sha256": "DA89FC64481EF602409F18C32D88059569EB1845E5C7AE8C164B26592FE322FF",
+          "rows": 20000,
+          "sequence_length": 512,
+          "fields": [
+            "attention_mask",
+            "input_ids",
+            "labels"
+          ],
+          "exact_label_contract": false,
+          "generated_prefix_contract": false
+        }
+      ],
+      "shard_count": 1,
+      "label_contract": "explicit_labels"
+    },
+    "exact_copy": {
+      "directory": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\prepared_data\\fdt_v4_curriculum_v4\\exact_copy",
+      "split": "train",
+      "manifest_sha256": "41C9A2F0F702402E364A052BC3CF4D9BCC242BC34BD5B5E12684B3A5FAF1FF8B",
+      "shards": [
+        {
+          "path": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\prepared_data\\fdt_v4_curriculum_v4\\exact_copy\\shards\\train\\shard_00000.pt",
+          "sha256": "8088D25D494339903588F2BE455CF1D94D72872FEB6A837B9FE061277950C09B",
+          "rows": 4096,
+          "sequence_length": 512,
+          "fields": [
+            "attention_mask",
+            "copy_source_positions",
+            "copy_target_mask",
+            "input_ids",
+            "labels",
+            "prompt_mask",
+            "source_boundary"
+          ],
+          "exact_label_contract": true,
+          "generated_prefix_contract": false
+        }
+      ],
+      "shard_count": 1,
+      "label_contract": "explicit_labels_with_minus_100_prompt"
+    },
+    "long_context": {
+      "directory": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\prepared_data\\fdt_v4_curriculum_v4\\long_context",
+      "split": "train",
+      "manifest_sha256": "874AEBD9756C704C2AD96B1318F740A3B5DAACCC6ADBD2DE0A46D63B4B14A083",
+      "shards": [
+        {
+          "path": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\prepared_data\\fdt_v4_curriculum_v4\\long_context\\shards\\train\\shard_00000.pt",
+          "sha256": "80B1C21378FD66D8F655D3304985C99600A9B668B828098AFC574CC8E3F0E26F",
+          "rows": 64,
+          "sequence_length": 8192,
+          "fields": [
+            "attention_mask",
+            "input_ids",
+            "labels"
+          ],
+          "exact_label_contract": false,
+          "generated_prefix_contract": false
+        },
+        {
+          "path": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\prepared_data\\fdt_v4_curriculum_v4\\long_context\\shards\\train\\shard_00001.pt",
+          "sha256": "5F4237A7CD53B3DB4D4F7865F7102A63A4D412FA2685C4524B5BE39343F57092",
+          "rows": 64,
+          "sequence_length": 16384,
+          "fields": [
+            "attention_mask",
+            "input_ids",
+            "labels"
+          ],
+          "exact_label_contract": false,
+          "generated_prefix_contract": false
+        }
+      ],
+      "shard_count": 2,
+      "label_contract": "explicit_labels"
+    },
+    "generated_prefix": {
+      "directory": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\prepared_data\\fdt_v4_curriculum_v4\\generated_prefix",
+      "split": "train",
+      "manifest_sha256": "244830CBACC80E793C990042243E13906D0B88C9EDB64B4D18567E1E92BA4459",
+      "shards": [
+        {
+          "path": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\prepared_data\\fdt_v4_curriculum_v4\\generated_prefix\\shards\\train\\shard_00000.pt",
+          "sha256": "AEAD3169AA43597C9A8D7B16BABA9AAF74F571124656B97BC6C3C33B031807F3",
+          "rows": 2048,
+          "sequence_length": 512,
+          "fields": [
+            "attention_mask",
+            "input_ids",
+            "labels",
+            "loop_negative_ids",
+            "loop_negative_mask"
+          ],
+          "exact_label_contract": false,
+          "generated_prefix_contract": true
+        }
+      ],
+      "shard_count": 1,
+      "label_contract": "explicit_labels"
+    },
+    "validation": {
+      "directory": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\prepared_data\\fdt_v4_curriculum_v4\\validation",
+      "split": "validation",
+      "manifest_sha256": "5435D6CADC2F9810E10A260F51CB1A8FD1D4F0354FC7D892C913D0AB0A345EA3",
+      "shards": [
+        {
+          "path": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\prepared_data\\fdt_v4_curriculum_v4\\validation\\shards\\validation\\shard_00000.pt",
+          "sha256": "E044E8B8D2382825994A1115FC95A5553ADF556DE503CB4DBA83BFC6CDC1FFE6",
+          "rows": 800,
+          "sequence_length": 512,
+          "fields": [
+            "attention_mask",
+            "input_ids",
+            "labels"
+          ],
+          "exact_label_contract": false,
+          "generated_prefix_contract": false
+        }
+      ],
+      "shard_count": 1,
+      "label_contract": "explicit_labels"
+    }
+  }
+}

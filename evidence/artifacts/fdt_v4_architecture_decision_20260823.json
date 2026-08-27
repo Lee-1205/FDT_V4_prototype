@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "decision": "BUILD_FDT_V4_FROM_SCRATCH",
+  "date": "2026-08-23",
+  "previous_prototype": {
+    "name": "fdt_v3_anchor_indexed_dual_memory / Anchor Exact v2",
+    "status": "REJECTED_AS_PARENT",
+    "reason": "Pointer realignment improved immediate continuation but not distant retrieval.",
+    "evidence": {
+      "continuation_exact": "4/4",
+      "distance_64_exact": "0/4",
+      "distance_512_exact": "0/4",
+      "distance_1400_exact": "0/4",
+      "candidate_recall_focused": "0/4",
+      "artifact": "artifacts/fdt_anchor_exact_step1701_realign_pointer_500m_smoke_20260822.json"
+    }
+  },
+  "architecture": {
+    "model_type": "fdt_v4",
+    "memory_paths": [
+      "rope_local_working_memory",
+      "fuzzy_semantic_memory",
+      "exact_episodic_memory"
+    ],
+    "fuzzy_core": {
+      "num_anchors": 256,
+      "top_k": 8,
+      "router_dim": 256,
+      "cosine_temperature": 0.25,
+      "routing_change": "none"
+    },
+    "exact_memory": {
+      "raw_token_storage": true,
+      "anchor_index_is_proposal_only": true,
+      "full_source_correctness_fallback": true,
+      "copy_cursor": true,
+      "generic_lm_pointer_targets": false
+    },
+    "generation": {
+      "repetition_scope_default": "generated",
+      "copy_cursor_penalty_exempt": true,
+      "ngram_loop_detector": true
+    }
+  },
+  "scale_policy": {
+    "single_trainable_lineage": true,
+    "main": {"dim": 1216, "layers": 20, "heads": 19, "target_parameters": 426000000},
+    "small_model_training_forbidden": true,
+    "tiny_random_unit_tests_only": true
+  },
+  "delegation": {
+    "training_supervisor": "gpt-5.6-luna",
+    "official_evaluator": "gpt-5.6-terra",
+    "official_precision": "fp32_unquantized",
+    "abnormality_flow": [
+      "luna_atomic_checkpoint_and_pause",
+      "terra_diagnosis_and_classification",
+      "sol_for_major_architecture_objective_or_data_contract_change",
+      "direct_bounded_repair_for_lightweight_operational_config_or_runtime_issue"
+    ],
+    "luna_may_continue_through_failed_gate": false
+  }
+}

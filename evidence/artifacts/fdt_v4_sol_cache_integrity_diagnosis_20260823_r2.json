@@ -1,0 +1,57 @@
+{
+  "schema_version": 2,
+  "artifact_status": "CORRECTED_R2",
+  "supersedes_for_decisions": [
+    "artifacts/FDT_V4_SOL_CACHE_INTEGRITY_DIAGNOSIS_20260823.md",
+    "artifacts/fdt_v4_sol_cache_integrity_diagnosis_20260823.json"
+  ],
+  "old_incident_artifacts_preserved": true,
+  "target_commit": "6ce911ce1a14e4d882f3065ed8685736e4a89b37",
+  "checkpoint": "runs/fdt_v4_audit_warmstart_20260823_0af5577/latest.pt",
+  "checkpoint_sha256": "2E9D5764CFE145CC9DEBB53540F84CC33E9CB64124BAA76920F2B5C53CAF785F",
+  "checkpoint_parameter_count": 424474072,
+  "checkpoint_stage_status": "AUDIT_UNTRAINED_WARM_START",
+  "primary_evidence": "artifacts/final_audit_inputs/20260823_6ce911ce/cache_integrity_cuda_fp32.json",
+  "primary_evidence_sha256": "795AB02FFD5D54499AFD659D3A23762B00C0AE288B05EDBA9F805C4873C8CDFA",
+  "evaluator_sha256": "0AE0A62AB611D2422CB391DC7A4B406EE7830907E894F58EC26A49F19657B06E",
+  "context_8192": {
+    "prefill_full_max_abs_logit_error": 0.000014185905456542969,
+    "prefill_full_token_agreement": true,
+    "decode_full_max_abs_logit_error": 0.000011920928955078125,
+    "decode_full_token_agreement": true,
+    "incremental_vs_full_raw_anchor_state_error": 0.9068603515625,
+    "incremental_vs_full_normalized_anchor_state_error": 0.013851165771484375,
+    "repeat_full_vs_full_raw_anchor_state_error": 1.9453125,
+    "repeat_full_vs_full_normalized_anchor_state_error": 0.0018981695175170898,
+    "normalized_excess_over_repeat_baseline": 0.011952996253967285,
+    "tolerance": 0.0003,
+    "raw_status": "FAIL"
+  },
+  "audit_axes": {
+    "INFERENCE_INTEGRITY": "FAIL",
+    "LONG_CONTEXT": "PARTIAL"
+  },
+  "classification": "POSSIBLE_CAUSAL_OR_CACHE_STATE_DRIFT",
+  "severity": "major",
+  "requires_sol": true,
+  "diagnosis": {
+    "architecture_bug_proven": false,
+    "auditor_aliasing_bug_proven": false,
+    "scatter_nondeterminism_present": true,
+    "scatter_nondeterminism_sufficient_to_explain_normalized_excess": false,
+    "strongest_supported_hypothesis": "LAST_TOKEN_TOPK_ROUTE_OR_MEMBERSHIP_DISCONTINUITY_FROM_INCREMENTAL_FULL_NUMERIC_PATH_DIFFERENCE",
+    "raw_fail_relaxed": false
+  },
+  "constraints_preserved": {
+    "fuzzy_routing_semantics": true,
+    "num_anchors": 256,
+    "top_k": 8,
+    "router_dim": 256,
+    "tolerance": 0.0003,
+    "gpu_work_performed": false
+  },
+  "source_changes": [],
+  "focused_cpu_tests_rerun": false,
+  "focused_cpu_tests_rerun_reason": "No source changed; R2 corrects provenance and exact evidence values only.",
+  "next_diagnostic": "Capture immutable pre-decode state and per-anchor-layer appended-token anchor input, top-k indices, memberships, boundary margin, and pre-mutation contribution for incremental decode and full recompute."
+}

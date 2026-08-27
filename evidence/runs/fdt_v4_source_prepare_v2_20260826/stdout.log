@@ -1,0 +1,16 @@
+{
+  "output": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\prepared_data\\fdt_v4_source_base_v2_100k_ctx512_20260826",
+  "manifest_sha256": "2b7d2d144c97c6a91dedf31142cbcf8b1f12a36d2bdd9339421935b6193e8aea",
+  "train_shard_sha256": "b6d77bf4144e5d171aeb5bc7e475944c313d33db6ae703c08cfa5af20ef47589",
+  "validation_shard_sha256": "e044e8b8d2382825994a1115fc95a5553adf556de503cb4dba83bfc6cdc1ffe6",
+  "rows": 100000,
+  "active_tokens": 31648699,
+  "categories": {
+    "factual_qa": 20000,
+    "retrieval": 20000,
+    "python_code": 20000,
+    "json": 20000,
+    "natural_lm": 20000
+  },
+  "post_build_exact_overlap": 0
+}

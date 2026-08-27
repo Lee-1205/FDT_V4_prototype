@@ -1,0 +1,11 @@
+﻿{
+    "status":  "LAUNCHED",
+    "supervisor_pid":  3968,
+    "run_dir":  "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r5",
+    "state_dir":  "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_speed_supervisor_20260827_r5",
+    "recovery_sha256":  "5264D326820635FA8B5100D07B62EAD72E226A88C1D415F89958C6269266C4E1",
+    "config_sha256":  "1FDC4BFE449596B5438D6CE372EF8FACB6A06DD1A5ED0DA5F5EFCD95D72323B8",
+    "trainer_sha256":  "4835D1C9D7097364AB7A5282A2CC7401982330F4E57A3796772DDF2594F856A5",
+    "supervisor_sha256":  "9293ADD9369FB253AC526E4D491728DF86F3B490FFB2F50E6E513F750F4557A2",
+    "runtime":  "short512_batch1_no_checkpoint_long8k16k_checkpointed_resume_payload_released"
+}

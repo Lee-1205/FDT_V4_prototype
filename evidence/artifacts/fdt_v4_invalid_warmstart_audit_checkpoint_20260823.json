@@ -1,0 +1,9 @@
+{
+  "status": "INVALID_WARM_START",
+  "checkpoint": "runs/fdt_v4_audit_warmstart_20260823_4b2c06c/latest.pt",
+  "checkpoint_sha256": "C1F2EC59221373387F1AF7D16CE6FF0736D3850CF3DF4D85C4F730B3E66B7B90",
+  "parent_checkpoint_sha256": "7EE3F88D319928DD2D3F2542290F55FFCD036DCBB32A8AB22437C511E5890179",
+  "reason": "The warm-start denylist matched fuzzy-anchor q_proj parameters, left them random, and the trainer would then freeze them.",
+  "decision": "Preserve as invalid evidence. Never train, evaluate, resume, promote, or use as a parent.",
+  "gpu_launched": false
+}

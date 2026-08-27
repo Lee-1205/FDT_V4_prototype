@@ -1,0 +1,1033 @@
+맞습니다. 그 점을 반영하면 앞서 제가 받아들였던 **“프로파일링 결과 → 곧바로 현재 주 연구 환경의 절대 성능 병목”**이라는 해석은 수정해야 합니다.
+
+먼저 자료 자체의 표기는 하나 확인해야 합니다. 업로드된 검수 리포트에는 검수 GPU가 **GTX 1650 4GB(sm_75)**라고 기록되어 있습니다.  만약 말씀한 GTX 1660이 별도의 실험 환경을 가리키는 것이라면 둘을 구분해서 기록해야 합니다. 어느 쪽이든 핵심은 같습니다. **4~6GB급 Turing GPU에서 나온 20–36 tok/s, CPU dispatch/CUDA 비율, 실효 메모리 대역폭 수치는 현재 주 연구 GPU의 절대 병목으로 그대로 이식해서는 안 됩니다.**
+
+다만 그 프로파일링에서 얻은 **정성적 신호**는 버릴 필요가 없습니다. `489 ATen ops/token`, 작은 gather/scatter/top-k/cosine 연산 다수, batch 1→4에서 step 시간이 거의 그대로였다는 것은 “현재 eager 구현이 kernel-launch/dispatch에 민감할 가능성”을 보여줍니다. 하지만 **몇 ms가 dispatch이고 몇 배 빨라질 수 있는지는 실제 연구 GPU에서 다시 측정하기 전에는 미확정**으로 내려야 합니다. 
+
+그리고 Exact Memory에 대해서도 이제 결론을 바꾸겠습니다. **진단 결과와 무관하게 넣는 것이 맞습니다.** 이유는 FDT가 의미를 퍼지하게 조직하는 구조인 이상, `Q7M2X9K4P8V3N6L1`, UUID, 해시, 숫자, 코드 식별자처럼 **의미적 유사성 자체가 정보가 아닌 데이터**를 fuzzy semantic state에 정확히 보존시키려고 하는 것이 애초에 역할 불일치이기 때문입니다.
+
+아래를 저는 **다음 FDT 세대의 최종 해결안**으로 잡겠습니다.
+
+---
+
+# 1. FDT의 핵심은 건드리지 않는다
+
+현재 검증된 core는 유지합니다.
+
+\[
+d=1216,\quad L=20,\quad W=64
+\]
+
+\[
+A=256,\quad K=8,\quad d_r=256,\quad T=0.25
+\]
+
+그리고 fuzzy layer도 현재처럼 0,2,4,…,18에 둡니다. 현재 구조의 사양은 이 값들로 고정돼 있습니다. 
+
+특히 이번 버전에서는 **hierarchical routing과 adaptive-k를 넣지 않습니다.**
+
+둘 다 계산량을 줄일 수는 있지만,
+
+\[
+\text{현재 routing 안정성}
+\]
+
+이라는 중요한 변수를 동시에 바꾸기 때문입니다.
+
+즉 다음 버전의 원칙은:
+
+\[
+\boxed{\text{semantic routing은 보존하고 주변 병목만 고친다}}
+\]
+
+입니다.
+
+---
+
+# 2. 기억 구조를 세 계층으로 공식화한다
+
+다음 FDT는 기억을 명확히 세 종류로 분리해야 합니다.
+
+\[
+\boxed{
+M=
+M_{\text{working}}
++
+M_{\text{semantic}}
++
+M_{\text{exact}}
+}
+\]
+
+### Working Memory
+
+현재의 local attention입니다.
+
+\[
+M_{\text{working}}
+=
+\{K,V\}_{t-63:t}
+\]
+
+즉 최근 64 token의 고해상도 관계를 처리합니다.
+
+### Fuzzy Semantic Memory
+
+현재 anchor numerator/mass입니다.
+
+\[
+S_{j,t}
+=
+\frac{N_{j,t}}
+{M_{j,t}+\epsilon}
+\]
+
+\[
+N_{j,t}
+=
+N_{j,t-1}
++
+\mu_{t,j}v_t
+\]
+
+\[
+M_{j,t}
+=
+M_{j,t-1}
++
+\mu_{t,j}
+\]
+
+이 부분은 **의미, 구조, 관계, 일반화**를 담당합니다.
+
+### Exact Episodic Memory
+
+새로 추가합니다.
+
+\[
+\boxed{
+E_t=(x_1,x_2,\ldots,x_t)
+}
+\]
+
+여기에는 token ID를 손실 없이 저장합니다.
+
+즉 FDT의 기억 철학을 다음처럼 정의할 수 있습니다.
+
+\[
+\boxed{\text{Meaning is fuzzy}}
+\]
+
+\[
+\boxed{\text{Identity is exact}}
+\]
+
+이 구분은 앞으로 FDT의 핵심 설계 원칙으로 잡아도 좋다고 봅니다.
+
+---
+
+# 3. Exact Memory는 선택사항이 아니라 기본 구성요소로 만든다
+
+기존 exact-copy 실패가 exposure bias 때문에 증폭되는 것은 맞습니다. Python은 teacher-forced PPL 6.5로 가장 좋은데 자유 생성 반복률은 0.666이었습니다. 
+
+그러나 그 사실이 Exact Memory를 불필요하게 만들지는 않습니다.
+
+예를 들어
+
+```text
+1847283927
+Q7M2X9K4P8V3N6L1
+e742c91...
+user_temp_17
+```
+
+같은 값은 **의미를 이해해서 복원해야 할 데이터가 아닙니다.**
+
+정확한 token sequence 자체가 정보입니다.
+
+현재 보고서에서도 가장 큰 병목이 숫자·식별자·key/value의 exact preservation이며, 비슷하지만 다른 identifier로 치환하고 JSON 값이 변하는 현상이 기록되어 있습니다. 
+
+따라서 새 FDT는:
+
+```text
+semantic:
+"이것은 record identifier이다"
+
+exact:
+"R20261805-2"
+```
+
+를 따로 기억해야 합니다.
+
+---
+
+# 4. Exact Memory 때문에 계산량이 다시 커지지 않게 한다
+
+여기가 굉장히 중요합니다.
+
+잘못 구현하면:
+
+\[
+O(N(K+W))
+\]
+
+를 만들고 나서 Exact Memory 검색 때문에 다시
+
+\[
+O(N^2)
+\]
+
+가 될 수 있습니다.
+
+그래서는 안 됩니다.
+
+Exact Memory는 append-only raw-token buffer로 둡니다.
+
+예를 들어 32-token chunk를 쓰면:
+
+```text
+Chunk 0 : token 0~31
+Chunk 1 : token 32~63
+...
+```
+
+각 chunk에는 대략:
+
+```text
+start
+length
+raw token IDs
+
+top anchor IDs
+anchor weights
+
+optional small retrieval key
+```
+
+만 저장합니다.
+
+그리고 **기존 fuzzy router를 Exact Memory의 1차 색인으로 그대로 재사용**합니다.
+
+\[
+h_t
+\rightarrow
+\text{existing top-8 anchors}
+\rightarrow
+\text{anchor postings}
+\rightarrow
+\text{candidate chunks}
+\]
+
+즉 Exact Memory 때문에 별도의 256-way router를 다시 만들지 않습니다.
+
+---
+
+# 5. Exact Memory의 retrieval은 2단계로 제한한다
+
+현재 token이 Exact Memory를 요구한다고 판단되면 먼저 기존 top-8 anchor를 이용합니다.
+
+\[
+\mathcal A_t=
+TopK_8(h_t)
+\]
+
+각 anchor에 연결된 최근/관련 chunk 목록에서 후보를 가져옵니다.
+
+예:
+
+\[
+C_t\le16
+\]
+
+정도로 candidate chunk 수를 하드 제한합니다.
+
+그다음 작은 reranker만 사용합니다.
+
+예를 들어
+
+\[
+d_e=64
+\]
+
+차원의 retrieval key라면:
+
+\[
+score(q,c)=q^\top k_c
+\]
+
+16개 candidate에 대해 계산하면 비용은 매우 작습니다.
+
+그래서 per-token Exact Memory 비용은 전체 memory 길이 \(M\)이 아니라
+
+\[
+\boxed{O(Cd_e)}
+\]
+
+가 됩니다.
+
+원하는 전체 계산 형태는:
+
+\[
+\boxed{
+O(N(W+K))
++
+O(pNCd_e)
+}
+\]
+
+입니다.
+
+여기서 \(p\)는 Exact Memory를 실제로 조회하는 token 비율입니다.
+
+즉 memory가 8K→100K→1M token으로 커져도 **모든 raw token을 매 decode step 스캔하지 않습니다.**
+
+---
+
+# 6. 한 번 찾은 exact 문자열은 다시 검색하지 않는다
+
+예를 들어 source memory에서
+
+```text
+Q7M2X9K4P8V3N6L1
+```
+
+를 찾았다고 합시다.
+
+매 character/token마다 Exact Memory retrieval을 다시 하면 바보 같은 구조가 됩니다.
+
+따라서:
+
+```text
+source_start
+source_end
+cursor
+```
+
+를 저장합니다.
+
+첫 retrieval:
+
+\[
+c_0=\operatorname{retrieve}(h_t)
+\]
+
+그다음부터는
+
+\[
+x_{t+1}=E[cursor]
+\]
+
+\[
+cursor\leftarrow cursor+1
+\]
+
+입니다.
+
+즉 64-token exact sequence도 **retrieval은 한 번**입니다.
+
+이 `copy cursor`가 Exact Memory의 핵심 최적화입니다.
+
+---
+
+# 7. 출력 분포도 Semantic / Copy를 명시적으로 분리한다
+
+일반 LM logits를
+
+\[
+p_{\rm LM}(v)
+\]
+
+라고 하고 Exact Memory에서 얻은 copy distribution을
+
+\[
+p_{\rm copy}(v)
+\]
+
+라고 합시다.
+
+작은 gate:
+
+\[
+g_t=\sigma(w^\top h_t+b)
+\]
+
+를 두고,
+
+\[
+\boxed{
+p(v)
+=
+(1-g_t)p_{\rm LM}(v)
++
+g_t p_{\rm copy}(v)
+}
+\]
+
+로 합칩니다.
+
+의미 있는 자연어:
+
+\[
+g_t\approx0
+\]
+
+식별자·숫자·quoted value:
+
+\[
+g_t\approx1
+\]
+
+이 되는 구조입니다.
+
+초기에는 gate 학습에 모든 것을 맡기지 말고 deterministic supervision을 사용합니다.
+
+예:
+
+```text
+숫자
+UUID-like string
+identifier
+JSON value
+quoted literal
+Python variable/function signature
+```
+
+등에 copy target을 명시합니다.
+
+---
+
+# 8. 반복 패널티와 Exact Copy를 서로 충돌시키지 않는다
+
+현재 수정에서 `generated-only` repetition penalty가 retrieval을 보존하면서 반복률을 절반 가까이 줄였다는 것은 좋은 수정입니다. 
+
+따라서 다음 버전에서는:
+
+\[
+\boxed{\text{repetition scope = generated}}
+\]
+
+를 **기본값**으로 바꿉니다.
+
+그리고 Exact Copy cursor가 활성화되어 있는 동안은:
+
+\[
+\boxed{\text{repetition penalty}=0}
+\]
+
+또는 해당 copied source token에 대한 penalty exemption을 적용합니다.
+
+왜냐하면:
+
+```text
+11112222
+```
+
+같은 값에서 반복은 **정답**일 수 있기 때문입니다.
+
+즉 decoder는
+
+```text
+NORMAL_GENERATION
+COPY_MODE
+```
+
+를 구분해야 합니다.
+
+---
+
+# 9. 반복 문제는 추론 패널티가 아니라 학습에서도 직접 해결한다
+
+현재 strict loop-free는 17/50이고, 자유 생성이 명백한 핵심 병목입니다. 
+
+그런데 V20 T1에는 이미 EOS weight 2.0이 들어가 있습니다. 
+
+따라서 단순히 “EOS를 훨씬 크게 올린다”는 해결법은 위험합니다.
+
+다음 학습 objective를:
+
+\[
+\boxed{
+\mathcal L=
+\mathcal L_{\rm LM}
++\lambda_e\mathcal L_{\rm EOS}
++\lambda_u\mathcal L_{\rm loop}
++\lambda_c\mathcal L_{\rm copy}
+}
+\]
+
+로 분리하는 게 좋습니다.
+
+EOS는 예를 들어:
+
+```text
+2.0 / 2.5 / 3.0
+```
+
+정도만 작은 sweep으로 확인합니다.
+
+동시에 정상적인 반복과 비정상적인 반복을 구별하는 loop loss를 추가합니다.
+
+그리고 teacher-forcing 문제에는 **full scheduled sampling을 바로 넣지 않습니다.**
+
+대신 먼저:
+
+```text
+정답 prefix
+      ↓
+일부 구간 모델 생성
+      ↓
+그 상태에서 다시 올바른 continuation을 학습
+```
+
+하는 **self-generated-prefix recovery**를 추천합니다.
+
+이를 수식으로 표현하면 정상 prefix \(x_{<t}\) 대신
+
+\[
+\tilde x_{<t}
+\sim p_\theta
+\]
+
+의 일부를 입력하고도
+
+\[
+-\log p_\theta(x_t|\tilde x_{<t})
+\]
+
+를 최소화합니다.
+
+즉 모델이 자기 실수를 한 번 냈다고 해서 영원히 궤도를 이탈하지 않도록 학습합니다.
+
+---
+
+# 10. Python 192-token 문제는 먼저 문서 불일치를 해결한다
+
+이번 자료에는 중요한 충돌이 있습니다.
+
+다음버전 권고안은 Python이 192 token까지 생성되면서 붕괴한다고 씁니다. 
+
+그런데 공식 V20 T1 training configuration에는:
+
+\[
+\boxed{\text{code completion cap}=96}
+\]
+
+이라고 되어 있습니다. 
+
+따라서 다음 개발 전에 반드시:
+
+```text
+training completion cap
+evaluation max_new_tokens
+runtime max_new_tokens
+```
+
+를 별개의 config로 분리하고 모두 log에 남겨야 합니다.
+
+`192`가 evaluation generation limit이었다면 training cap을 줄이는 근거가 아닙니다.
+
+---
+
+# 11. RoPE는 다음 scratch architecture부터 적용한다
+
+현재 learned absolute positional embedding은 제거합니다.
+
+Local Attention에:
+
+\[
+q_t'=R_tq_t
+\]
+
+\[
+k_j'=R_jk_j
+\]
+
+를 적용합니다.
+
+**Fuzzy anchor router에는 위치 회전을 넣지 않는 것을 우선 권합니다.**
+
+왜냐하면 semantic anchor는:
+
+> “이 token이 문장 어디에 있는가?”
+
+보다
+
+> “현재 representation이 어떤 의미 집합에 속하는가?”
+
+를 보는 것이 핵심이기 때문입니다.
+
+즉:
+
+```text
+RoPE
+→ Local Q/K only
+
+Fuzzy Router
+→ contextual hidden state
+```
+
+로 분리합니다.
+
+그리고 positional feature가 anchor에 필요하다면 그것은 hidden state를 통해 간접적으로 전달될 수 있습니다.
+
+---
+
+# 12. 8K를 최소 장문 실험 규격으로 만든다
+
+현재 2048은 너무 짧습니다.
+
+실제 기존 비용 비교에서도:
+
+```text
+512   Dense faster
+1024  Dense faster
+2048  FDT faster
+```
+
+였지만 2048의 dense 결과는 VRAM pressure 영역이었습니다. 
+
+그래서 장문 benchmark는 최소:
+
+\[
+512,\;1K,\;2K,\;4K,\;8K
+\]
+
+이고 가능하면
+
+\[
+16K
+\]
+
+까지 갑니다.
+
+측정값도 training tok/s 하나로 끝내면 안 됩니다.
+
+\[
+T_{\rm prefill}(N)
+\]
+
+\[
+T_{\rm decode/token}(N)
+\]
+
+\[
+VRAM(N)
+\]
+
+을 각각 측정합니다.
+
+특히 현재 FDT가 보여준:
+
+\[
+T_{\rm decode/token}(N)\approx const.
+\]
+
+가 8K/16K에서도 유지되는지 확인하는 것이 핵심입니다.
+
+---
+
+# 13. 다만 8K 전체를 처음부터 학습하지 않아도 됨
+
+16GB라는 제약 때문에 모든 batch를 8K로 만들 이유는 없습니다.
+
+훈련 distribution을 예를 들어:
+
+```text
+2K : 대부분
+4K : 일부
+8K : 소수
+```
+
+로 만드는 것이 현실적입니다.
+
+중요한 것은 모델이 positional/routing dynamics를 긴 범위에서도 경험하게 하는 것입니다.
+
+그리고 8K full backward가 안 들어간다면:
+
+```text
+2048-token chunks
++
+anchor state carry
+```
+
+를 이용한 stateful training도 실험할 가치가 있습니다.
+
+단, chunk 사이 gradient를 detach하면 완전한 8K BPTT는 아니므로 그 사실은 결과에 명시합니다.
+
+---
+
+# 14. 속도 최적화는 반드시 실제 주 연구 GPU에서 다시 시작한다
+
+여기는 이전 답변에서 가장 크게 수정할 부분입니다.
+
+검수 자료의 profiler는 **Turing 4GB 환경에서 얻어진 것**입니다. 업로드된 문서 기준으로는 GTX 1650입니다. 
+
+따라서 다음과 같은 수치는 **일반화 금지**입니다.
+
+```text
+~140 GB/s effective bandwidth
+18 ms dispatch overhead
+36 tok/s
+2× optimization potential
+```
+
+이것들은 해당 검수 환경의 수치입니다.
+
+반면 다음 관찰은 다른 GPU에서도 확인해볼 가치가 있는 **가설**입니다.
+
+```text
+작은 kernel 호출이 지나치게 많다
+anchor path가 eager execution에 불리하다
+batch 1→4에서 latency가 거의 안 늘어났다
+```
+
+그래서 최종 optimization process는:
+
+```text
+실제 연구 GPU profiler
+          ↓
+정확한 hotspot 재산정
+          ↓
+torch.compile
+          ↓
+CUDA Graphs
+          ↓
+필요한 부분만 Triton/custom CUDA
+```
+
+입니다.
+
+기존 `scatter_add_` 수정은 결과가 동일하면서 prefill 1.4~1.6배 개선됐으므로 그대로 유지합니다. 
+
+---
+
+# 15. 커널 최적화 목표는 “연산량 감소”가 아니라 우선 “호출 수 감소”
+
+현재 FDT는 dense Transformer보다 표준 CUDA kernel과 잘 맞지 않을 가능성이 큽니다.
+
+따라서 처음부터 anchor 수를 256→128로 줄이거나 top8→top4로 줄이지 않습니다.
+
+우선:
+
+```text
+normalize
+router projection
+cosine
+top-k
+membership softmax
+```
+
+를 가능한 한 fused path로 만들고,
+
+그 다음:
+
+```text
+anchor gather
+base summary
+recency summary
+weighted reduction
+state update
+```
+
+도 fused path로 만듭니다.
+
+즉:
+
+\[
+\boxed{\text{같은 FDT를 더 빠르게}}
+\]
+
+먼저 확인합니다.
+
+그 뒤에도 연산량이 문제일 때만 algorithmic modification을 검토합니다.
+
+---
+
+# 16. 평가 하네스도 새 구조에 맞게 재설계한다
+
+현재 evaluator의 엄밀성은 이미 꽤 좋지만 미측정 항목이 있습니다. 보고서 자체도 exact-copy matrix, Python unit tests, JSON schema/value fidelity 등이 아직 없다고 명시합니다. 
+
+다음 평가기는 최소 아래 계층을 동시에 기록해야 합니다.
+
+| 영역 | 필수 지표 |
+|---|---|
+| LM | BPB, PPL, top-1 |
+| Generation | loop-free, trigram repetition, first loop position, EOS |
+| Exact | 4/8/16/32/64 exact, char/token accuracy, edit distance |
+| Teacher-forced Exact | gold rank, probability, first divergence |
+| Memory | retrieval success vs distance, distractors |
+| JSON | syntax, schema, per-field exact, whole-object exact |
+| Python | parse, compile, signature, AST, unit test |
+| Fuzzy | anchor entropy, effective-K, route trace |
+| Exact Memory | retrieval precision, copy accuracy, gate rate |
+| Long Context | 2K/4K/8K/16K retrieval, state retention |
+| Systems | prefill, decode ms/token, VRAM, kernel count |
+
+이게 앞으로 하나의 `evaluation suite`가 되어야 합니다.
+
+---
+
+# 17. Exact Memory ablation도 반드시 남긴다
+
+Exact Memory는 넣되 **효과를 검증할 수 있도록 끌 수 있어야 합니다.**
+
+예를 들어 같은 checkpoint에서:
+
+```text
+FDT
+FDT + Exact store only
+FDT + Exact retrieval
+FDT + Exact retrieval + copy
+```
+
+를 비교합니다.
+
+그러면:
+
+```text
+copy 정확도 개선
+자연어 손상 없음
+latency 증가량
+memory 증가량
+```
+
+을 정확히 볼 수 있습니다.
+
+중요한 것은 “Exact Memory가 필요하다고 생각해서 넣었다”에서 끝나는 것이 아니라:
+
+\[
+\boxed{
+\text{fuzzy semantic memory로 해결하지 못한 영역을 exact path가 선택적으로 해결한다}
+}
+\]
+
+를 실험으로 보여주는 것입니다.
+
+---
+
+# 18. 학습 데이터 자체도 바꿔야 한다
+
+기존 V16에서 Python completion-supervised token contribution이 **75.17%**까지 올라갔던 것은 row 균형이 실제 gradient 균형을 의미하지 않는다는 강한 증거입니다. 
+
+따라서 데이터 mix는 row count가 아니라
+
+\[
+\text{supervised tokens}
+\times
+\text{loss weight}
+\]
+
+그리고 가능하면 실제 gradient contribution을 기준으로 관리합니다.
+
+Exact Memory 학습 데이터도 의미 있는 문자열만 쓰면 안 됩니다.
+
+의도적으로:
+
+```text
+random digits
+random alphanumeric
+UUID-like
+hex
+hash-like
+dates
+floats
+negative values
+JSON keys/values
+code identifiers
+repeated-character strings
+```
+
+를 넣어야 합니다.
+
+이건 일반화보다 **lossless identity channel을 훈련하기 위한 데이터**입니다.
+
+---
+
+# 19. 모델 크기는 당장 116M으로 내리지 않는다
+
+새 리뷰의 compute-optimal 분석은 참고할 가치는 큽니다. 현재 426M/529M-token이라는 비율이 매우 낮은 것도 사실입니다. 
+
+하지만 그 계산으로 바로
+
+\[
+426M\rightarrow116M
+\]
+
+을 메인 모델로 결정하는 것은 반대합니다.
+
+왜냐하면 지금 목적은 상업적으로 compute-optimal한 LM을 만드는 게 아니라 **새 아키텍처가 어떤 성질을 갖는지 연구하는 것**이기 때문입니다.
+
+따라서:
+
+```text
+Small FDT
+~100–150M
+→ 빠른 실험/ablation/seed
+
+Main FDT
+~426–450M
+→ 최종 구조 확인
+```
+
+의 두 스케일로 운영하는 것이 좋습니다.
+
+450M에서 every experiment를 처음부터 학습할 필요가 없습니다.
+
+---
+
+# 20. 최종적으로 제가 제안하는 다음 세대 구조
+
+수식으로 압축하면 다음입니다.
+
+\[
+\boxed{
+h_t^{0}=E(x_t)+\text{RoPE-local positional processing}
+}
+\]
+
+각 block:
+
+\[
+u_t^\ell
+=
+h_t^\ell+
+LocalAttn_{W=64}^\ell(h_t^\ell)
+\]
+
+anchor layer에서는:
+
+\[
+\mu_{t,j}
+=
+TopKSoftmax_8
+\left(
+\frac{\cos(R_\ell u_t^\ell,A_{\ell,j})}{0.25}
+\right)
+\]
+
+\[
+s_t^\ell
+=
+\sum_j
+\mu_{t,j}S_{t-1,j}^\ell
+\]
+
+동시에 필요할 경우:
+
+\[
+e_t
+=
+ExactRetrieve
+(E_{<t},\mu_t,h_t)
+\]
+
+그리고
+
+\[
+v_t^\ell
+=
+u_t^\ell+s_t^\ell
+\]
+
+최종:
+
+\[
+h_t^{\ell+1}
+=
+v_t^\ell+
+SwiGLU(v_t^\ell)
+\]
+
+LM distribution:
+
+\[
+p_{\rm LM}
+=
+softmax(E^\top h_t)
+\]
+
+Exact Copy distribution:
+
+\[
+p_{\rm exact}
+=
+Copy(E,cursor)
+\]
+
+최종 출력:
+
+\[
+\boxed{
+p_t
+=
+(1-g_t)p_{\rm LM}
++
+g_t p_{\rm exact}
+}
+\]
+
+입니다.
+
+즉 다음 FDT를 한 문장으로 정의하면:
+
+\[
+\boxed{
+\textbf{Local Working Memory}
++
+\textbf{Fuzzy Semantic Memory}
++
+\textbf{Exact Episodic Memory}
+}
+\]
+
+를 가진 causal recurrent language model입니다.
+
+---
+
+## 최종 개발 순서
+
+제가 지금 실제 연구 로드맵을 잠그라면 순서를 이렇게 고정하겠습니다.
+
+**1단계에서는 평가부터 고칩니다.** exact 4/8/16/32/64, gold-token rank/probability, loop, EOS, BPB를 한 harness에 넣고 96/192 token 설정 불일치를 제거합니다.
+
+**2단계에서는 RoPE 전환을 먼저 작은 모델에서 검증합니다.** 기존 fuzzy routing, top-8, anchor 수는 그대로 유지합니다.
+
+**3단계에서 Exact Memory를 구현합니다.** raw token buffer + chunk anchor index + candidate cap + copy cursor 구조로 만들고 feature flag를 둡니다.
+
+**4단계에서 학습 objective를 수정합니다.** 기존 CE를 유지하고 EOS small sweep, loop/unlikelihood loss, copy supervision, self-generated-prefix recovery를 추가합니다.
+
+**5단계에서는 실제 주 연구 GPU에서 처음부터 다시 profile합니다.** 검수용 Turing GPU의 절대 수치를 폐기하고 kernel count, CPU launch, CUDA time, bandwidth를 다시 측정합니다.
+
+**6단계에서 `torch.compile → CUDA Graph → selective fusion` 순으로 최적화합니다.** hierarchical routing/adaptive-k는 여전히 보류합니다.
+
+**7단계에서 2K→4K→8K, 가능하면 16K long-context 실험을 합니다.** 이때 처음으로 FDT의 `decode cost ≈ context-independent`라는 장점을 본격적으로 주장할 수 있습니다.
+
+**8단계에서만 최종 426~450M scratch run을 합니다.** 그 전에 작은 모델로 모든 구조 변경을 걸러냅니다.
+
+---
+
+이렇게 가면 다음 세대는 단순히 **“현재 FDT에 이것저것 더 붙인 모델”**이 아닙니다.
+
+처음 FDT의 출발점이었던
+
+\[
+\text{언어 의미를 fuzzy set membership으로 조직한다}
+\]
+
+는 아이디어는 그대로 살리고,
+
+그 아이디어가 원래부터 담당하기 부적합했던
+
+\[
+\text{무의미한 문자열·숫자·식별자의 정확한 보존}
+\]
+
+은 Exact Episodic Memory에 넘기며,
+
+긴 문맥은 RoPE와 incremental state로 열고,
+
+생성 안정성은 학습 objective로 고치고,
+
+속도 문제는 실제 목표 GPU에 맞는 kernel/runtime optimization으로 해결하는 구조가 됩니다.
+
+저는 이걸 현재까지의 논의를 종합한 **FDT의 가장 보수적이면서도 완성도 높은 다음 세대 방향**으로 보겠습니다. 기존의 가장 독특한 부분은 하나도 버리지 않으면서, 지금 관찰된 네 병목을 서로 다른 적절한 메커니즘으로 해결하는 방향입니다.

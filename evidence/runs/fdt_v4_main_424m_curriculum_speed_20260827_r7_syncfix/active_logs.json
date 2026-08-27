@@ -1,0 +1,7 @@
+{
+  "stderr": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r7_syncfix\\stderr.log",
+  "training_log": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r7_syncfix\\training_log.jsonl",
+  "pid": 12496,
+  "recovery": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r7_syncfix\\latest_recovery.pt",
+  "stdout": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r7_syncfix\\stdout.log"
+}

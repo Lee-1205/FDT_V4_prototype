@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "source": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r7_syncfix\\latest_recovery.pt",
+  "source_sha256": "9C9BDD50AB7C083E3E9808F99988495E9BDAEC29647A78662ABFB9EF0DE66232",
+  "destination": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r8_fast_backend\\latest_recovery.pt",
+  "destination_sha256": "8705ADCD0FD142FC69F02F3A850BF07E49495B539F2D5673A826DCB452C47D92",
+  "stage_status": "PAUSED",
+  "optimizer_step": 1696,
+  "tokens_seen": 9831728,
+  "optimizer_state_included": true,
+  "optimizer_state_present": true,
+  "source_states_equal": true,
+  "torch_rng_present": true,
+  "cuda_rng_present": true,
+  "python_rng_present": true,
+  "model_config_equal": true,
+  "trainer_sha256": "B351DF0B9B6CDB9E20B0858897F5849647E281110B71A96B6CF83708D5E6C547",
+  "pointer_sha256": "65D392DD32447279674CEB2D7298E669A99FFA35D9953228A2F323C763608BB8",
+  "backend_diagnosis_sha256": "0A720AFAE65059CBF32B520E923C63FE50A31ED9CDF8EDED5DD8F88D6190D5C8",
+  "measured_short_tokens_per_second": 1178.3757297718685,
+  "temporary_residue": []
+}

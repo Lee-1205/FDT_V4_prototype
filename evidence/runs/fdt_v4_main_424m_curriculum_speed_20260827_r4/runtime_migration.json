@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "source": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r3\\latest_recovery.pt",
+  "source_sha256": "B6B3734E5CF929B09F7F1975F4B136EC390C98847DAB4C27EC84C7B70EE90471",
+  "destination": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r4\\latest_recovery.pt",
+  "destination_sha256": "1BB5073CCCCA0E623B84C0796DCAAFA999C68785B2E7EF308A9326A47658A710",
+  "stage_status": "PAUSED",
+  "optimizer_step": 866,
+  "tokens_seen": 5009953,
+  "optimizer_state_included": true,
+  "optimizer_state_present": true,
+  "source_states_equal": true,
+  "torch_rng_present": true,
+  "cuda_rng_present": true,
+  "python_rng_present": true,
+  "model_config_equal": true,
+  "selected_variant": "short_batch1_uncheckpointed",
+  "measured_tokens_per_second": 1267.1041490054863,
+  "runtime_changes": {
+    "activation_checkpointing_min_sequence_length": 8192,
+    "lm_loss_checkpointing_min_sequence_length": 8192,
+    "short_sequence_batch_size": 1,
+    "short_sequence_max_length": 512
+  },
+  "temporary_residue": []
+}

@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "checkpoint": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_audit_warmstart_20260823_0af5577\\latest.pt",
+  "checkpoint_sha256": "2E9D5764CFE145CC9DEBB53540F84CC33E9CB64124BAA76920F2B5C53CAF785F",
+  "checkpoint_stage_status": "AUDIT_UNTRAINED_WARM_START",
+  "parameter_count": 424474072,
+  "context": 8192,
+  "precision": "bf16_autocast_fp32_master",
+  "quantization": "none",
+  "loss": 11.44521427154541,
+  "base_grad_norm": 340.887939453125,
+  "exact_grad_norm": 0.0,
+  "finite_parameters_after_step": true,
+  "elapsed_seconds": 6.1233181999996305,
+  "tokens_per_second": 1337.8367304185654,
+  "peak_allocated_gib": 7.685397624969482,
+  "peak_reserved_gib": 8.0234375,
+  "memory_fraction_cap": 0.88,
+  "gpu": "NVIDIA GeForce RTX 5060 Ti"
+}

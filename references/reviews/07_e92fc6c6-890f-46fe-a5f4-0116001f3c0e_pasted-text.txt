@@ -1,0 +1,286 @@
+
+기존 FDT v4 core 구조(RoPE, W64, fuzzy anchor 256/top8, Exact Memory)는 변경하지 않는다.
+
+추가할 학습 최적화:
+
+1. Dynamic Loss Balancing
+- row 수가 아니라 실제 supervised-token 수와 loss contribution 기준으로
+  natural / knowledge / exact / recovery / long-context 비중을 자동 보정.
+- 한 영역이 gradient를 과점하지 못하도록 cap 적용.
+
+2. Exact-Memory Curriculum
+- 4→8→16→32→64 token 순으로 exact-copy 난이도 증가.
+- 숫자, random string, UUID/hash, JSON value, code identifier를 균형 학습.
+- 처음부터 긴 문자열만 학습시키지 않는다.
+
+3. Prefix-Recovery Curriculum
+- 초기에는 정상 teacher forcing 위주.
+- 학습 진행에 따라 model-generated/corrupted prefix 비율을 점진 증가.
+- 한 번의 오출력 이후 정상 trajectory로 복귀하는 능력을 학습.
+
+4. Loop Unlikelihood Loss
+- 비정상적인 반복 n-gram에만 추가 loss 적용.
+- 코드/숫자/Exact Copy의 정상 반복은 제외.
+- inference 3-gram block에만 의존하지 않도록 한다.
+
+5. Mixed Context Curriculum
+- 대부분 2K, 일부 4K, 소량 8K/16K.
+- 긴 context 비율은 초반 낮게 시작해 후반 증가.
+- long sample 때문에 전체 학습 throughput이 지나치게 떨어지지 않게 제한.
+
+6. Sequence Packing
+- 짧은 natural/knowledge 샘플은 가능한 한 context에 packing.
+- sample boundary와 EOS/loss mask는 엄격히 유지.
+- padding 연산 낭비 최소화.
+
+7. Selective Freeze / Unfreeze
+- 초기 v4 안정화 단계에서는 검증된 fuzzy router/anchor를 우선 보존.
+- RoPE/Exact Memory/new objectives가 안정된 뒤 필요한 경우에만 점진 unfreeze.
+- routing regression을 매 단계 검사.
+
+8. Capability-balanced Batch
+- 같은 batch가 특정 Python/JSON/Exact 유형으로 몰리지 않게 category mixture 보장.
+- row count뿐 아니라 실제 target token 수 기준으로 배치 균형화.
+
+필수 ablation:
+A. baseline
+B. + dynamic balancing
+C. + exact curriculum
+D. + recovery/loop loss
+E. + mixed long-context
+F. full combination
+
+각 실험은 작은 smoke run만 자동 실행 가능하게 만들고,
+본 학습은 사용자가 직접 실행하도록 명령어를 제공한다.
+
+기록:
+- git commit
+- config
+- seed
+- token mixture
+- effective supervised tokens/category
+- loss contribution/category
+- throughput
+- VRAM
+- BPB
+- loop-free
+- exact 4/8/16/32/64
+- long-context retrieval
+
+금지:
+- 모델 크기 변경
+- anchor 256/top8 변경
+- adaptive-k / hierarchical routing 추가
+- 대규모 refactor
+- 불필요한 외부 조사
+- 장시간 학습 자동 실행
+
+완료 시 출력은 짧게:
+1. 변경 파일
+2. 추가된 학습 기법
+3. 실행 명령
+4. ablation 명령
+5. 예상 위험 요소
+6. git diff 요약
+
+
+목표:
+FDT v4의 품질을 보존하면서 실제 추론 속도와 메모리 효율을 최대화한다.
+반복 패널티를 켜서 품질을 가리는 방식은 성능 개선으로 인정하지 않는다.
+
+핵심 원칙:
+- W64 local attention 유지
+- fuzzy anchors 256 / top8 / router_dim256 유지
+- RoPE 유지
+- Exact Memory + Copy Cursor 유지
+- cache/full recompute 결과 보존
+- adaptive-k / hierarchical routing 금지
+
+구현 우선순위:
+
+1. Decode Fast Path
+- token당 Python loop / tensor allocation 최소화
+- decode용 buffer/state 사전 할당 및 재사용
+- 불필요한 clone/cat/reshape/device sync 제거
+- static shape 가능한 경로 고정
+
+2. torch.compile
+- inference 전용 compiled path 분리
+- reduce-overhead 계열 설정 시험
+- eager 대비 correctness와 latency A/B 측정
+
+3. CUDA Graph
+- batch/context state shape가 고정 가능한 decode path capture
+- launch overhead 감소
+- eager/compile/graph를 각각 독립 benchmark
+
+4. Fuzzy Router Fusion
+가능하면 다음을 한 경로로 묶는다:
+normalize
+→ router projection
+→ cosine
+→ top-k
+→ membership softmax
+
+수학적 routing 결과는 바꾸지 않는다.
+
+5. Anchor Memory Fusion
+가능하면:
+anchor gather
+→ base/recent summary
+→ weighted reduction
+→ numerator/mass update
+를 fuse한다.
+
+6. Exact Memory Fast Path
+- 전체 context scan 금지
+- 기존 top8 anchor index 재사용
+- bounded candidate chunks
+- retrieval 결과 cache
+- Copy Cursor 동안 재검색 금지
+
+7. Copy Fast Path
+Exact span이 확정되면:
+- sampling/top-k/top-p 생략
+- 불필요한 vocabulary decision 생략 가능 여부 검토
+- 긴 span은 token-by-token decode보다 batched mini-prefill/state ingestion이 빠른지 비교
+- copied tokens는 이후 FDT state에 정확히 반영되어야 함
+
+8. LM Head 최적화
+- Copy Mode에서는 full-vocab LM head 계산이 정말 필요한지 확인
+- 필요 없으면 안전하게 우회
+- normal generation에서는 기존 결과 유지
+
+9. Cache 최적화
+- local KV는 W64 고정 ring buffer 가능 여부 검토
+- anchor numerator/mass in-place update
+- 매 token concat 금지
+- RoPE position offset 정확성 유지
+
+10. 3-gram/repetition logic
+- main speed/quality benchmark에서는 OFF
+- 별도의 safety/generation diagnostic으로만 측정
+- repetition penalty 없이도 모델 자체 품질이 유지되는지 평가
+
+성능 측정은 반드시 현재 실제 연구 GPU에서 새로 한다.
+과거 GTX16xx profiler의 절대 ms/token, bandwidth, overhead 수치는 재사용하지 않는다.
+
+Benchmark contexts:
+512 / 1K / 2K / 4K / 8K / 16K
+
+Batch:
+1 / 2 / 4 / 8 가능한 범위
+
+각각 측정:
+- prefill tok/s
+- decode ms/token
+- decode tok/s
+- peak VRAM
+- kernel/ATen call count
+- CPU self time
+- CUDA self time
+- router time
+- anchor update time
+- Exact Memory overhead
+
+특히 T_decode(N)의 slope를 계산한다.
+
+목표:
+FDT decode latency가 2K→16K에서 거의 평평하게 유지되는지 확인한다.
+
+Transformer 대조군:
+- 유사 parameter count
+- 동일 GPU/dtype
+- KV cache 사용
+- PyTorch SDPA/가능한 optimized attention 사용
+- batch/context 동일
+
+비교에서 반드시 분리:
+1. Prefill
+2. Decode
+3. VRAM
+4. Batch scaling
+5. Long-context scaling
+
+학습 속도가 Transformer보다 느린 것은 이번 판정 기준이 아니다.
+
+이번 inference 연구의 성공 기준은:
+- 품질 regression 없음
+- repetition penalty 없이 정상 생성 유지
+- Exact Copy 정확성 유지
+- cache/full integrity 유지
+- 8K/16K 정상 동작
+- long-context decode scaling에서 Transformer 대비 명확한 우위
+- 또는 동일 throughput에서 VRAM 우위
+- 또는 동일 VRAM에서 더 긴 context 처리
+
+A/B:
+A eager
+B optimized allocations/cache
+C torch.compile
+D CUDA Graph
+E fused router/anchor
+F full optimized
+
+각 단계의 개선량을 따로 기록한다.
+한꺼번에 적용한 최종 수치만 보고하지 않는다.
+
+장시간 학습은 실행하지 않는다.
+기존 checkpoint로 inference optimization만 수행한다.
+
+완료 출력:
+1. 변경 파일
+2. 병목 원인
+3. 각 최적화 A/B 표
+4. FDT vs optimized Transformer 표
+5. 512~16K decode latency curve
+6. VRAM curve
+7. correctness regression 여부
+8. 가장 효과가 컸던 최적화
+9. 아직 남은 병목
+10. 다음 최적화 1개만 추천
+
+# Additional Inference Optimizations
+
+11. Weight Quantization
+- BF16/FP16 baseline과 INT8/INT4 weight-only inference를 비교한다.
+- 품질, exact-copy, cache integrity가 유지되는 경우에만 채택한다.
+- 누적되는 fuzzy anchor numerator/mass는 무리하게 저정밀화하지 않는다.
+- batch1 decode에서 weight-memory-bandwidth 감소 효과를 측정한다.
+
+12. Fixed-W64 Attention Kernel
+- local attention window가 항상 W=64라는 점을 이용한다.
+- generic attention 대비 W64-specialized Triton/CUDA kernel의 가치가 있는지 profiler로 확인한다.
+- 수학적 attention 결과는 변경하지 않는다.
+
+13. Continuous Batching
+- batch 1/2/4/8 및 가능한 더 큰 batch에서 long-context throughput을 측정한다.
+- requests/sec, VRAM/request, tok/s를 optimized Transformer와 비교한다.
+- FDT의 bounded local/semantic state가 long-context batching에서 실제 이점인지 검증한다.
+
+14. RoPE Fast Path
+- 16K position용 rotary cache를 사전 계산한다.
+- decode마다 sin/cos를 재생성하지 않는다.
+- incremental position offset correctness를 유지한다.
+
+15. Exact-Memory Storage Benchmark
+- 2K/4K/8K/16K에서 raw token memory, index metadata, retrieval cache가 차지하는 실제 메모리를 측정한다.
+- Transformer KV cache와 동일 조건에서 별도로 비교한다.
+
+16. Prefill Optimization
+- 8K/16K sparse causal prefix scan을 별도로 profile한다.
+- allocation, scatter/gather, synchronization 병목을 찾는다.
+- 가능한 경우 fused/parallel prefix scan을 시험한다.
+- decode 최적화 결과와 섞지 않는다.
+
+최종적으로 다음 세 지표를 모두 보고한다:
+
+A. Single-user latency
+B. Long-context VRAM
+C. Multi-request throughput
+
+단순 tok/s 하나만으로 승패를 판정하지 않는다.
+
+탐색 이후 가능한 사안을 적용하고 적용한 사안을 출력한 뒤 너는 타이머 없이 대기 모드로 돌입하라. 이후 내가 필요할 때마다 결과를 요구할거야
+
+토큰 사용량을 최대한 줄이도록 노력하라.

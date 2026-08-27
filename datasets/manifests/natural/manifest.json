@@ -1,0 +1,15 @@
+{
+  "name": "natural",
+  "schema_version": "fdt_v4_curriculum_source_manifest_v1",
+  "shards": [
+    {
+      "file": "shards\\train\\shard_00000.pt",
+      "rows": 20000,
+      "sha256": "D1096C5AF243DD4D68CA120472DF21C228EEDB3A85F8979316484B678B5DFAA4",
+      "tokens": 9860000
+    }
+  ],
+  "source_directory": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\prepared_data\\fdt_v4_contract_sources_v3_20260826\\natural",
+  "source_manifest_sha256": "56AFAA3FF8A25A5CA2ECE55A6E6474494E324A61D258F30E4834319659CDE8CD",
+  "split": "train"
+}

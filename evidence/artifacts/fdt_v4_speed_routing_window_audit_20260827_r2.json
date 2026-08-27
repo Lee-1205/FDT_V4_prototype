@@ -1,0 +1,94 @@
+{
+  "status": "PASS",
+  "checkpoint": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r3\\latest_recovery.pt",
+  "checkpoint_sha256": "B6B3734E5CF929B09F7F1975F4B136EC390C98847DAB4C27EC84C7B70EE90471",
+  "config_sha256": "358DE85C696AC0D263791A7200D1D6E75FBBF70090365BFB963893D226772E14",
+  "trainer_sha256": "E700F7F5001266B725A727821700A807B8DCBCBADE9D90C30787890D74190B8B",
+  "start_step": 866,
+  "window_steps": 25,
+  "dead_anchor_fraction_limit": 0.01,
+  "all_sample_orders_identical": true,
+  "all_source_states_identical": true,
+  "variants": [
+    {
+      "short_batch_size": 1,
+      "sample_order_sha256": "EBE81659C7E2C6801E7E7BAF7A348866E4490BAE5B9D917A37D9DF933B22F38A",
+      "source_states": {
+        "natural": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 4130,
+          "seed": 20260823
+        },
+        "factual": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 2855,
+          "seed": 20261832
+        },
+        "exact_copy": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 866,
+          "seed": 20262841
+        },
+        "long_context": {
+          "epoch": 1,
+          "shard_index": 0,
+          "cursor": 15,
+          "seed": 20263850
+        },
+        "generated_prefix": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 0,
+          "seed": 20264859
+        }
+      },
+      "window_dead_anchor_fraction": 0.0,
+      "maximum_single_step_dead_anchor_fraction": 0.09765625,
+      "peak_allocated_gib": 4.414639949798584,
+      "peak_reserved_gib": 4.76171875
+    },
+    {
+      "short_batch_size": 2,
+      "sample_order_sha256": "EBE81659C7E2C6801E7E7BAF7A348866E4490BAE5B9D917A37D9DF933B22F38A",
+      "source_states": {
+        "natural": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 4130,
+          "seed": 20260823
+        },
+        "factual": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 2855,
+          "seed": 20261832
+        },
+        "exact_copy": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 866,
+          "seed": 20262841
+        },
+        "long_context": {
+          "epoch": 1,
+          "shard_index": 0,
+          "cursor": 15,
+          "seed": 20263850
+        },
+        "generated_prefix": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 0,
+          "seed": 20264859
+        }
+      },
+      "window_dead_anchor_fraction": 0.0,
+      "maximum_single_step_dead_anchor_fraction": 0.09765625,
+      "peak_allocated_gib": 4.414639949798584,
+      "peak_reserved_gib": 4.76171875
+    }
+  ]
+}

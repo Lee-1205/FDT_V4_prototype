@@ -1,0 +1,645 @@
+{
+  "status": "DIAGNOSTIC_ONLY",
+  "checkpoint": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_audit_warmstart_20260823_0af5577\\latest.pt",
+  "checkpoint_sha256": "2E9D5764CFE145CC9DEBB53540F84CC33E9CB64124BAA76920F2B5C53CAF785F",
+  "dtype": "float32",
+  "quantization": "none",
+  "contexts": [
+    {
+      "context": 4096,
+      "extended_context": 4097,
+      "decode_logit_max_abs_error": 9.059906005859375e-06,
+      "first_topk_mismatch_layer": null,
+      "layers": [
+        {
+          "layer_index": 0,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            52,
+            45,
+            216,
+            171,
+            181,
+            70,
+            118,
+            7
+          ],
+          "recomputed_indices": [
+            52,
+            45,
+            216,
+            171,
+            181,
+            70,
+            118,
+            7
+          ],
+          "route_input_max_abs_error": 3.635883331298828e-06,
+          "membership_max_abs_error": 1.1175870895385742e-07,
+          "distance_max_abs_error": 4.76837158203125e-07,
+          "incremental_boundary_margin": 0.000706791877746582,
+          "recomputed_boundary_margin": 0.0007068514823913574
+        },
+        {
+          "layer_index": 2,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            41,
+            245,
+            109,
+            201,
+            92,
+            211,
+            80,
+            111
+          ],
+          "recomputed_indices": [
+            41,
+            245,
+            109,
+            201,
+            92,
+            211,
+            80,
+            111
+          ],
+          "route_input_max_abs_error": 4.76837158203125e-06,
+          "membership_max_abs_error": 2.4586915969848633e-07,
+          "distance_max_abs_error": 6.556510925292969e-07,
+          "incremental_boundary_margin": 0.005392611026763916,
+          "recomputed_boundary_margin": 0.005392670631408691
+        },
+        {
+          "layer_index": 4,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            156,
+            79,
+            242,
+            187,
+            219,
+            167,
+            59,
+            75
+          ],
+          "recomputed_indices": [
+            156,
+            79,
+            242,
+            187,
+            219,
+            167,
+            59,
+            75
+          ],
+          "route_input_max_abs_error": 5.364418029785156e-06,
+          "membership_max_abs_error": 7.152557373046875e-07,
+          "distance_max_abs_error": 7.152557373046875e-07,
+          "incremental_boundary_margin": 0.008564412593841553,
+          "recomputed_boundary_margin": 0.008564352989196777
+        },
+        {
+          "layer_index": 6,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            200,
+            161,
+            126,
+            32,
+            47,
+            212,
+            242,
+            128
+          ],
+          "recomputed_indices": [
+            200,
+            161,
+            126,
+            32,
+            47,
+            212,
+            242,
+            128
+          ],
+          "route_input_max_abs_error": 5.9157609939575195e-06,
+          "membership_max_abs_error": 1.430511474609375e-06,
+          "distance_max_abs_error": 1.2516975402832031e-06,
+          "incremental_boundary_margin": 0.004977524280548096,
+          "recomputed_boundary_margin": 0.004977226257324219
+        },
+        {
+          "layer_index": 8,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            83,
+            131,
+            181,
+            219,
+            237,
+            162,
+            161,
+            255
+          ],
+          "recomputed_indices": [
+            83,
+            131,
+            181,
+            219,
+            237,
+            162,
+            161,
+            255
+          ],
+          "route_input_max_abs_error": 6.198883056640625e-06,
+          "membership_max_abs_error": 1.4603137969970703e-06,
+          "distance_max_abs_error": 1.4901161193847656e-06,
+          "incremental_boundary_margin": 0.009833276271820068,
+          "recomputed_boundary_margin": 0.00983285903930664
+        },
+        {
+          "layer_index": 10,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            120,
+            203,
+            188,
+            79,
+            86,
+            14,
+            170,
+            167
+          ],
+          "recomputed_indices": [
+            120,
+            203,
+            188,
+            79,
+            86,
+            14,
+            170,
+            167
+          ],
+          "route_input_max_abs_error": 6.22868537902832e-06,
+          "membership_max_abs_error": 2.7567148208618164e-07,
+          "distance_max_abs_error": 9.5367431640625e-07,
+          "incremental_boundary_margin": 0.013945221900939941,
+          "recomputed_boundary_margin": 0.013944864273071289
+        },
+        {
+          "layer_index": 12,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            183,
+            53,
+            246,
+            47,
+            102,
+            18,
+            190,
+            25
+          ],
+          "recomputed_indices": [
+            183,
+            53,
+            246,
+            47,
+            102,
+            18,
+            190,
+            25
+          ],
+          "route_input_max_abs_error": 6.198883056640625e-06,
+          "membership_max_abs_error": 2.086162567138672e-07,
+          "distance_max_abs_error": 7.152557373046875e-07,
+          "incremental_boundary_margin": 0.002477884292602539,
+          "recomputed_boundary_margin": 0.002477705478668213
+        },
+        {
+          "layer_index": 14,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            245,
+            58,
+            97,
+            159,
+            228,
+            146,
+            239,
+            187
+          ],
+          "recomputed_indices": [
+            245,
+            58,
+            97,
+            159,
+            228,
+            146,
+            239,
+            187
+          ],
+          "route_input_max_abs_error": 7.092952728271484e-06,
+          "membership_max_abs_error": 1.862645149230957e-07,
+          "distance_max_abs_error": 7.152557373046875e-07,
+          "incremental_boundary_margin": 0.005930542945861816,
+          "recomputed_boundary_margin": 0.005930900573730469
+        },
+        {
+          "layer_index": 16,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            149,
+            208,
+            56,
+            210,
+            72,
+            172,
+            160,
+            224
+          ],
+          "recomputed_indices": [
+            149,
+            208,
+            56,
+            210,
+            72,
+            172,
+            160,
+            224
+          ],
+          "route_input_max_abs_error": 6.794929504394531e-06,
+          "membership_max_abs_error": 5.364418029785156e-07,
+          "distance_max_abs_error": 4.76837158203125e-07,
+          "incremental_boundary_margin": 0.011294960975646973,
+          "recomputed_boundary_margin": 0.011295437812805176
+        },
+        {
+          "layer_index": 18,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            216,
+            95,
+            240,
+            251,
+            32,
+            26,
+            11,
+            137
+          ],
+          "recomputed_indices": [
+            216,
+            95,
+            240,
+            251,
+            32,
+            26,
+            11,
+            137
+          ],
+          "route_input_max_abs_error": 7.748603820800781e-06,
+          "membership_max_abs_error": 4.6193599700927734e-07,
+          "distance_max_abs_error": 7.152557373046875e-07,
+          "incremental_boundary_margin": 0.04215502738952637,
+          "recomputed_boundary_margin": 0.04215502738952637
+        }
+      ]
+    },
+    {
+      "context": 8192,
+      "extended_context": 8193,
+      "decode_logit_max_abs_error": 1.919269561767578e-05,
+      "first_topk_mismatch_layer": null,
+      "layers": [
+        {
+          "layer_index": 0,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            58,
+            52,
+            254,
+            47,
+            171,
+            30,
+            45,
+            89
+          ],
+          "recomputed_indices": [
+            58,
+            52,
+            254,
+            47,
+            171,
+            30,
+            45,
+            89
+          ],
+          "route_input_max_abs_error": 5.9604644775390625e-06,
+          "membership_max_abs_error": 8.195638656616211e-08,
+          "distance_max_abs_error": 2.980232238769531e-07,
+          "incremental_boundary_margin": 0.000596463680267334,
+          "recomputed_boundary_margin": 0.0005965232849121094
+        },
+        {
+          "layer_index": 2,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            41,
+            245,
+            201,
+            36,
+            103,
+            118,
+            92,
+            155
+          ],
+          "recomputed_indices": [
+            41,
+            245,
+            201,
+            36,
+            103,
+            118,
+            92,
+            155
+          ],
+          "route_input_max_abs_error": 5.0067901611328125e-06,
+          "membership_max_abs_error": 2.3096799850463867e-07,
+          "distance_max_abs_error": 8.344650268554688e-07,
+          "incremental_boundary_margin": 0.002730131149291992,
+          "recomputed_boundary_margin": 0.0027300119400024414
+        },
+        {
+          "layer_index": 4,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            156,
+            219,
+            187,
+            79,
+            125,
+            168,
+            172,
+            201
+          ],
+          "recomputed_indices": [
+            156,
+            219,
+            187,
+            79,
+            125,
+            168,
+            172,
+            201
+          ],
+          "route_input_max_abs_error": 6.854534149169922e-06,
+          "membership_max_abs_error": 5.066394805908203e-07,
+          "distance_max_abs_error": 7.152557373046875e-07,
+          "incremental_boundary_margin": 0.011641383171081543,
+          "recomputed_boundary_margin": 0.011641502380371094
+        },
+        {
+          "layer_index": 6,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            161,
+            32,
+            25,
+            126,
+            235,
+            245,
+            88,
+            200
+          ],
+          "recomputed_indices": [
+            161,
+            32,
+            25,
+            126,
+            235,
+            245,
+            88,
+            200
+          ],
+          "route_input_max_abs_error": 1.1548399925231934e-05,
+          "membership_max_abs_error": 8.344650268554688e-07,
+          "distance_max_abs_error": 1.5497207641601562e-06,
+          "incremental_boundary_margin": 0.013368785381317139,
+          "recomputed_boundary_margin": 0.013367295265197754
+        },
+        {
+          "layer_index": 8,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            181,
+            83,
+            219,
+            56,
+            162,
+            248,
+            122,
+            131
+          ],
+          "recomputed_indices": [
+            181,
+            83,
+            219,
+            56,
+            162,
+            248,
+            122,
+            131
+          ],
+          "route_input_max_abs_error": 1.1920928955078125e-05,
+          "membership_max_abs_error": 4.172325134277344e-07,
+          "distance_max_abs_error": 1.0728836059570312e-06,
+          "incremental_boundary_margin": 0.0032012462615966797,
+          "recomputed_boundary_margin": 0.0032001137733459473
+        },
+        {
+          "layer_index": 10,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            239,
+            188,
+            120,
+            203,
+            33,
+            32,
+            52,
+            46
+          ],
+          "recomputed_indices": [
+            239,
+            188,
+            120,
+            203,
+            33,
+            32,
+            52,
+            46
+          ],
+          "route_input_max_abs_error": 1.33514404296875e-05,
+          "membership_max_abs_error": 3.8370490074157715e-07,
+          "distance_max_abs_error": 1.7881393432617188e-06,
+          "incremental_boundary_margin": 0.004582583904266357,
+          "recomputed_boundary_margin": 0.004582345485687256
+        },
+        {
+          "layer_index": 12,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            241,
+            183,
+            246,
+            25,
+            114,
+            53,
+            171,
+            18
+          ],
+          "recomputed_indices": [
+            241,
+            183,
+            246,
+            25,
+            114,
+            53,
+            171,
+            18
+          ],
+          "route_input_max_abs_error": 1.341104507446289e-05,
+          "membership_max_abs_error": 4.470348358154297e-07,
+          "distance_max_abs_error": 1.6689300537109375e-06,
+          "incremental_boundary_margin": 0.010751724243164062,
+          "recomputed_boundary_margin": 0.010751724243164062
+        },
+        {
+          "layer_index": 14,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            58,
+            245,
+            41,
+            228,
+            97,
+            184,
+            187,
+            39
+          ],
+          "recomputed_indices": [
+            58,
+            245,
+            41,
+            228,
+            97,
+            184,
+            187,
+            39
+          ],
+          "route_input_max_abs_error": 1.2874603271484375e-05,
+          "membership_max_abs_error": 3.948807716369629e-07,
+          "distance_max_abs_error": 1.6093254089355469e-06,
+          "incremental_boundary_margin": 0.006212055683135986,
+          "recomputed_boundary_margin": 0.006213128566741943
+        },
+        {
+          "layer_index": 16,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            208,
+            210,
+            56,
+            149,
+            202,
+            72,
+            224,
+            50
+          ],
+          "recomputed_indices": [
+            208,
+            210,
+            56,
+            149,
+            202,
+            72,
+            224,
+            50
+          ],
+          "route_input_max_abs_error": 1.1980533599853516e-05,
+          "membership_max_abs_error": 2.980232238769531e-07,
+          "distance_max_abs_error": 1.3113021850585938e-06,
+          "incremental_boundary_margin": 0.04531443119049072,
+          "recomputed_boundary_margin": 0.045314133167266846
+        },
+        {
+          "layer_index": 18,
+          "top1_equal": true,
+          "topk_order_equal": true,
+          "topk_set_equal": true,
+          "incremental_indices": [
+            216,
+            240,
+            196,
+            25,
+            151,
+            146,
+            11,
+            251
+          ],
+          "recomputed_indices": [
+            216,
+            240,
+            196,
+            25,
+            151,
+            146,
+            11,
+            251
+          ],
+          "route_input_max_abs_error": 1.2233853340148926e-05,
+          "membership_max_abs_error": 1.5497207641601562e-06,
+          "distance_max_abs_error": 3.4570693969726562e-06,
+          "incremental_boundary_margin": 0.014085888862609863,
+          "recomputed_boundary_margin": 0.014085054397583008
+        }
+      ]
+    }
+  ]
+}

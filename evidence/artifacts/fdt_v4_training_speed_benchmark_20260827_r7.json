@@ -1,0 +1,293 @@
+{
+  "status": "PASS",
+  "checkpoint": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r4\\latest_recovery.pt",
+  "checkpoint_sha256": "1F20C75E4B5F2A3B14CC6D707A95C17C49A58E1FEC3DC3138002E33381B456FE",
+  "config": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\configs\\fdt_v4_main_426m_speed_r1.yaml",
+  "config_sha256": "1FDC4BFE449596B5438D6CE372EF8FACB6A06DD1A5ED0DA5F5EFCD95D72323B8",
+  "trainer": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\scripts\\train_fdt_v4_curriculum_speed.py",
+  "trainer_sha256": "4835D1C9D7097364AB7A5282A2CC7401982330F4E57A3796772DDF2594F856A5",
+  "measured_steps": 2,
+  "variants": [
+    {
+      "name": "original_batch1_checkpointed",
+      "short_batch_size": 1,
+      "checkpoint_minimum": 1,
+      "steps": [
+        {
+          "optimizer_step": 888,
+          "base_forward_groups": 8,
+          "effective_samples": 8,
+          "base_tokens": 3944,
+          "base_loss": 5.797438144683838,
+          "exact_loss": 0.18504156172275543,
+          "exact_pointer_accuracy": 0.625,
+          "base_grad_norm": 8.285808563232422,
+          "exact_grad_norm": 0.953993022441864,
+          "dead_anchor_fraction_when_observed": null,
+          "elapsed_seconds": 4.893324100004975,
+          "tokens_per_second": 805.9960712587973,
+          "peak_allocated_gib": 7.710220813751221,
+          "peak_reserved_gib": 8.08203125
+        },
+        {
+          "optimizer_step": 889,
+          "base_forward_groups": 8,
+          "effective_samples": 8,
+          "base_tokens": 3944,
+          "base_loss": 5.837637722492218,
+          "exact_loss": 0.15217499434947968,
+          "exact_pointer_accuracy": 0.65625,
+          "base_grad_norm": 7.5478739738464355,
+          "exact_grad_norm": 0.8360762596130371,
+          "dead_anchor_fraction_when_observed": null,
+          "elapsed_seconds": 4.3686466999934055,
+          "tokens_per_second": 902.7967402367314,
+          "peak_allocated_gib": 7.708969593048096,
+          "peak_reserved_gib": 8.146484375
+        }
+      ],
+      "mean_tokens_per_second": 854.3964057477643,
+      "peak_allocated_gib": 7.710220813751221,
+      "peak_reserved_gib": 8.146484375,
+      "sample_order_sha256": "2D78539852506EB6E858CEB1957A9FAFFEA7E937D131D4A0807ACF1F76E6F615",
+      "source_states": {
+        "natural": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 4123,
+          "seed": 20260823
+        },
+        "factual": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 2847,
+          "seed": 20261832
+        },
+        "exact_copy": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 889,
+          "seed": 20262841
+        },
+        "long_context": {
+          "epoch": 1,
+          "shard_index": 0,
+          "cursor": 14,
+          "seed": 20263850
+        },
+        "generated_prefix": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 0,
+          "seed": 20264859
+        }
+      },
+      "long_context_smoke": []
+    },
+    {
+      "name": "short_batch1_uncheckpointed",
+      "short_batch_size": 1,
+      "checkpoint_minimum": 8192,
+      "steps": [
+        {
+          "optimizer_step": 888,
+          "base_forward_groups": 8,
+          "effective_samples": 8,
+          "base_tokens": 3944,
+          "base_loss": 5.797438144683838,
+          "exact_loss": 0.18504156172275543,
+          "exact_pointer_accuracy": 0.625,
+          "base_grad_norm": 8.285808563232422,
+          "exact_grad_norm": 0.953993022441864,
+          "dead_anchor_fraction_when_observed": null,
+          "elapsed_seconds": 3.203592799953185,
+          "tokens_per_second": 1231.1177625501077,
+          "peak_allocated_gib": 8.611096858978271,
+          "peak_reserved_gib": 8.841796875
+        },
+        {
+          "optimizer_step": 889,
+          "base_forward_groups": 8,
+          "effective_samples": 8,
+          "base_tokens": 3944,
+          "base_loss": 5.837637722492218,
+          "exact_loss": 0.15217499434947968,
+          "exact_pointer_accuracy": 0.65625,
+          "base_grad_norm": 7.5478739738464355,
+          "exact_grad_norm": 0.8360762596130371,
+          "dead_anchor_fraction_when_observed": null,
+          "elapsed_seconds": 3.0965588000253774,
+          "tokens_per_second": 1273.671922512073,
+          "peak_allocated_gib": 8.604669570922852,
+          "peak_reserved_gib": 8.841796875
+        }
+      ],
+      "mean_tokens_per_second": 1252.3948425310905,
+      "peak_allocated_gib": 8.611096858978271,
+      "peak_reserved_gib": 8.841796875,
+      "sample_order_sha256": "2D78539852506EB6E858CEB1957A9FAFFEA7E937D131D4A0807ACF1F76E6F615",
+      "source_states": {
+        "natural": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 4123,
+          "seed": 20260823
+        },
+        "factual": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 2847,
+          "seed": 20261832
+        },
+        "exact_copy": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 889,
+          "seed": 20262841
+        },
+        "long_context": {
+          "epoch": 1,
+          "shard_index": 0,
+          "cursor": 14,
+          "seed": 20263850
+        },
+        "generated_prefix": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 0,
+          "seed": 20264859
+        }
+      },
+      "long_context_smoke": []
+    },
+    {
+      "name": "short_batch2_uncheckpointed",
+      "short_batch_size": 2,
+      "checkpoint_minimum": 8192,
+      "steps": [
+        {
+          "optimizer_step": 888,
+          "base_forward_groups": 4,
+          "effective_samples": 8,
+          "base_tokens": 3944,
+          "base_loss": 5.7981858253479,
+          "exact_loss": 0.18504156172275543,
+          "exact_pointer_accuracy": 0.625,
+          "base_grad_norm": 8.286773681640625,
+          "exact_grad_norm": 0.953993022441864,
+          "dead_anchor_fraction_when_observed": null,
+          "elapsed_seconds": 2.4406172000453807,
+          "tokens_per_second": 1615.9846779440322,
+          "peak_allocated_gib": 10.122639179229736,
+          "peak_reserved_gib": 10.396484375
+        },
+        {
+          "optimizer_step": 889,
+          "base_forward_groups": 4,
+          "effective_samples": 8,
+          "base_tokens": 3944,
+          "base_loss": 5.837826609611511,
+          "exact_loss": 0.1474449187517166,
+          "exact_pointer_accuracy": 0.65625,
+          "base_grad_norm": 7.544361114501953,
+          "exact_grad_norm": 0.8273826837539673,
+          "dead_anchor_fraction_when_observed": null,
+          "elapsed_seconds": 2.3491262000170536,
+          "tokens_per_second": 1678.92214559242,
+          "peak_allocated_gib": 10.120419025421143,
+          "peak_reserved_gib": 10.396484375
+        }
+      ],
+      "mean_tokens_per_second": 1647.453411768226,
+      "peak_allocated_gib": 10.122639179229736,
+      "peak_reserved_gib": 10.396484375,
+      "sample_order_sha256": "2D78539852506EB6E858CEB1957A9FAFFEA7E937D131D4A0807ACF1F76E6F615",
+      "source_states": {
+        "natural": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 4123,
+          "seed": 20260823
+        },
+        "factual": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 2847,
+          "seed": 20261832
+        },
+        "exact_copy": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 889,
+          "seed": 20262841
+        },
+        "long_context": {
+          "epoch": 1,
+          "shard_index": 0,
+          "cursor": 14,
+          "seed": 20263850
+        },
+        "generated_prefix": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 0,
+          "seed": 20264859
+        }
+      },
+      "long_context_smoke": [
+        {
+          "sequence_length": 8192,
+          "checkpointing_enabled": true,
+          "finite_loss": true,
+          "loss": 5.493391513824463,
+          "elapsed_seconds": 5.48654189996887,
+          "tokens_per_second": 1493.108072326301,
+          "peak_allocated_gib": 8.527028560638428,
+          "peak_reserved_gib": 8.724609375
+        },
+        {
+          "sequence_length": 16384,
+          "checkpointing_enabled": true,
+          "finite_loss": true,
+          "loss": 5.458920478820801,
+          "elapsed_seconds": 11.034924499981571,
+          "tokens_per_second": 1484.7405616619635,
+          "peak_allocated_gib": 10.725008487701416,
+          "peak_reserved_gib": 11.208984375
+        }
+      ]
+    }
+  ],
+  "sampled_update_comparisons_vs_original": {
+    "short_batch1_uncheckpointed": {
+      "sample_count": 9412,
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0
+    },
+    "short_batch2_uncheckpointed": {
+      "sample_count": 9412,
+      "max_abs": 4.481524229049683e-06,
+      "rms": 1.1324638423001392e-07,
+      "relative_l2": 2.1820588326726578e-07
+    }
+  },
+  "base_loss_max_abs_deltas_vs_original": {
+    "short_batch1_uncheckpointed": 0.0,
+    "short_batch2_uncheckpointed": 0.0007476806640625
+  },
+  "candidate_equivalence": {
+    "short_batch1_uncheckpointed": true,
+    "short_batch2_uncheckpointed": false
+  },
+  "selected_variant": "short_batch1_uncheckpointed",
+  "equivalence_tolerances": {
+    "short_batch1_sampled_update_max_abs": 0.0,
+    "short_batch2_sampled_update_relative_l2": 1e-06,
+    "base_loss_max_abs": 0.0002
+  },
+  "all_sample_orders_identical": true,
+  "all_source_states_identical": true,
+  "long_context_checkpoint_safety_pass": true,
+  "equivalence_pass": true
+}

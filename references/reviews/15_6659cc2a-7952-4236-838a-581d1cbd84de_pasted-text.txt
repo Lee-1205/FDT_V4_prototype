@@ -1,0 +1,448 @@
+맞습니다. 지금 단계부터는 **GitHub private repository를 단순 코드 백업이 아니라 FDT 연구 전체의 ‘기준 원장(single source of truth)’로 쓰는 편**이 좋습니다. 특히 앞으로 RoPE, Exact Memory, 생성 안정화, CUDA 최적화가 동시에 진행되면 “어느 체크포인트가 어느 코드/데이터/config에서 나왔는가”가 금방 꼬입니다.
+
+제가 권하는 구조는 대략 이렇습니다.
+
+```text
+FDT/
+├─ src/
+│  └─ fdt/
+│     ├─ model/
+│     │  ├─ core.py
+│     │  ├─ local_attention.py
+│     │  ├─ fuzzy_router.py
+│     │  ├─ semantic_memory.py
+│     │  └─ exact_memory.py
+│     ├─ training/
+│     │  ├─ objectives.py
+│     │  ├─ loop_loss.py
+│     │  └─ copy_supervision.py
+│     ├─ inference/
+│     │  ├─ runtime.py
+│     │  ├─ generation.py
+│     │  └─ copy_cursor.py
+│     └─ kernels/
+│        ├─ eager/
+│        ├─ triton/
+│        └─ cuda/
+│
+├─ configs/
+│  ├─ architecture/
+│  ├─ training/
+│  ├─ evaluation/
+│  └─ experiments/
+│
+├─ eval/
+│  ├─ exact_copy/
+│  ├─ repetition/
+│  ├─ long_context/
+│  ├─ json/
+│  ├─ python/
+│  └─ bpb/
+│
+├─ benchmarks/
+│  ├─ gpu/
+│  ├─ long_context/
+│  └─ dense_control/
+│
+├─ experiments/
+│  ├─ registry.csv
+│  └─ README.md
+│
+├─ docs/
+│  ├─ ARCHITECTURE.md
+│  ├─ RESEARCH_LOG.md
+│  ├─ EXPERIMENT_PROTOCOL.md
+│  ├─ EXACT_MEMORY.md
+│  ├─ LONG_CONTEXT.md
+│  └─ ROADMAP.md
+│
+├─ releases/
+│  └─ manifests/
+│
+└─ .github/
+   ├─ ISSUE_TEMPLATE/
+   ├─ PULL_REQUEST_TEMPLATE.md
+   └─ workflows/
+```
+
+이렇게 해두면 **코드와 연구 기록이 따로 놀지 않습니다.**
+
+가장 중요한 건 앞으로 모든 실험을 Git commit과 연결하는 겁니다. 예를 들어 실험 하나마다 다음 정보를 자동으로 남깁니다.
+
+```text
+run_id: fdt_v4_exactmem_a03
+git_commit: 71d8c9a
+branch: exp/exact-memory-v1
+
+model:
+  dim: 1216
+  layers: 20
+  anchors: 256
+  top_k: 8
+  local_window: 64
+  rope: true
+  exact_memory: true
+
+training:
+  tokens: 700000000
+  context_mix: [2048, 4096]
+  seed: 42
+
+hardware:
+  gpu: RTX 5060 Ti 16GB
+  torch: ...
+  cuda: ...
+
+results:
+  bpb: ...
+  loop_free: ...
+  exact_16: ...
+  exact_64: ...
+  decode_2k_ms: ...
+  decode_8k_ms: ...
+```
+
+그러면 3개월 뒤에도
+
+> “Exact Memory v2에서 32자리 copy가 갑자기 잘됐던 모델이 뭐였지?”
+
+라고 했을 때 체크포인트 이름만 찾아다닐 필요가 없습니다.
+
+\[
+\boxed{
+Experiment
+\leftrightarrow
+Git commit
+\leftrightarrow
+Config
+\leftrightarrow
+Checkpoint
+\leftrightarrow
+Evaluation
+}
+\]
+
+이 연결을 만드는 게 핵심입니다.
+
+### Branch도 기능별로 분리하는 게 좋음
+
+현재 단계라면 `main`은 항상 **재현 가능한 안정판**으로 두는 걸 권합니다.
+
+```text
+main
+│
+├─ exp/rope
+├─ exp/exact-memory
+├─ exp/freegen-stability
+├─ perf/torch-compile
+├─ perf/cuda-graph
+├─ perf/triton-router
+└─ eval/long-context
+```
+
+중요한 건 **RoPE + Exact Memory + loop objective + kernel optimization을 한 branch에서 한꺼번에 바꾸지 않는 것**입니다.
+
+예를 들어:
+
+```text
+main
+ ↓
+exp/rope
+ ↓ 검증
+merge
+
+main
+ ↓
+exp/exact-memory
+ ↓ 검증
+merge
+```
+
+이렇게 해야 무엇 때문에 성능이 변했는지를 추적할 수 있습니다.
+
+그리고 큰 변경은 PR로 자기 자신에게 merge해도 좋습니다. 협업자가 없어도 PR을 쓰는 이유는 **코드 리뷰보다 연구 기록** 때문입니다.
+
+예를 들면 PR 제목:
+
+```text
+[ARCH] Add Exact Episodic Memory v1
+```
+
+본문:
+
+```text
+Hypothesis
+- Fuzzy semantic state cannot reliably preserve arbitrary identity.
+
+Changed
+- raw token episodic buffer
+- anchor-indexed chunk lookup
+- copy cursor
+- exact-need gate
+
+Unchanged
+- 256 anchors
+- top-k 8
+- temperature 0.25
+- fuzzy layer positions
+
+Required evaluation
+- exact 4/8/16/32/64
+- BPB
+- loop-free
+- JSON value exact
+- decode latency
+```
+
+이런 PR 하나가 나중에 사실상 **연구 노트 한 장**이 됩니다.
+
+### GitHub Issues도 꽤 잘 맞습니다
+
+지금 우리가 이야기한 것들을 Issue로 쪼개면 좋습니다.
+
+예를 들어:
+
+```text
+ARCH-01  Replace absolute position embedding with RoPE
+ARCH-02  Implement Exact Memory raw token store
+ARCH-03  Anchor-indexed exact retrieval
+ARCH-04  Copy cursor
+
+TRAIN-01 Exposure-bias diagnostic
+TRAIN-02 Loop/unlikelihood objective
+TRAIN-03 EOS weight sweep
+TRAIN-04 Self-generated-prefix recovery
+
+EVAL-01 4/8/16/32/64 exact matrix
+EVAL-02 Long-context 2K/4K/8K/16K
+EVAL-03 BPB harness
+
+PERF-01 RTX 5060 Ti profiler baseline
+PERF-02 torch.compile
+PERF-03 CUDA Graph
+PERF-04 Router fusion
+```
+
+그러면 주변 사람에게 공유할 때도 “소스 전체 읽어봐”가 아니라
+
+> “ARCH-02와 ARCH-03 봐줘.”
+
+라고 하면 됩니다.
+
+이게 협업 난이도를 크게 낮춥니다.
+
+---
+
+## 특히 GitHub Actions를 이용하면 좋은 부분
+
+모델 전체 학습을 Actions에서 돌리면 안 됩니다. GPU도 맞지 않고 비용/시간 측면에서도 부적절합니다.
+
+대신 **연구가 망가지지 않았는지를 검사하는 작은 CI**를 돌리면 아주 좋습니다.
+
+commit/PR마다:
+
+```text
+import test
+model build test
+parameter count check
+causality test
+cache vs full-recompute test
+Exact Memory unit test
+copy cursor test
+router top-k invariants
+config validation
+evaluation script smoke test
+```
+
+정도만 돌립니다.
+
+예를 들어 현재 핵심 invariant:
+
+\[
+A=256,\quad K=8,\quad W=64
+\]
+
+를 실수로 바꿨다면 CI가 바로 잡아낼 수 있습니다.
+
+또:
+
+```text
+cache decode == full recompute
+```
+
+같은 검사를 작은 random model에서 자동으로 해두면 RoPE나 Exact Memory를 추가하면서 causal state를 깨뜨리는 일을 빨리 발견할 수 있습니다.
+
+현재 릴리스도 `verify_release.py`에서 87/87을 통과시키는 형태의 검증 체계가 이미 있으므로, 이 검증 철학을 CI로 올리는 게 자연스럽습니다. 
+
+---
+
+## 큰 체크포인트는 Git 저장소 자체에 넣지 않는 게 좋음
+
+이건 꽤 중요합니다.
+
+`.pt` 파일을 일반 Git으로 계속 commit하면 repository history가 급격하게 커집니다.
+
+예를 들어:
+
+```text
+latest.pt    1.6 GB
+v4_a.pt      1.6 GB
+v4_b.pt      1.6 GB
+...
+```
+
+를 반복하면 Git이 연구 기록 저장소가 아니라 checkpoint 창고가 됩니다.
+
+저라면 GitHub에는:
+
+```text
+checkpoint name
+SHA-256
+size
+training tokens
+git commit
+config hash
+evaluation result
+external storage location
+```
+
+만 저장합니다.
+
+예:
+
+```json
+{
+  "checkpoint": "fdt_v4_exactmem_a03.pt",
+  "sha256": "...",
+  "git_commit": "71d8c9a",
+  "tokens": 812345678,
+  "config": "configs/experiments/v4_exactmem_a03.yaml"
+}
+```
+
+실제 checkpoint는 별도 저장공간에 두고요.
+
+정말 중요한 **milestone checkpoint만** 공유용 release asset이나 별도의 모델 저장소로 올리는 편이 관리하기 쉽습니다.
+
+---
+
+## 그리고 ‘주변과 공유’에는 문서 계층을 두는 게 좋음
+
+현재처럼 연구를 깊게 아는 사람에게는 전체 report를 보여주면 되지만, 처음 보는 사람에게 400M 모델의 routing/evaluator history를 전부 읽으라고 하면 진입장벽이 큽니다.
+
+그래서 repository 첫 화면은 세 단계로 나누는 게 좋습니다.
+
+```text
+README.md
+   ↓
+5분 안에 이해
+
+docs/ARCHITECTURE.md
+   ↓
+30분 정도 기술적 이해
+
+docs/RESEARCH_LOG.md
+reports/
+experiments/
+   ↓
+연구 전체 검토
+```
+
+README에는 아주 간단히:
+
+> FDT is an experimental causal language-model architecture based on dynamic fuzzy semantic membership. It combines local attention with persistent fuzzy semantic memory and exact episodic memory.
+
+그리고 그림으로:
+
+```text
+Local Working Memory
+        +
+Fuzzy Semantic Memory
+        +
+Exact Episodic Memory
+```
+
+정도만 보여줍니다.
+
+그 아래에:
+
+```text
+Current status
+Known limitations
+Latest stable model
+Latest research branch
+How to reproduce evaluation
+```
+
+를 둡니다.
+
+그러면 친구나 선생님, 다른 개발자에게 private repo access 하나만 줘도 **프로젝트 전체를 훨씬 쉽게 따라올 수 있습니다.**
+
+---
+
+## GitHub Projects도 꽤 유용함
+
+특히 다음 세대 개발에서는 칸반 보드 하나를 만들어:
+
+```text
+Backlog
+→ Ready
+→ Experimenting
+→ Evaluation
+→ Accepted
+→ Rejected
+```
+
+로 관리하면 좋습니다.
+
+여기서 **Rejected를 없애지 않는 것**이 중요합니다.
+
+예를 들어:
+
+```text
+Adaptive-k
+Status: Rejected for v4
+Reason: routing stability risk
+```
+
+```text
+Hierarchical routing
+Status: Deferred
+Reason: changes core routing before Exact Memory baseline
+```
+
+이런 식으로 남겨두면 몇 달 뒤에 같은 아이디어를 다시 처음부터 고민하는 일을 막을 수 있습니다.
+
+실패한 V13/V14/V20 T2를 삭제하지 않고 연구 계보에 보존해온 현재 방식과도 잘 맞습니다. 기존 보고서 역시 실패·중단 branch를 단순 삭제하지 않고 multi-objective 기록으로 남기고 있습니다. 
+
+---
+
+## 결국 GitHub가 FDT에서 맡을 역할
+
+저라면 앞으로 GitHub를 이렇게 정의하겠습니다.
+
+\[
+\boxed{
+\text{GitHub}
+=
+\text{Source Code}
++
+\text{Research Ledger}
++
+\text{Experiment Registry}
++
+\text{Collaboration Hub}
++
+\text{Release Provenance}
+}
+\]
+
+특히 FDT처럼 **계속 아키텍처 자체가 변하는 연구에서는 GitHub의 가장 큰 가치가 코드 공유보다 ‘왜 이렇게 됐는지’를 보존하는 것**입니다.
+
+앞으로 제가 FDT 개발 계획이나 Codex용 구현 프롬프트를 만들어줄 때도 아예 기본 전제를
+
+> **“현재 private GitHub repository를 기준으로 branch/issue/PR/config/experiment registry를 함께 갱신한다.”**
+
+로 잡는 게 좋겠습니다.
+
+그러면 다음 Exact Memory 개발도 단순히 “코드 고쳐줘”가 아니라, **branch 생성 → 구현 → unit test → benchmark → experiment manifest → PR 기록 → 조건 충족 시 merge**까지 하나의 연구 절차로 묶을 수 있습니다.

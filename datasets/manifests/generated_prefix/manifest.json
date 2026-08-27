@@ -1,0 +1,15 @@
+{
+  "name": "generated_prefix",
+  "schema_version": "fdt_v4_curriculum_source_manifest_v1",
+  "shards": [
+    {
+      "file": "shards\\train\\shard_00000.pt",
+      "rows": 2048,
+      "sha256": "AEAD3169AA43597C9A8D7B16BABA9AAF74F571124656B97BC6C3C33B031807F3",
+      "tokens": 1048576
+    }
+  ],
+  "source_directory": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\prepared_data\\fdt_v4_contract_sources_v3_20260826\\generated_prefix",
+  "source_manifest_sha256": "0C64FFA0F7059D800164FE593977E62971B11749870BE0A382EFD130E5595A8A",
+  "split": "train"
+}

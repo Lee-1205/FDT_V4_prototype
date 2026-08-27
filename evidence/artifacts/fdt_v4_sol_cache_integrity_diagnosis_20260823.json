@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "target_commit": "6ce911c995a3e87916fc05f45fb69f85776f9130",
+  "checkpoint_sha256": "2E9D5764CFE145CC9DEBB53540F84CC33E9CB64124BAA76920F2B5C53CAF785F",
+  "checkpoint_parameter_count": 424474072,
+  "primary_evidence": "artifacts/final_audit_inputs/20260823_6ce911c/cache_integrity_cuda_fp32.json",
+  "raw_status": "FAIL",
+  "tolerance": 0.0003,
+  "classification": "POSSIBLE_CAUSAL_OR_CACHE_STATE_DRIFT",
+  "severity": "major",
+  "requires_sol": true,
+  "diagnosis": {
+    "architecture_bug_proven": false,
+    "auditor_aliasing_bug_proven": false,
+    "strongest_hypothesis": "LAST_TOKEN_TOPK_ROUTE_OR_MEMBERSHIP_DISCONTINUITY_FROM_DECODE_FULL_NUMERIC_PATH_DIFFERENCE",
+    "incremental_vs_full_normalized_error_8192": 0.0138512,
+    "repeat_full_vs_full_normalized_error_8192": 0.0005697,
+    "normalized_excess_8192": 0.0132814,
+    "logits_within_tolerance": true,
+    "greedy_token_agreement": true,
+    "raw_fail_relaxed": false
+  },
+  "constraints_preserved": {
+    "fuzzy_routing_semantics": true,
+    "num_anchors": 256,
+    "top_k": 8,
+    "router_dim": 256,
+    "gpu_work_performed": false
+  },
+  "source_changes": [],
+  "focused_cpu_tests": {
+    "status": "PASS",
+    "passed": 2,
+    "tests": [
+      "tests/test_fdt_v4_cache_audit.py::test_small_cpu_fp32_incremental_anchor_state_matches_full_recompute",
+      "tests/test_fdt_v3.py::test_v3_incremental_cache_matches_recompute"
+    ]
+  },
+  "next_diagnostic": "Capture per-anchor-layer appended-token anchor input, top-k indices, membership, boundary margin, and pre-mutation contribution for incremental decode and full recompute."
+}

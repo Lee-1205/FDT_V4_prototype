@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "source_checkpoint": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r5\\latest_recovery.pt",
+  "source_checkpoint_sha256": "323E9C9E9B5CC3FB5C79197F5C06CE9825CB8C9711921E130FE971B0E4577731",
+  "checkpoint": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r6_fixed_validation\\latest_recovery.pt",
+  "checkpoint_sha256": "84C61D63CA0E435E3AD3763321A479BD33382D71370687C741F91600E9FAFF6F",
+  "optimizer_step": 1250,
+  "tokens_seen": 7059624,
+  "stage_status": "PAUSED",
+  "optimizer_state_included": true,
+  "source_states_present": true,
+  "torch_rng_present": true,
+  "cuda_rng_present": true,
+  "python_rng_present": true,
+  "overfit_gate_version": "fixed_validation_v2",
+  "old_gate_evidence_preserved": true,
+  "temp_residue": []
+}

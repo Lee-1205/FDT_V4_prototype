@@ -1,0 +1,18 @@
+{
+  "status": "INVALID_FOR_8K_PROMPT_PLUS_DECODE",
+  "checkpoint": "runs/fdt_v4_audit_warmstart_20260823_9ebeb2a/latest.pt",
+  "checkpoint_sha256": "74FFD48645FB188352A42C7BD8AF9618676A81859087B0AE8384C8D50D2BF85E",
+  "observed": {
+    "context_tokens": 8192,
+    "fp32_prefill": "PASS",
+    "prefill_ms": 2043.114990234375,
+    "exact_store_ms": 229.10275268554688,
+    "decode": "FAIL",
+    "error": "decode cache reached max_seq_len"
+  },
+  "root_cause": "The configured 8192-position capacity left no position for generation after an 8192-token prompt.",
+  "repair": "Increase non-parametric RoPE position capacity to 16384 and regenerate the audit checkpoint. Keep 8K as the required prompt-plus-decode gate and 16K exploratory.",
+  "gpu": "NVIDIA GeForce RTX 5060 Ti",
+  "dtype": "float32",
+  "quantization": "none"
+}

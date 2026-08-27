@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "scope": "FDT v4 private-archive regression suite after final-audit metadata repair",
+  "audit_tool_sha256": "FC99BD61A6F1368976C48D9F0B119F34E04AB5130F3668047E13657E63B5B84F",
+  "passed": 51,
+  "warnings": 2,
+  "failed": 0,
+  "gpu_used": false,
+  "pythonpath": "source/src",
+  "initial_invocation_note": "The first archive-layout invocation omitted PYTHONPATH and failed collection before tests ran; the corrected pinned source path completed normally.",
+  "result": "51 passed, 2 warnings"
+}

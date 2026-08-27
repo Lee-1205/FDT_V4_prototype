@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pure FDT v4 Training</title><link rel="stylesheet" href="/styles.css"></head>
+<body>
+  <header><h1>Pure FDT v4 Training</h1><nav><a class="active" href="/">학습</a><a href="/models.html">모델 테스트</a></nav></header>
+  <main>
+    <section class="metrics" aria-live="polite">
+      <div><span>LOSS</span><strong id="loss">--</strong></div>
+      <div><span>ROUTING ENTROPY</span><strong id="entropy">--</strong></div>
+      <div><span>REMAINING</span><strong id="remaining">--</strong></div>
+    </section>
+    <div class="status"><span id="status">연결 중</span><span id="progress">--</span></div>
+    <section class="controls"><button id="stop" class="danger">비상 정지</button><button id="resume">재개</button></section>
+  </main>
+  <div id="notice" class="notice" hidden></div><script src="/app.js"></script>
+</body></html>

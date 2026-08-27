@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "source": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r6_fixed_validation\\latest_recovery.pt",
+  "source_sha256": "A04344A0E217C807DE8A9307639BC3088268D06F81F5C4E5A113A5D0D4A8B561",
+  "destination": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r7_syncfix\\latest_recovery.pt",
+  "destination_sha256": "E575FB98D20E6DB283DFD95721A8B4F500E082C693097091C2C0F43AC7E2F06F",
+  "stage_status": "PAUSED",
+  "optimizer_step": 1677,
+  "tokens_seen": 9733695,
+  "optimizer_state_included": true,
+  "optimizer_state_present": true,
+  "source_states_equal": true,
+  "torch_rng_present": true,
+  "cuda_rng_present": true,
+  "python_rng_present": true,
+  "model_config_equal": true,
+  "trainer_sha256": "FB2787970090A150DB6400CB4701B053454C112D46C0F3C7269737483A4E53B6",
+  "pointer_sha256": "65D392DD32447279674CEB2D7298E669A99FFA35D9953228A2F323C763608BB8",
+  "temporary_residue": []
+}

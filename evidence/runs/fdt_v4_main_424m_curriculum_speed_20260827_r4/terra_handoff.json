@@ -1,0 +1,50 @@
+{
+  "schema_version": "fdt_terra_handoff_v1",
+  "artifact_role": "verified_checkpoint_evaluation_input",
+  "status": "ABNORMAL",
+  "handoff_status": "ABNORMAL",
+  "handoff_type": "INCIDENT",
+  "created_at": 1787776751.8442533,
+  "source_run": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r4",
+  "checkpoint": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r4\\latest.pt",
+  "checkpoint_sha256": "BB4B5CBF944A41011EC657A160B5AB0E8F80255F93E32E397CFBD60F93B3C41A",
+  "recovery_checkpoint": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r4\\latest_recovery.pt",
+  "recovery_sha256": "1F20C75E4B5F2A3B14CC6D707A95C17C49A58E1FEC3DC3138002E33381B456FE",
+  "stage_status": "PAUSED",
+  "severity": "warning",
+  "classification": "abnormality_or_safety_stop",
+  "trigger": "trainer_safety_state",
+  "luna_action": "PAUSED_AND_HANDOFF",
+  "terra_instruction": "diagnose_only_no_luna_redesign",
+  "required_remedy_classification": "pending_terra",
+  "next_route": "terra",
+  "sol_route_condition": "Terra must classify major_architecture_objective_data_contract before Sol is routed",
+  "escalation_policy": {
+    "routine_owner": "luna",
+    "abnormality_owner": "terra",
+    "major_remedy_owner": "sol",
+    "lightweight_remedy_owner": "terra_or_luna",
+    "single_trainable_model": "fdt_v4_main_426m",
+    "forbidden_model_variants": [
+      "fdt_v4_probe_116m",
+      "116m",
+      "scratch_probe"
+    ],
+    "luna_abnormality_action": "checkpoint_pause_and_atomic_handoff",
+    "luna_may_redesign": false,
+    "luna_may_continue_after_gate_failure": false
+  },
+  "optimizer_step": 887,
+  "tokens_seen": 5115874,
+  "model_type": "fdt_v4",
+  "evaluator": "scripts/terra_fdt_v4_evaluator.py",
+  "config_sha256": "4263E635A230D1F7A448C6AB158B74346C1778D6275D8ABCAB39E89FD894E72C",
+  "precision_contract": "bf16_autocast_fp32_master",
+  "environment_contract": {
+    "python": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
+    "torch": "2.10.0+cu128",
+    "cuda": "12.8"
+  },
+  "evaluation_executed": false,
+  "handoff_contract": "Terra owns evaluation; supervisor only writes verified immutable input metadata"
+}

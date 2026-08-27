@@ -1,0 +1,19 @@
+{
+  "schema": "fdt_v4_audit_incident_v1",
+  "status": "INVALIDATED_METADATA",
+  "reason": "A short commit SHA was expanded by assumption instead of git rev-parse.",
+  "incorrect_commit": "6ce911c995a3e87916fc05f45fb69f85776f9130",
+  "correct_commit": "6ce911ce1a14e4d882f3065ed8685736e4a89b37",
+  "affected_evidence": [
+    "artifacts/final_audit_inputs/20260823_6ce911c/exact_copy_cuda_fp32",
+    "artifacts/final_audit_inputs/20260823_6ce911c/cache_integrity_cuda_fp32.json",
+    "artifacts/final_audit_inputs/20260823_6ce911c/gpu_profile_current_fp32.json",
+    "artifacts/final_audit_inputs/20260823_6ce911c/gpu_profile_current_fp32.csv",
+    "artifacts/final_audit_inputs/20260823_6ce911c/regression_tests.json",
+    "artifacts/final_audit_inputs/20260823_6ce911c/private_visibility.json",
+    "artifacts/final_audit_inputs/20260823_6ce911c/reproducibility_readiness.json",
+    "artifacts/final_audit/20260823_6ce911c_preliminary"
+  ],
+  "data_validity": "Measured model outputs are retained as incident evidence, but these artifacts must not support the final decision because their declared commit is invalid.",
+  "repair": "Regenerate every decision input in a fresh immutable directory using the exact git rev-parse output."
+}

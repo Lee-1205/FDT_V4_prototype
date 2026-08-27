@@ -1,0 +1,69 @@
+{
+  "evaluation_tensor_dataset": "shards\\validation\\shard_00000.pt",
+  "evaluation_tensor_dataset_sha256": "E044E8B8D2382825994A1115FC95A5553ADF556DE503CB4DBA83BFC6CDC1FFE6",
+  "exact_prompt_source_contract": true,
+  "explicit_labels": true,
+  "generated_prefix_loop_negative_contract": true,
+  "historical_overlap_limitations": "Only available payloads were scanned; pruned historical payloads require nonce construction evidence.",
+  "long_context_training_contract": "contains_at_least_one_8192_token_shard_and_never_exceeds_16384",
+  "schema_version": "fdt_v4_curriculum_manifest_v4",
+  "sources": {
+    "exact_copy": [
+      {
+        "file": "shards\\train\\shard_00000.pt",
+        "rows": 4096,
+        "sha256": "8088D25D494339903588F2BE455CF1D94D72872FEB6A837B9FE061277950C09B",
+        "tokens": 943272
+      }
+    ],
+    "factual": [
+      {
+        "file": "shards\\train\\shard_00000.pt",
+        "rows": 20000,
+        "sha256": "DA89FC64481EF602409F18C32D88059569EB1845E5C7AE8C164B26592FE322FF",
+        "tokens": 9860000
+      }
+    ],
+    "generated_prefix": [
+      {
+        "file": "shards\\train\\shard_00000.pt",
+        "rows": 2048,
+        "sha256": "AEAD3169AA43597C9A8D7B16BABA9AAF74F571124656B97BC6C3C33B031807F3",
+        "tokens": 1048576
+      }
+    ],
+    "long_context": [
+      {
+        "file": "shards\\train\\shard_00000.pt",
+        "rows": 64,
+        "sha256": "80B1C21378FD66D8F655D3304985C99600A9B668B828098AFC574CC8E3F0E26F",
+        "tokens": 524288
+      },
+      {
+        "file": "shards\\train\\shard_00001.pt",
+        "rows": 64,
+        "sha256": "5F4237A7CD53B3DB4D4F7865F7102A63A4D412FA2685C4524B5BE39343F57092",
+        "tokens": 1048576
+      }
+    ],
+    "natural": [
+      {
+        "file": "shards\\train\\shard_00000.pt",
+        "rows": 20000,
+        "sha256": "D1096C5AF243DD4D68CA120472DF21C228EEDB3A85F8979316484B678B5DFAA4",
+        "tokens": 9860000
+      }
+    ],
+    "validation": [
+      {
+        "file": "shards\\validation\\shard_00000.pt",
+        "rows": 800,
+        "sha256": "E044E8B8D2382825994A1115FC95A5553ADF556DE503CB4DBA83BFC6CDC1FFE6",
+        "tokens": 103989
+      }
+    ]
+  },
+  "tokenizer_dir": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\tokenizers\\fdt_v3_bpe_24k",
+  "tokenizer_json": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\tokenizers\\fdt_v3_bpe_24k\\tokenizer.json",
+  "tokenizer_json_sha256": "4FADE0C72E8673BA1E4319C8821593BB5E62A8C27792E2412DE3BDC52D232862"
+}

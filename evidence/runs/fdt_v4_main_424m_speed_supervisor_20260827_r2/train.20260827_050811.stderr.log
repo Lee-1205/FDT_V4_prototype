@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "C:\Users\User\Documents\Codex\2026-06-26\dk\outputs\FDT_RLM\scripts\train_fdt_v4_curriculum_speed.py", line 1413, in <module>
+    raise SystemExit(train(parse_args()))
+  File "C:\Users\User\Documents\Codex\2026-06-26\dk\outputs\FDT_RLM\scripts\train_fdt_v4_curriculum_speed.py", line 1198, in train
+    raise FloatingPointError(
+FloatingPointError: 25-step dead-anchor fraction 0.054688 exceeds safety limit

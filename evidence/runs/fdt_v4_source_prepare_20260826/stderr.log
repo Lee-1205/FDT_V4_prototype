@@ -1,0 +1,9 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Traceback (most recent call last):
+  File "C:\Users\User\Documents\Codex\2026-06-26\dk\outputs\FDT_RLM\scripts\prepare_fdt_v21_knowledge_scale.py", line 323, in <module>
+    main()
+  File "C:\Users\User\Documents\Codex\2026-06-26\dk\outputs\FDT_RLM\scripts\prepare_fdt_v21_knowledge_scale.py", line 223, in main
+    factual = add_factual_knowledge(writer, CATEGORY_COUNTS["factual_qa"], args.seed + 1)
+  File "C:\Users\User\Documents\Codex\2026-06-26\dk\outputs\FDT_RLM\scripts\prepare_fdt_v21_knowledge_scale.py", line 103, in add_factual_knowledge
+    raise RuntimeError(f"could not fill V21 factual quotas: {dict(accepted)}")
+RuntimeError: could not fill V21 factual quotas: {'long_8_plus': 1015, 'medium_5_7': 4000, 'short_1_4': 14000}

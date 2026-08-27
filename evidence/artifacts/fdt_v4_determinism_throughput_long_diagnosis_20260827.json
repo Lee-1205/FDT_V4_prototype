@@ -1,0 +1,191 @@
+{
+  "status": "PASS",
+  "checkpoint": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_speed_20260827_r7_syncfix\\latest_recovery.pt",
+  "checkpoint_sha256": "9C9BDD50AB7C083E3E9808F99988495E9BDAEC29647A78662ABFB9EF0DE66232",
+  "config": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\configs\\fdt_v4_main_426m_speed_r1.yaml",
+  "config_sha256": "44058EDF7A338B7E0572A097B5F728C7B121ED5D3D86636538DE83954165D8FA",
+  "benchmark_sha256": "3A993660AD7B11C92EA10E8DDBABBB8F8EA594F68D6207D2488CD8BC4D64ACA7",
+  "trainer_sha256": "FB2787970090A150DB6400CB4701B053454C112D46C0F3C7269737483A4E53B6",
+  "variants": [
+    {
+      "name": "live_deterministic",
+      "short_batch_size": 1,
+      "checkpoint_minimum": 8192,
+      "deterministic_algorithms": true,
+      "steps": [
+        {
+          "optimizer_step": 1697,
+          "base_forward_groups": 8,
+          "effective_samples": 8,
+          "base_tokens": 3944,
+          "base_loss": 5.346496433019638,
+          "exact_loss": 0.4239388406276703,
+          "exact_pointer_accuracy": 0.25,
+          "base_grad_norm": 7.830831050872803,
+          "exact_grad_norm": 4.231353282928467,
+          "dead_anchor_fraction_when_observed": null,
+          "elapsed_seconds": 23.655257499951404,
+          "tokens_per_second": 166.72826326274836,
+          "peak_allocated_gib": 9.004205703735352,
+          "peak_reserved_gib": 9.251953125
+        }
+      ],
+      "mean_tokens_per_second": 166.72826326274836,
+      "peak_allocated_gib": 9.004205703735352,
+      "peak_reserved_gib": 9.251953125,
+      "sample_order_sha256": "FDE67942B768719C2D5ADCA82AEA54220ADF4098BC8E82E5A0A546B479DE65E0",
+      "source_states": {
+        "natural": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 7874,
+          "seed": 20260823
+        },
+        "factual": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 5430,
+          "seed": 20261832
+        },
+        "exact_copy": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 1697,
+          "seed": 20262841
+        },
+        "long_context": {
+          "epoch": 2,
+          "shard_index": 0,
+          "cursor": 16,
+          "seed": 20263850
+        },
+        "generated_prefix": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 43,
+          "seed": 20264859
+        }
+      },
+      "long_context_smoke": [
+        {
+          "sequence_length": 8192,
+          "checkpointing_enabled": true,
+          "finite_loss": true,
+          "loss": 5.445781707763672,
+          "elapsed_seconds": 36.158427499991376,
+          "tokens_per_second": 226.55852498015722,
+          "peak_allocated_gib": 8.790453433990479,
+          "peak_reserved_gib": 9.5859375
+        },
+        {
+          "sequence_length": 16384,
+          "checkpointing_enabled": true,
+          "finite_loss": true,
+          "loss": 5.410511493682861,
+          "elapsed_seconds": 72.56939129997045,
+          "tokens_per_second": 225.7701174903843,
+          "peak_allocated_gib": 10.725496292114258,
+          "peak_reserved_gib": 11.236328125
+        }
+      ]
+    },
+    {
+      "name": "candidate_fast_backend",
+      "short_batch_size": 1,
+      "checkpoint_minimum": 8192,
+      "deterministic_algorithms": false,
+      "steps": [
+        {
+          "optimizer_step": 1697,
+          "base_forward_groups": 8,
+          "effective_samples": 8,
+          "base_tokens": 3944,
+          "base_loss": 5.346496433019638,
+          "exact_loss": 0.4239388406276703,
+          "exact_pointer_accuracy": 0.25,
+          "base_grad_norm": 7.830831050872803,
+          "exact_grad_norm": 4.231353282928467,
+          "dead_anchor_fraction_when_observed": null,
+          "elapsed_seconds": 3.346979999972973,
+          "tokens_per_second": 1178.3757297718685,
+          "peak_allocated_gib": 8.605006694793701,
+          "peak_reserved_gib": 8.8515625
+        }
+      ],
+      "mean_tokens_per_second": 1178.3757297718685,
+      "peak_allocated_gib": 8.605006694793701,
+      "peak_reserved_gib": 8.8515625,
+      "sample_order_sha256": "FDE67942B768719C2D5ADCA82AEA54220ADF4098BC8E82E5A0A546B479DE65E0",
+      "source_states": {
+        "natural": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 7874,
+          "seed": 20260823
+        },
+        "factual": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 5430,
+          "seed": 20261832
+        },
+        "exact_copy": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 1697,
+          "seed": 20262841
+        },
+        "long_context": {
+          "epoch": 2,
+          "shard_index": 0,
+          "cursor": 16,
+          "seed": 20263850
+        },
+        "generated_prefix": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 43,
+          "seed": 20264859
+        }
+      },
+      "long_context_smoke": [
+        {
+          "sequence_length": 8192,
+          "checkpointing_enabled": true,
+          "finite_loss": true,
+          "loss": 5.445781707763672,
+          "elapsed_seconds": 5.756647500034887,
+          "tokens_per_second": 1423.0504820644921,
+          "peak_allocated_gib": 8.522069931030273,
+          "peak_reserved_gib": 9.017578125
+        },
+        {
+          "sequence_length": 16384,
+          "checkpointing_enabled": true,
+          "finite_loss": true,
+          "loss": 5.410511493682861,
+          "elapsed_seconds": 11.583182999980636,
+          "tokens_per_second": 1414.4644006770325,
+          "peak_allocated_gib": 10.724851608276367,
+          "peak_reserved_gib": 11.208984375
+        }
+      ]
+    }
+  ],
+  "sampled_update_comparison": {
+    "sample_count": 9412,
+    "max_abs": 0.0,
+    "rms": 0.0,
+    "relative_l2": 0.0
+  },
+  "base_loss_abs_delta": 0.0,
+  "exact_loss_abs_delta": 0.0,
+  "sample_order_equal": true,
+  "source_states_equal": true,
+  "long_context_loss_abs_deltas": [
+    0.0,
+    0.0
+  ],
+  "long_context_contract_pass": true,
+  "equivalence_pass": true
+}

@@ -1,0 +1,6 @@
+{
+  "reason": "optimizer/data cursor transaction did not reach a committed boundary",
+  "last_committed_step": 849,
+  "last_committed_tokens": 4919808,
+  "recovery_policy": "retain the previous latest_recovery.pt without overwrite"
+}

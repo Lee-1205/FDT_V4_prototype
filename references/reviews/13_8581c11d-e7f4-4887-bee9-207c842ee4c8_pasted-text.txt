@@ -1,0 +1,823 @@
+네. 이번 자료까지 합치면 다음 버전에서 무엇을 고쳐야 하는지가 꽤 선명해졌습니다. 결론부터 말하면 **현재 Pure-FDT에는 서로 다른 네 문제가 겹쳐 있습니다.**
+
+> **① 자유 생성 안정성(exposure/loop), ② exact identity 보존, ③ 2K 위치 상한, ④ GPU 실행 효율.**
+
+이 네 가지를 하나의 원인으로 묶으면 안 됩니다. 특히 새 리뷰가 제시한 “거의 모든 exact 실패가 exposure bias 하나다”라는 해석은 **강한 단서는 있지만 아직 너무 강한 결론**입니다. 반대로 기존에 우리가 의심했던 “모든 exact 실패가 fuzzy anchor의 정보손실 때문이다” 역시 아직 입증되지 않았습니다. 둘을 분리하는 실험이 우선입니다.
+
+## 1. 반복 루프 패널티: 코드는 고쳐졌지만, 아직 ‘완전히 적절한 상태’는 아님
+
+원본에는 실제 버그가 있었습니다. fp32에서는 `repetition_penalty > 1`일 때 inference tensor를 in-place 수정해 크래시했고, 수정본은 `logits.clone()`을 추가해서 이를 해결했습니다. 또 `repetition_scope="generated"`를 새로 만들어 프롬프트의 토큰을 페널티에서 제외합니다. 
+
+실측도 상당히 좋습니다.
+
+- penalty 1.00: 반복률 0.463
+- 1.10 + 전체 prompt까지 penalty: 0.279이지만 retrieval 파괴
+- **1.10 + generated-only: 0.232, retrieval/JSON 유지**
+- **1.15 + generated-only: 0.178, retrieval/JSON 유지** 
+
+문제는 **기본값이 아직 `all`**이라는 점입니다. 실제 diff에서도 `repetition_scope: str = "all"`이고 CLI/API 쪽도 `all`이 기본입니다.  현재 코드는 generated-only를 제대로 구현했지만, 기본 실행은 여전히 exact-copy에 불리한 경로입니다.
+
+따라서 다음 버전에서는 기본값 자체를
+
+```text
+repetition_scope = "generated"
+```
+
+로 바꾸는 게 맞습니다.
+
+다만 이것도 어디까지나 **추론 단계의 응급처치**입니다. 현재 방식은 “이미 생성했던 token ID면 모두 낮춘다”는 비교적 거친 방법이기 때문에 Python처럼 `self`, `=`, 괄호, 변수 이름 등이 정상적으로 반복되어야 하는 영역까지 억제할 수 있습니다.
+
+그래서 장기적으로는 단순 token repetition penalty보다 **실제 loop가 발생했을 때만 강하게 작동하는 n-gram 기반 loop detector**가 더 좋습니다. Exact Memory의 copy cursor가 활성화되어 있을 때는 repetition penalty를 아예 적용하지 않아야 하고요.
+
+학습 쪽에는 별도의 반복 억제 objective를 넣는 편이 더 근본적입니다. 예를 들어
+
+\[
+\mathcal L
+=
+\mathcal L_{\mathrm{CE}}
++\lambda_{\mathrm{UL}}\mathcal L_{\mathrm{unlikelihood}}
++\lambda_{\mathrm{EOS}}\mathcal L_{\mathrm{EOS}}
++\lambda_{\mathrm{copy}}\mathcal L_{\mathrm{copy}}
+\]
+
+형태입니다.
+
+반복 후보 집합 \(C_t\)에 대해
+
+\[
+\mathcal L_{\mathrm{UL}}
+=
+-\sum_{c\in C_t}
+\log(1-p_\theta(c|x_{<t}))
+\]
+
+처럼 “지금 생성하면 loop로 이어지는 token”의 확률을 직접 낮추는 것입니다. Unlikelihood Training은 실제로 maximum-likelihood LM의 반복 문제를 겨냥해 제안됐고, perplexity를 크게 해치지 않으면서 반복 생성을 줄인 결과가 있습니다. 
+
+---
+
+# 2. 2048 상한 문제: 이 지적은 거의 정확함
+
+현재 모델이 정말 흥미로운 것은 **decode latency가 context에 따라 거의 변하지 않았다는 것**입니다.
+
+```text
+ctx   16 : 34.9 ms/token
+ctx  128 : 27.9
+ctx  512 : 27.7
+ctx 1024 : 28.0
+ctx 1900 : 27.9
+```
+
+즉 warm-up 구간을 제외하면 사실상 평평합니다. 
+
+이건 FDT의 핵심 설계가 실제로 작동하고 있다는 꽤 좋은 시스템적 증거입니다.
+
+Dense Transformer decode는 새 token마다 이전 KV를 읽으므로 attention 부분이 context \(N\)에 따라 증가하지만, 현재 FDT는
+
+\[
+\text{last 64 KV}
++
+\text{fixed anchor numerator/mass}
+\]
+
+만 유지하므로 incremental semantic path의 크기가 context와 함께 증가하지 않습니다.
+
+다만 엄밀하게는 이렇게 표현해야 합니다.
+
+\[
+\boxed{\text{decode interaction cost per token} \approx O(1)}
+\]
+
+이지 전체 prompt 비용이 \(O(1)\)이라는 뜻은 아닙니다. Prefill은 여전히 대략 선형으로 증가합니다.
+
+현재 benchmark의 문제도 리뷰 지적대로입니다. 512와 1024에서는 dense가 훨씬 빠르고, 2048에서 FDT가 역전한 것은 dense control이 22.26GB까지 올라가 **VRAM cliff를 맞았기 때문**입니다.  게다가 기존 dense control에는 SDPA/FlashAttention/fused kernel도 적용되지 않았습니다. 
+
+따라서 다음 benchmark는 반드시
+
+```text
+512
+1K
+2K
+4K
+8K
+16K
+```
+
+까지 가는 게 좋습니다.
+
+**8K는 최소 목표**, 16K까지 있으면 slope가 훨씬 명확합니다.
+
+중요한 것은 단순히 “8K에서 누가 빠르냐”보다
+
+\[
+T_{\mathrm{decode}}(N)
+\]
+
+의 기울기를 보는 것입니다.
+
+FDT가
+
+\[
+28,\ 28,\ 28,\ 29,\ 29\text{ ms}
+\]
+
+처럼 움직이고 optimized dense가 context에 따라 계속 증가한다면, 그게 진짜 아키텍처적 증거입니다.
+
+---
+
+# 3. RoPE 전환: 해야 함. 그러나 “RoPE니까 2K 학습 후 16K도 자동으로 됨”은 아님
+
+현재 사양은 명확히
+
+```text
+learned position embedding
+RoPE 없음
+context = 2048
+```
+
+입니다. 
+
+따라서 현재 absolute position table은 정말로 2048을 하드 상한으로 만듭니다.
+
+다음 구조에서는 learned positional embedding을 없애고 **local attention의 Q/K에 RoPE를 적용**하는 것이 맞습니다.
+
+개념적으로
+
+\[
+q_t'=R(t)q_t,\qquad
+k_j'=R(j)k_j
+\]
+
+로 만들고
+
+\[
+\alpha_{tj}
+=
+\operatorname{softmax}
+\left(
+\frac{q_t'^Tk_j'}{\sqrt{d_h}}
+\right)
+\]
+
+를 계산합니다.
+
+Fuzzy anchor는 그대로 둡니다.
+
+```text
+256 anchors
+top-k = 8
+router dim = 256
+cosine
+T = 0.25
+```
+
+전혀 손댈 필요 없습니다.
+
+다만 RoPE 자체가 학습 길이 밖 extrapolation을 보장하는 것은 아닙니다. Position Interpolation 연구는 RoPE 기반 모델을 학습 길이 바깥으로 그대로 extrapolate하면 attention score가 크게 불안정해질 수 있다고 지적하며, interpolation과 짧은 추가 학습으로 context를 확장했습니다.  YaRN 역시 기본 RoPE 모델이 훈련 길이 바깥에서 자동으로 잘 일반화하지 않는다는 문제를 출발점으로 합니다. 
+
+따라서 목표를
+
+> “2K로 학습하고 RoPE만 붙여 16K inference”
+
+로 잡으면 안 됩니다.
+
+자원 제약을 고려하면 더 현실적인 방법은:
+
+```text
+Base training
+2K 위주
+
+        ↓
+
+Long-context continuation
+2K + 4K 혼합
+
+        ↓
+
+가능한 범위에서
+4K + 일부 8K
+
+        ↓
+
+Evaluation
+2K / 4K / 8K / 16K
+```
+
+입니다.
+
+426~450M에서 full-BPTT 8K가 VRAM에 안 들어간다면 activation checkpointing이나 stateful chunk training도 연구할 수 있습니다.
+
+예를 들어:
+
+```text
+8K sequence
+
+chunk 1: 0~2047
+    ↓ anchor state 유지
+chunk 2: 2048~4095
+    ↓
+chunk 3
+    ↓
+chunk 4
+```
+
+처럼 실제 inference와 같은 상태 전달을 사용하는 truncated-BPTT 실험도 가능합니다. 다만 state를 chunk 경계에서 detach하면 초기 token까지 long-range gradient가 전달되지 않으므로, 이것은 **완전한 8K 학습과 동등하지 않다는 점**을 명확히 해야 합니다.
+
+---
+
+# 4. Exact Memory는 현재 파일에는 구현되어 있지 않음
+
+이 부분은 명확합니다.
+
+현재 diff에 들어간 architecture-level 변경은 사실상 `scatter_add → scatter_add_` 최적화이고, Exact Memory 관련 구현은 없습니다. 
+
+현재 존재하는
+
+```text
+anchor numerator
+anchor mass
+long summary
+recent summary
+```
+
+는 **Fuzzy Semantic Memory**입니다.
+
+그것을 Exact Memory라고 부르면 안 됩니다.
+
+또 `repetition_scope="generated"` 역시 Exact Memory가 아닙니다. 이것은 단지 프롬프트에 있는 ID를 복사하려고 할 때 decoder가 해당 token의 logit을 억누르지 않도록 해주는 것입니다.
+
+즉 현재는:
+
+```text
+Semantic Memory       있음
+Exact Episodic Memory 없음
+```
+
+입니다.
+
+그리고 새 자료를 보고 나니 Exact Memory를 바로 구조에 넣기 전에 **한 가지 진단을 먼저 하는 게 더 중요해졌습니다.**
+
+현재 exact-copy 실패가 두 종류일 수 있기 때문입니다.
+
+### A. 내부 representation에서 이미 정보가 사라짐
+
+예를 들어 정답 token을 teacher forcing으로 줘도
+
+```text
+gold token rank = 500
+probability ≈ 0
+```
+
+이라면 fuzzy compression이나 표현 자체의 문제입니다.
+
+이 경우 Exact Memory가 강하게 필요합니다.
+
+### B. 정보는 있는데 free-running generation에서 궤도를 이탈함
+
+```text
+gold rank = 1~3
+gold probability 높음
+
+하지만 한 번 잘못 생성
+↓
+다음 상태가 틀어짐
+↓
+loop
+```
+
+이면 primarily sequence-stability/exposure 문제입니다.
+
+새 평가에서 **Python PPL 6.5인데 반복률 0.666**이라는 결과는 B가 상당히 크다는 증거입니다. 
+
+하지만 A도 아직 배제할 수 없습니다. 10자리 identifier는 정확 복사되는데 16자리가 망가지고, 기존 lineage exact-copy probe는 첫 divergence가 위치 1에서 발생하기도 했습니다.  
+
+그러므로 먼저 기존 보고서가 이미 제안했던:
+
+\[
+4,\ 8,\ 16,\ 32,\ 64\text{ characters}
+\]
+
+exact-copy matrix와 gold-token rank/probability/first-divergence를 실행해야 합니다. 
+
+이게 가장 중요한 진단입니다.
+
+---
+
+# 5. 그래도 Exact Memory를 구현한다면 현재 설계는 이렇게 가는 게 맞음
+
+기존 fuzzy core는 **그대로 고정**합니다.
+
+```text
+                 Current hidden
+                       │
+                 existing router
+                 256 → Top-8
+                       │
+          ┌────────────┴────────────┐
+          │                         │
+   Fuzzy Semantic Memory       Exact-Need Gate
+          │                         │
+          │                     필요할 때만
+          │                         ▼
+          │                Exact chunk index
+          │                         ↓
+          │                  candidate spans
+          │                         ↓
+          │                    Copy cursor
+          └────────────┬────────────┘
+                       ▼
+                     Output
+```
+
+Exact store 자체는 원본 token을 그대로 저장합니다.
+
+\[
+E=
+\{x_1,x_2,\ldots,x_t\}.
+\]
+
+예를 들어 32-token chunk를 사용하면 8K context에서도 겨우 256개 chunk입니다. 지금 단계에서는 ANN 같은 복잡한 색인이 필요조차 없습니다.
+
+각 chunk에는:
+
+```text
+start
+length
+raw token IDs
+top 2~4 anchor IDs
+anchor weights
+```
+
+정도만 둡니다.
+
+현재 top-8 anchor를 query index로 **그대로 재사용**하고, 두 번째 router는 만들지 않습니다.
+
+후보가 발견되면
+
+```text
+source_start
+source_end
+cursor
+```
+
+를 만들고 이후에는 retrieval을 다시 하지 않고
+
+\[
+x_{\mathrm{out}}
+=
+E[\text{cursor}]
+\]
+
+\[
+\text{cursor}\leftarrow\text{cursor}+1
+\]
+
+만 합니다.
+
+이게 copy cursor입니다.
+
+그리고 기존에 우려했던 대로 **adaptive-k나 hierarchical semantic routing은 건드리지 않는 것이 좋습니다.**
+
+Exact Memory는 semantic routing 안정성을 바꾸지 않고 옆에 붙여야 합니다.
+
+또 하나 중요한 수정이 있습니다. Exact Memory를 넣으면 더 이상
+
+> “전체 memory가 O(1)이다”
+
+라고 할 수 없습니다.
+
+정확히는:
+
+\[
+\boxed{
+\text{Fuzzy semantic state}=O(1)
+}
+\]
+
+이지만
+
+\[
+\boxed{
+\text{Exact raw memory}=O(N)
+}
+\]
+
+입니다.
+
+다만 raw token ID의 \(O(N)\) 저장은 Transformer의 다층 KV cache보다 훨씬 작고, candidate 수를 제한하면 **decode 계산량은 context 길이와 거의 독립적으로 유지할 수 있습니다.**
+
+---
+
+# 6. 학습 과정에는 실제로 문제가 있는가? — 예. 하지만 ‘하나’가 아님
+
+여기서는 네 가지를 분리해야 합니다.
+
+### 첫째, base model 자체가 크게 undertrained된 것은 맞음
+
+426,806,356 parameters에 누적 token이 528,905,026이므로
+
+\[
+D/N\simeq1.24.
+\]
+
+리뷰가 이를 강하게 지적했고, 실제 BPB에서도 전체 평균 1.550으로 GPT-2 124M의 1.453보다 나쁩니다. 반면 TinyStories와 Python에서는 GPT-2 medium보다 좋습니다. 
+
+즉 현재 결과는
+
+> **범용 모델링은 부족하지만 특정 학습 분포에서는 상당히 강하게 형성됨**
+
+으로 읽는 게 맞습니다.
+
+다만 리뷰의
+
+> “Chinchilla가 20 token/param이므로 426M은 잘못된 크기이고 반드시 116M으로 줄여야 한다.”
+
+까지 그대로 받아들이지는 않겠습니다.
+
+Chinchilla scaling law는 **Transformer language model을 대상으로 한 compute-optimal 결과**입니다. 논문 자체도 Transformer를 대상으로 모델 크기와 token 수를 함께 scaling한 결과입니다. 
+
+게다가 이후 scaling 연구에서도 단순히 `6ND`와 parameter count만으로 실제 compute를 나타내면 attention 등의 차이 때문에 특히 작은 모델에서 오차가 상당할 수 있다고 지적합니다. 
+
+FDT는 더더욱 연산 구조가 다릅니다.
+
+그래서 **116M 권고는 좋은 compute-budget baseline이지 FDT의 최적 크기가 아닙니다.**
+
+연구 목적이라면 426~450M을 main research scale로 유지할 수 있습니다. 대신:
+
+> “450M이 compute-optimal하다”
+
+고 주장하지 않고, 작은 100~150M 모델을 **cheap architecture probe**용으로 쓰는 게 좋습니다.
+
+---
+
+### 둘째, exposure bias/자유 생성 안정성 문제가 확실히 있음
+
+가장 강한 증거가 이겁니다.
+
+\[
+PPL_{\text{Python}}=6.5
+\]
+
+인데
+
+\[
+R_{\text{repeat}}=0.666.
+\]
+
+TinyStories는
+
+\[
+7.6,\quad0.093.
+\]
+
+즉 단순히 PPL이 나빠서 반복하는 게 아닙니다. 
+
+따라서 다음 학습부터 **teacher-forced validation만으로 checkpoint를 승격시키면 안 됩니다.**
+
+매 checkpoint에 최소한
+
+```text
+teacher-forced BPB/PPL
+free-run loop-free rate
+first-loop position
+trigram repetition
+EOS rate
+generated length
+exact-copy free-run
+exact-copy gold rank/prob
+```
+
+를 함께 기록해야 합니다.
+
+---
+
+### 셋째, scheduled sampling은 바로 주력으로 쓰지 않는 편이 좋음
+
+리뷰의 scheduled sampling 제안은 합리적인 아이디어지만, 그대로 1순위로 넣는 것은 권하지 않습니다.
+
+Scheduled sampling은 오래전부터 **훈련 objective가 일관되지 않을 수 있다는 이론적 비판**이 있습니다. 
+
+저라면 순서를:
+
+```text
+CE
+→ EOS 보정
+→ Unlikelihood repetition loss
+→ 짧은 self-generated-prefix recovery training
+→ 그래도 부족할 때 scheduled sampling 소규모 ablation
+```
+
+으로 잡겠습니다.
+
+특히 self-generated-prefix recovery는 FDT에 잘 맞습니다.
+
+모델이 16~32 token을 생성하게 한 뒤,
+
+```text
+정상
+정상
+정상
+잘못된 token
+↓
+이 상태에서 다시 정상 궤도로 복귀하도록 학습
+```
+
+시키는 방식입니다.
+
+“항상 완벽한 정답 prefix만 본 모델”이라는 문제를 직접 완화할 수 있습니다.
+
+---
+
+### 넷째, EOS를 그냥 무작정 올리면 안 됨
+
+현재 V20 T1에는 이미
+
+\[
+\lambda_{\rm EOS}=2.0
+\]
+
+이 들어가 있습니다. copied-value grounding 1.5, Python signature 1.25, prompt retention 0.35도 이미 적용됐습니다. 
+
+그리고 V18 계보에는 factual/EOS와 retrieval/JSON 사이 trade-off도 기록돼 있습니다. 
+
+따라서
+
+```text
+EOS = 2 → 4
+```
+
+처럼 무작정 올리기보다,
+
+```text
+2.0
+2.5
+3.0
+```
+
+정도의 작은 sweep을 하고
+
+```text
+loop-free
+정상 종료
+premature EOS
+retrieval
+JSON exact
+```
+
+을 함께 봐야 합니다.
+
+---
+
+## 중요한 자료 불일치도 하나 발견됨
+
+새 권고안에는
+
+> “Python 샘플이 192토큰까지 가면서 무너진다”
+
+고 적혀 있습니다. 
+
+그런데 기존 공식 보고서의 V20 T1 학습 설정은 명확하게
+
+\[
+\boxed{\text{code completion cap}=96}
+\]
+
+입니다. 
+
+따라서 **지금 바로 “192→짧게”로 수정하면 안 됩니다.**
+
+먼저 확인해야 합니다.
+
+> 192가 **training sample cap**인지, 아니면 **evaluation max_new_tokens**인지.
+
+현재 제공된 자료만으로는 둘을 동일한 값으로 볼 수 없습니다.
+
+이 불일치를 해결한 다음 completion length를 조정해야 합니다.
+
+---
+
+# 7. 속도 문제: 이제 원인이 상당히 명확해짐
+
+`scatter_add → scatter_add_` 한 줄 수정으로 prefill이 1.4~1.6배 빨라졌다는 건 중요한 발견입니다.
+
+1900 context에서 불필요한 복제로 약 0.66초가 소비되고 있었고, 변경 뒤 출력도 동일했습니다. 
+
+즉 현재 FDT에는 여전히 **구현 최적화로 회수할 수 있는 성능이 상당히 남아 있습니다.**
+
+Decode profile도 더 결정적입니다.
+
+```text
+489 ATen ops / token
+CUDA self 24.5 ms
+CPU self  33.0 ms
+
+aten::mm
+141 calls
+10.3 ms
+```
+
+
+
+그래서 우리가 전에 추측했던:
+
+> “FLOPs 문제보다 작은 kernel과 dispatch가 너무 많다.”
+
+가 이제 실제 profiling으로 상당히 뒷받침됩니다.
+
+다만 이 profiler 수치는 검수 환경과 연결해서 읽어야 합니다. 검수 머신은 GTX 1650 + torch 2.11이었습니다. 
+
+따라서 **RTX 5060 Ti에서도 18ms가 그대로 dispatch overhead라고 단정하면 안 됩니다.**
+
+5060 Ti에서 다시 profile해야 합니다.
+
+최적화 순서는 저는 이렇게 잡겠습니다.
+
+```text
+현재 scatter_add_ fix
+        ↓
+5060 Ti torch.profiler / Nsight
+        ↓
+torch.compile
+mode="reduce-overhead"
+        ↓
+CUDA Graph capture
+        ↓
+남은 hotspot만 Triton/CUDA fusion
+```
+
+특히 decode의 tensor shape은 대부분 고정되어 있으므로 CUDA Graph와 궁합이 좋을 가능성이 있습니다.
+
+Fuzzy path에서는 최종적으로:
+
+```text
+normalize
+→ router projection
+→ cosine
+→ top-k
+→ membership softmax
+```
+
+와
+
+```text
+anchor gather
+→ long/recent weighting
+→ reduction
+→ state update
+```
+
+를 각각 최대한 적은 kernel로 합치는 게 목표입니다.
+
+**하지만 256 anchors/top8/10 anchor layers 자체는 바꾸지 않습니다.**
+
+우리가 걱정했던 hierarchical routing이나 adaptive-k로 계산량을 줄이는 것보다 먼저 **동일 계산을 더 좋은 kernel로 실행**해야 합니다.
+
+---
+
+# 8. 다음 버전에서 제가 권하는 실제 구조
+
+현재 Core:
+
+\[
+d=1216,\quad
+L=20,\quad
+H=19,\quad
+W=64,
+\]
+
+\[
+A=256,\quad
+K=8,\quad
+d_r=256,\quad
+T=0.25
+\]
+
+는 당분간 그대로 둡니다. 현재 구조 사양은 공식 보고서와 일치합니다. 
+
+바뀌는 것은 주변부입니다.
+
+```text
+Token
+  │
+  ▼
+RoPE Local Attention W=64
+  │
+  ▼
+Existing Fuzzy Router
+256 → fixed Top-8
+  │
+  ├─────────────► Fuzzy Semantic Memory
+  │
+  └─────────────► Exact-Need Gate
+                         │
+                     필요할 때
+                         ▼
+                   Exact Memory
+                         │
+                    Copy Cursor
+  │                      │
+  └──────────┬───────────┘
+             ▼
+          SwiGLU
+             │
+             ▼
+           Output
+```
+
+그리고 generation controller에는:
+
+```text
+generated-only repetition control
++ EOS/stop
++ copy-mode exemption
+```
+
+을 둡니다.
+
+이렇게 하면 FDT의 본래 정체성인
+
+\[
+\text{fuzzy semantic organization}
+\]
+
+은 그대로 보존하면서,
+
+\[
+\text{exact identity}
+\]
+
+만 별도의 channel로 보완합니다.
+
+---
+
+# 9. 실제 개발 순서는 이 순서가 가장 안전함
+
+**P0 — 현재 checkpoint에서 원인 분리.** 새 모델을 학습시키기 전에 generated-only penalty를 기본으로 바꾸고, 4/8/16/32/64 exact-copy에서 `teacher-forced gold rank/probability + free-run + first divergence`를 동시에 측정해야 합니다. 여기서 representation loss와 exposure bias를 분리합니다.
+
+**P1 — RoPE 버전 구축.** learned positional embedding을 제거하고 local Q/K에 RoPE를 적용합니다. 작은 FDT에서 먼저 회귀시험을 하고, 2K→4K→8K context 평가 harness를 만듭니다. 현재 모델의 2048 한계를 그대로 가진 채 속도 연구를 계속하는 것은 이제 의미가 작습니다.
+
+**P2 — 생성 목적함수 수정.** EOS는 작은 sweep으로 조정하고, repetition unlikelihood + 짧은 model-prefix recovery를 먼저 시험합니다. Scheduled sampling은 그 이후 ablation으로 둡니다.
+
+**P3 — Exact Memory prototype.** P0에서 teacher-forced exact identity까지 나쁘다는 것이 확인되면 본격 적용합니다. 기존 top-8을 index로 재사용하고 raw token/chunk + copy cursor를 붙입니다. adaptive-k와 hierarchical semantic routing은 보류합니다.
+
+**P4 — CUDA 최적화.** scatter fix는 유지하고, 5060 Ti에서 재프로파일 → `torch.compile` → CUDA Graph → 필요시에만 Triton fusion 순으로 갑니다.
+
+**P5 — 최종 8K/16K Architecture Benchmark.** FDT와 optimized dense control을 같은 dtype/parameter/hardware에서 비교하고 `prefill tok/s`, `decode ms/token`, VRAM, BPB, passkey/exact retrieval, state retention, loop-free를 모두 기록합니다.
+
+---
+
+## 마지막으로 116M 축소 권고에 대해서
+
+이건 그대로 따를 필요는 없다고 봅니다.
+
+리뷰가 발견한 **undertraining 자체는 실제 문제**입니다. 하지만 `20 tokens/parameter`를 FDT에 그대로 넣어서 “따라서 116M이 정답”이라고 하는 것은 Transformer scaling law를 새로운 아키텍처에 그대로 이식한 것입니다.
+
+연구 목적이라면 오히려:
+
+```text
+100~150M
+→ 빠른 구조/목적함수 실험용
+
+426~450M
+→ 본 FDT 연구 모델
+```
+
+의 두 트랙이 더 적합합니다.
+
+450M은 충분히 학습된 최종 상업 모델이라는 의미가 아니라,
+
+> **현재 하드웨어에서 FDT의 고차원 표현과 routing 현상을 관찰할 수 있는 최대 연구 스케일**
+
+로 유지하는 겁니다.
+
+---
+
+### 그래서 이번 자료를 반영한 제 최종 판정
+
+현재 FDT의 가장 희망적인 측정은 **context가 16→1900으로 증가해도 decode latency가 사실상 증가하지 않았다는 것**이고, 가장 큰 시스템 문제는 **그 상수가 28ms 정도로 너무 크다는 것**, 가장 큰 학습 문제는 **teacher forcing과 free generation 사이의 큰 간극**, 가장 큰 구조적 미해결 문제는 **exact identity가 representation 단계에서 정말 손실되는지 아직 분리되지 않았다는 것**입니다.
+
+따라서 다음 버전을 단순히 “Exact Memory를 추가한 FDT”로 만들기보다는,
+
+\[
+\boxed{
+\text{RoPE}
++
+\text{Free-generation stability training}
++
+\text{Optional Exact Memory}
++
+\text{Fused/graph decode}
+}
+\]
+
+의 네 축으로 설계하되 **각각 feature flag와 ablation을 가능하게 만들어야 합니다.**
+
+그렇게 해야 다음 실험에서 처음으로
+
+> “Fuzzy architecture의 문제였나?”,  
+> “학습 목적함수 문제였나?”,  
+> “GPU 구현 문제였나?”,  
+> “정확한 episodic memory가 진짜 필요했나?”
+
+를 각각 분리해서 답할 수 있습니다.
+
+그리고 현재 자료를 읽은 뒤에는, 이 **원인 분리 자체가 다음 학습보다 먼저 해야 할 가장 중요한 작업**이라고 봅니다.

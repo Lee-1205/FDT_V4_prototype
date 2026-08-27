@@ -1,0 +1,20 @@
+{
+  "hash": "ea2b3d3fd6447a9b4d9ef5a96a263ae8aef7dee9a46ec8784ea96a3c26b26e3a",
+  "special_tokens": [
+    "<pad>",
+    "<bos>",
+    "<eos>",
+    "<sep>",
+    "<rlm>",
+    "<read>",
+    "<search>",
+    "<call>",
+    "<compare>",
+    "<merge>",
+    "<stop>",
+    "<result>",
+    "<state>",
+    "<confidence>"
+  ],
+  "vocab_size": 24576
+}

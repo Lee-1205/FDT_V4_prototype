@@ -1,0 +1,446 @@
+그 방향이 가장 자연스럽습니다. 다만 현재 증거로는 **“긴 추론이 가능하다”가 아니라, 긴 추론에 유리한 두 조건—비용 증가가 완만한 구조와 빠른 의미/구조 형성—가 관찰되고 있다**고 표현하는 것이 정확합니다. 보고서에서도 FDT는 2,048 context에서 14.26GB, 2,033 tok/s를 유지했지만, 이것이 곧 coherent long reasoning을 증명하는 것은 아니라고 선을 긋고 있습니다. 
+
+그런데 **Exact Memory를 추가하면 지금 보이는 약점과 장점이 상당히 잘 맞물립니다.**
+
+## 제가 생각하는 최종 형태
+
+Pure-FDT를 아예 세 종류의 기억으로 분리하는 겁니다.
+
+```text
+                    현재 token
+                        │
+        ┌───────────────┼────────────────┐
+        │               │                │
+        ▼               ▼                ▼
+  Local Attention   Fuzzy Memory     Exact Memory
+     W = 64          256 anchors       raw tokens
+        │             top-8            / spans
+        │               │                │
+        ▼               ▼                ▼
+ 근거리 정확성       의미/개념 유지      값/문자열 보존
+ 문법·순서           장거리 압축         숫자·ID·변수
+        │               │                │
+        └───────────────┼────────────────┘
+                        ▼
+                  Current hidden
+                        │
+                 Normal / Copy Gate
+                        │
+                        ▼
+                    next token
+```
+
+이렇게 되면 각 메모리가 **서로 다른 종류의 문제를 담당**합니다.
+
+현재 FDT의 강점을 exact-copy 때문에 희생할 필요가 없습니다.
+
+---
+
+## 특히 긴 추론에서 Exact Memory가 더 중요함
+
+Exact Memory를 처음에는 단순히
+
+> UUID나 JSON 값을 정확히 복사하기 위한 장치
+
+로 생각했는데, 사실 **긴 추론에서는 훨씬 중요한 역할**을 할 수 있습니다.
+
+예를 들어 긴 문제를 풀면서 중간에 모델이 다음 결과를 얻었다고 합시다.
+
+```text
+A = 18427
+B = 0.03751
+현재 단계 = 7
+선택한 조건 = option_C
+```
+
+Fuzzy anchor에는 이런 정보가 대략적으로 남을 수 있습니다.
+
+```text
+A = 어떤 큰 정수
+B = 작은 실수
+현재 계산이 상당히 진행됨
+option_C가 선택됨
+```
+
+자연어 추론에는 이것도 상당히 유용합니다.
+
+그런데 2,000토큰 뒤에 정확히
+
+```text
+A = 18427
+```
+
+을 사용해야 한다면 `18427 → 18472` 같은 작은 변형 하나로 뒤의 계산 전체가 무너집니다.
+
+그래서 긴 추론에서는:
+
+```text
+Semantic memory:
+"A라는 중간 계산 결과가 존재한다"
+
+Exact memory:
+A = 18427
+```
+
+를 동시에 저장해야 합니다.
+
+즉 Exact Memory는 단순한 **copy 장치가 아니라 reasoning state 보존 장치**가 됩니다.
+
+---
+
+# 이 구조가 상당히 재미있는 이유
+
+일반 Transformer는 과거의 정확한 정보를 유지하려면 기본적으로 과거 K/V를 계속 가지고 갑니다.
+
+반면 우리가 생각하는 FDT는:
+
+```text
+과거의 의미
+→ 압축
+
+과거의 정확한 값
+→ 매우 작은 raw representation으로 보존
+```
+
+할 수 있습니다.
+
+즉 굳이 모든 것을 고차원 hidden state로 기억할 필요가 없습니다.
+
+### 의미 정보
+
+```text
+1216-dimensional representation
+      ↓
+fuzzy anchors
+      ↓
+압축
+```
+
+### 정확한 정보
+
+```text
+token IDs / positions / span
+      ↓
+lossless storage
+```
+
+입니다.
+
+이 두 종류는 저장 목적 자체가 다릅니다.
+
+---
+
+## 예를 들어 10만 토큰의 reasoning trace가 있다고 해보면
+
+기존 attention 방식에서는 긴 context를 계속 직접 접근할 수 있도록 상당한 K/V 상태를 유지해야 합니다.
+
+FDT에서는 원리상:
+
+```text
+최근 64 token
+        │
+        └─ high-resolution local state
+
+오래된 99,936 token
+        │
+        ├─ fuzzy semantic summary
+        │
+        └─ raw exact token/span memory
+```
+
+처럼 분리할 수 있습니다.
+
+그런데 raw token ID는 hidden state와 비교하면 매우 작습니다.
+
+따라서 **“의미를 계산하기 위해 보존하는 것”과 “나중에 정확히 복사하기 위해 보존하는 것”을 분리**할 수 있습니다.
+
+이것이 꽤 큰 차이입니다.
+
+---
+
+# 그리고 Anchor를 Exact Memory의 검색 인덱스로 쓰면 됨
+
+문제가 하나 있습니다.
+
+raw token을 100만 개 저장하는 건 별로 어렵지 않아도, 매 generation마다 100만 개를 검색하면 아무 의미가 없습니다.
+
+여기서 다시 Fuzzy Anchor가 등장합니다.
+
+```text
+현재 질문
+   │
+   ▼
+256 anchor와 비교
+   │
+   ▼
+Top-8
+   │
+   ▼
+해당 anchor와 연결된
+memory chunk만 검색
+   │
+   ▼
+Top relevant spans
+   │
+   ▼
+Exact retrieval
+```
+
+그러면 Anchor는 이제 두 역할을 갖습니다.
+
+```text
+Anchor
+├── semantic representation
+│
+└── exact memory index
+```
+
+이 구조는 원래 FDT 철학과도 굉장히 잘 맞습니다.
+
+**모든 과거 토큰을 계산하지 않고 의미 공간으로 후보를 줄인다**는 원래 아이디어가 그대로 유지되기 때문입니다.
+
+---
+
+# 실제로는 token보다 chunk 단위가 더 좋을 듯함
+
+예를 들어 32 token을 한 chunk로 잡는다고 합시다.
+
+```text
+Chunk 0    token 0~31
+Chunk 1    token 32~63
+Chunk 2    token 64~95
+...
+```
+
+각 chunk에는:
+
+```text
+raw token IDs
+start position
+semantic retrieval key
+anchor memberships
+```
+
+정도만 붙입니다.
+
+그러면:
+
+```text
+Current State
+     ↓
+Top-8 Anchors
+     ↓
+관련 Chunk 후보 20개
+     ↓
+rerank
+     ↓
+Top-2 chunks
+     ↓
+필요한 exact span
+```
+
+식으로 읽을 수 있습니다.
+
+긴 context에서도 전체 과거를 attention하는 구조로 돌아가지 않습니다.
+
+---
+
+# 특히 추론 과정에서는 “Commit” 개념을 넣는 게 좋음
+
+이건 한 단계 더 발전시킨 아이디어입니다.
+
+모든 생성 token을 똑같이 중요하게 기억할 필요는 없습니다.
+
+모델이 긴 추론을 하는 동안:
+
+```text
+생각 후보
+생각 후보
+수정
+가설
+폐기
+계산
+결론
+```
+
+이 계속 발생할 텐데, 여기서 중요한 상태만 **commit**하면 됩니다.
+
+예:
+
+```text
+Working trace
+    │
+    ├─ 임시 추론 → fuzzy memory에만
+    │
+    ├─ 임시 추론 → fuzzy memory에만
+    │
+    ├─ 계산 결과 확정
+    │        ↓
+    │    Exact Commit
+    │    A = 18427
+    │
+    ├─ 조건 확정
+    │        ↓
+    │    Exact Commit
+    │    selected=C
+    │
+    └─ 계속 추론
+```
+
+그러면 Exact Memory가 일종의 **모델 내부 노트북**처럼 작동합니다.
+
+물론 처음 구현에서는 모델이 무엇을 commit할지 스스로 결정하게 만들지 말고,
+
+- 숫자 결과
+- identifier
+- quoted span
+- JSON value
+- 함수명/signature
+- 명시적 변수 할당
+
+같이 deterministic하게 검출 가능한 것부터 저장하는 게 안전합니다.
+
+---
+
+# 이것을 더 발전시키면 3단계 기억계층이 됨
+
+결국 꽤 인간적인 형태가 됩니다.
+
+### 1. Working Memory
+
+```text
+Local Attention W=64
+```
+
+방금 읽은 내용.
+
+매우 정확하지만 짧습니다.
+
+### 2. Semantic Long-Term Memory
+
+```text
+Fuzzy Anchors
+```
+
+전체 맥락의 의미, 주제, 관계.
+
+매우 압축되어 있고 오래 갑니다.
+
+### 3. Episodic / Exact Memory
+
+```text
+Raw spans + pointers
+```
+
+특정 시점에 실제로 무엇이 쓰였는지.
+
+압축하지 않고 정확히 보존합니다.
+
+즉:
+
+\[
+\boxed{
+\text{Working}
++
+\text{Semantic}
++
+\text{Exact}
+}
+\]
+
+입니다.
+
+저는 이게 현재 Pure-FDT의 다음 구조로 꽤 설득력이 있다고 봅니다.
+
+---
+
+# 이러면 지금 발견한 자연어 장점을 유지할 수 있음
+
+중요한 것은 **Fuzzy Anchor에 exact-copy 책임을 더 이상 강요하지 않는 것**입니다.
+
+현재 보이는 현상을 보면 anchor 경로가:
+
+```text
+문법
+구조
+의미적 유사성
+일반적인 관계
+```
+
+를 처리하는 데 유리할 가능성이 있습니다.
+
+반면:
+
+```text
+18427
+R20261805-2
+Q7M2X9K4P8V3N6L1
+foo_bar_v17
+```
+
+같은 것은 의미 압축의 대상이 아닙니다.
+
+그러니까 역할을 분리하면 됩니다.
+
+```text
+                     정보
+                      │
+          ┌───────────┴───────────┐
+          ▼                       ▼
+     일반화 가능한가?         identity 자체가 중요한가?
+          │                       │
+          ▼                       ▼
+     Fuzzy Memory             Exact Memory
+          │                       │
+       압축/공유                lossless
+```
+
+이렇게 하면 **지금 FDT가 잘하는 것을 고치는 실수**를 피할 수 있습니다.
+
+---
+
+# 그리고 이게 제대로 되면 긴 추론에 중요한 세 조건을 갖게 됨
+
+첫 번째는 **계산 비용**입니다.
+
+현재 측정에서는 FDT 처리량이 context 512~2,048에서 대략 1,939~2,122 tok/s 범위에 머물렀고, 2,048에서도 14.26GB였습니다. 다만 비교 대상 dense Transformer는 최적화되지 않은 eager 구현이라는 제한이 있습니다. 
+
+두 번째는 **의미 상태 유지**입니다.
+
+Fuzzy anchor가 장거리 문맥을 압축해서 계속 전달합니다. 현재 구조도 local KV와 incremental anchor numerator/mass를 token마다 갱신하는 형태입니다. 
+
+세 번째는 지금 부족한 **정확 상태 유지**입니다.
+
+```text
+변수
+수치
+identifier
+중간 결과
+원문
+```
+
+를 Exact Memory가 담당합니다.
+
+즉:
+
+```text
+긴 추론
+  │
+  ├─ 계산이 싸야 함                ✓ 가능성 있음
+  │
+  ├─ 의미를 오래 유지해야 함       ✓ 구조상 담당 경로 존재
+  │
+  └─ 세부 상태를 정확히 유지해야 함 ✗ 현재 병목
+                                  ↓
+                             Exact Memory
+```
+
+가 됩니다.
+
+그래서 Exact Memory는 그냥 현재 모델의 작은 버그 패치가 아니라, **FDT를 실제 장문 reasoning architecture로 발전시키기 위해 빠져 있던 한 축**으로 보는 편이 더 적절합니다.
+
+---
+
+다만 그 다음에는 반드시 **“긴 context”와 “긴 reasoning”을 구분해서 검증**해야 합니다. 모델이 100K token을 싸게 처리할 수 있는 것과 100K token 동안 추론을 누적하면서 처음의 조건과 중간 결과를 틀리지 않는 것은 완전히 다른 문제입니다. 보고서도 현재 장문 비용 증거가 coherent reasoning이나 낮은 error accumulation을 보장하지 않는다고 명시합니다. 
+
+그래서 저는 다음 모델을 만들기 전에 **`Local + Fuzzy Semantic + Exact Episodic`의 3-memory 구조를 최소 변경으로 프로토타입하고, 현재 426.8M 체크포인트를 최대한 보존한 채 exact path만 학습하는 실험**을 먼저 해보는 게 가장 가치 있다고 봅니다. 성공하면 현재 모델의 자연어적 성향을 유지하면서도 가장 명확한 구조적 결함 하나를 직접 메울 수 있습니다.

@@ -1,0 +1,21 @@
+{
+  "name": "long_context",
+  "schema_version": "fdt_v4_curriculum_source_manifest_v1",
+  "shards": [
+    {
+      "file": "shards\\train\\shard_00000.pt",
+      "rows": 64,
+      "sha256": "80B1C21378FD66D8F655D3304985C99600A9B668B828098AFC574CC8E3F0E26F",
+      "tokens": 524288
+    },
+    {
+      "file": "shards\\train\\shard_00001.pt",
+      "rows": 64,
+      "sha256": "5F4237A7CD53B3DB4D4F7865F7102A63A4D412FA2685C4524B5BE39343F57092",
+      "tokens": 1048576
+    }
+  ],
+  "source_directory": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\prepared_data\\fdt_v4_contract_sources_v3_20260826\\long_context",
+  "source_manifest_sha256": "687B63F594005A6680056C535E9B5C64F306EAFF13F03FE88D4F315C9047490C",
+  "split": "train"
+}

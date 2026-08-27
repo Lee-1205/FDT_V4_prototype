@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "C:\Users\User\Documents\Codex\2026-06-26\dk\outputs\FDT_RLM\scripts\luna_fdt_v4_supervisor.py", line 320, in <module>
+    raise SystemExit(main(parse_args()))
+  File "C:\Users\User\Documents\Codex\2026-06-26\dk\outputs\FDT_RLM\scripts\luna_fdt_v4_supervisor.py", line 262, in main
+    raise RuntimeError("Trainer stopped without an atomic recovery checkpoint")
+RuntimeError: Trainer stopped without an atomic recovery checkpoint

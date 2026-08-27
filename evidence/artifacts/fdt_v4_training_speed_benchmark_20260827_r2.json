@@ -1,0 +1,282 @@
+{
+  "status": "PASS",
+  "checkpoint": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_main_424m_curriculum_20260826_r3\\latest_recovery.pt",
+  "checkpoint_sha256": "42698E3A6094D273612CEF68CB08AA344A1FAE63A31D70C87C13BC4F11CF0003",
+  "config": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\configs\\fdt_v4_main_426m_speed_r1.yaml",
+  "config_sha256": "358DE85C696AC0D263791A7200D1D6E75FBBF70090365BFB963893D226772E14",
+  "trainer": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\scripts\\train_fdt_v4_curriculum_speed.py",
+  "trainer_sha256": "572EAE184CF55F8AA1467FEB90C67B0DED953AED32E9DC2B5BB288B5BE753429",
+  "measured_steps": 2,
+  "variants": [
+    {
+      "name": "original_batch1_checkpointed",
+      "short_batch_size": 1,
+      "checkpoint_minimum": 1,
+      "steps": [
+        {
+          "optimizer_step": 850,
+          "base_forward_groups": 8,
+          "effective_samples": 8,
+          "base_tokens": 3944,
+          "base_loss": 5.431801617145538,
+          "exact_loss": 0.10708358138799667,
+          "exact_pointer_accuracy": 0.78125,
+          "base_grad_norm": 8.018592834472656,
+          "exact_grad_norm": 0.5658240914344788,
+          "elapsed_seconds": 4.795034799957648,
+          "tokens_per_second": 822.5174924767668,
+          "peak_allocated_gib": 7.710204601287842,
+          "peak_reserved_gib": 8.08203125
+        },
+        {
+          "optimizer_step": 851,
+          "base_forward_groups": 8,
+          "effective_samples": 8,
+          "base_tokens": 3944,
+          "base_loss": 5.655791163444519,
+          "exact_loss": 0.18698792159557343,
+          "exact_pointer_accuracy": 0.5625,
+          "base_grad_norm": 8.86123275756836,
+          "exact_grad_norm": 1.3942500352859497,
+          "elapsed_seconds": 4.2989407000131905,
+          "tokens_per_second": 917.4353114449564,
+          "peak_allocated_gib": 7.708953380584717,
+          "peak_reserved_gib": 8.146484375
+        }
+      ],
+      "mean_tokens_per_second": 869.9764019608616,
+      "peak_allocated_gib": 7.710204601287842,
+      "peak_reserved_gib": 8.146484375,
+      "sample_order_sha256": "D980C2A4EEAED19BF4CE45E0EFC54D52DCCDFEB2250BF8E2071F2813807BF62E",
+      "source_states": {
+        "natural": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 3946,
+          "seed": 20260823
+        },
+        "factual": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 2726,
+          "seed": 20261832
+        },
+        "exact_copy": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 851,
+          "seed": 20262841
+        },
+        "long_context": {
+          "epoch": 1,
+          "shard_index": 0,
+          "cursor": 8,
+          "seed": 20263850
+        },
+        "generated_prefix": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 0,
+          "seed": 20264859
+        }
+      },
+      "long_context_smoke": []
+    },
+    {
+      "name": "short_batch1_uncheckpointed",
+      "short_batch_size": 1,
+      "checkpoint_minimum": 8192,
+      "steps": [
+        {
+          "optimizer_step": 850,
+          "base_forward_groups": 8,
+          "effective_samples": 8,
+          "base_tokens": 3944,
+          "base_loss": 5.431801617145538,
+          "exact_loss": 0.10708358138799667,
+          "exact_pointer_accuracy": 0.78125,
+          "base_grad_norm": 8.018592834472656,
+          "exact_grad_norm": 0.5658240914344788,
+          "elapsed_seconds": 3.1486733999918215,
+          "tokens_per_second": 1252.5910118242953,
+          "peak_allocated_gib": 8.6069917678833,
+          "peak_reserved_gib": 8.83984375
+        },
+        {
+          "optimizer_step": 851,
+          "base_forward_groups": 8,
+          "effective_samples": 8,
+          "base_tokens": 3944,
+          "base_loss": 5.655791163444519,
+          "exact_loss": 0.18698792159557343,
+          "exact_pointer_accuracy": 0.5625,
+          "base_grad_norm": 8.86123275756836,
+          "exact_grad_norm": 1.3942500352859497,
+          "elapsed_seconds": 3.055967200023588,
+          "tokens_per_second": 1290.589768100115,
+          "peak_allocated_gib": 8.593154907226562,
+          "peak_reserved_gib": 8.83984375
+        }
+      ],
+      "mean_tokens_per_second": 1271.590389962205,
+      "peak_allocated_gib": 8.6069917678833,
+      "peak_reserved_gib": 8.83984375,
+      "sample_order_sha256": "D980C2A4EEAED19BF4CE45E0EFC54D52DCCDFEB2250BF8E2071F2813807BF62E",
+      "source_states": {
+        "natural": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 3946,
+          "seed": 20260823
+        },
+        "factual": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 2726,
+          "seed": 20261832
+        },
+        "exact_copy": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 851,
+          "seed": 20262841
+        },
+        "long_context": {
+          "epoch": 1,
+          "shard_index": 0,
+          "cursor": 8,
+          "seed": 20263850
+        },
+        "generated_prefix": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 0,
+          "seed": 20264859
+        }
+      },
+      "long_context_smoke": []
+    },
+    {
+      "name": "short_batch2_uncheckpointed",
+      "short_batch_size": 2,
+      "checkpoint_minimum": 8192,
+      "steps": [
+        {
+          "optimizer_step": 850,
+          "base_forward_groups": 4,
+          "effective_samples": 8,
+          "base_tokens": 3944,
+          "base_loss": 5.43170952796936,
+          "exact_loss": 0.10708358138799667,
+          "exact_pointer_accuracy": 0.78125,
+          "base_grad_norm": 8.017687797546387,
+          "exact_grad_norm": 0.5658240914344788,
+          "elapsed_seconds": 2.4117630000109784,
+          "tokens_per_second": 1635.3182298517918,
+          "peak_allocated_gib": 10.121365070343018,
+          "peak_reserved_gib": 10.3984375
+        },
+        {
+          "optimizer_step": 851,
+          "base_forward_groups": 4,
+          "effective_samples": 8,
+          "base_tokens": 3944,
+          "base_loss": 5.655877113342285,
+          "exact_loss": 0.18612512946128845,
+          "exact_pointer_accuracy": 0.625,
+          "base_grad_norm": 8.864846229553223,
+          "exact_grad_norm": 1.3805893659591675,
+          "elapsed_seconds": 2.3182832999737,
+          "tokens_per_second": 1701.2588582442631,
+          "peak_allocated_gib": 10.113531112670898,
+          "peak_reserved_gib": 10.3984375
+        }
+      ],
+      "mean_tokens_per_second": 1668.2885440480275,
+      "peak_allocated_gib": 10.121365070343018,
+      "peak_reserved_gib": 10.3984375,
+      "sample_order_sha256": "D980C2A4EEAED19BF4CE45E0EFC54D52DCCDFEB2250BF8E2071F2813807BF62E",
+      "source_states": {
+        "natural": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 3946,
+          "seed": 20260823
+        },
+        "factual": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 2726,
+          "seed": 20261832
+        },
+        "exact_copy": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 851,
+          "seed": 20262841
+        },
+        "long_context": {
+          "epoch": 1,
+          "shard_index": 0,
+          "cursor": 8,
+          "seed": 20263850
+        },
+        "generated_prefix": {
+          "epoch": 0,
+          "shard_index": 0,
+          "cursor": 0,
+          "seed": 20264859
+        }
+      },
+      "long_context_smoke": [
+        {
+          "sequence_length": 8192,
+          "checkpointing_enabled": true,
+          "finite_loss": true,
+          "loss": 5.495509624481201,
+          "elapsed_seconds": 5.464667199994437,
+          "tokens_per_second": 1499.0848848047578,
+          "peak_allocated_gib": 8.527012348175049,
+          "peak_reserved_gib": 8.716796875
+        },
+        {
+          "sequence_length": 16384,
+          "checkpointing_enabled": true,
+          "finite_loss": true,
+          "loss": 5.461061954498291,
+          "elapsed_seconds": 10.922238900035154,
+          "tokens_per_second": 1500.058747107909,
+          "peak_allocated_gib": 10.724883556365967,
+          "peak_reserved_gib": 11.203125
+        }
+      ]
+    }
+  ],
+  "sampled_update_comparisons_vs_original": {
+    "short_batch1_uncheckpointed": {
+      "sample_count": 9412,
+      "max_abs": 0.0,
+      "rms": 0.0,
+      "relative_l2": 0.0
+    },
+    "short_batch2_uncheckpointed": {
+      "sample_count": 9412,
+      "max_abs": 1.1324300430715084e-06,
+      "rms": 3.275890570630375e-08,
+      "relative_l2": 6.31207922811531e-08
+    }
+  },
+  "base_loss_max_abs_deltas_vs_original": {
+    "short_batch1_uncheckpointed": 0.0,
+    "short_batch2_uncheckpointed": 9.208917617797852e-05
+  },
+  "equivalence_tolerances": {
+    "short_batch1_sampled_update_max_abs": 0.0,
+    "short_batch2_sampled_update_relative_l2": 1e-06,
+    "base_loss_max_abs": 0.0002
+  },
+  "all_sample_orders_identical": true,
+  "all_source_states_identical": true,
+  "long_context_checkpoint_safety_pass": true,
+  "equivalence_pass": true
+}

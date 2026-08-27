@@ -1,0 +1,94 @@
+{
+  "schema_version": "fdt_v4_architecture_readiness_v1",
+  "status": "READY_TO_LAUNCH",
+  "training_launched_at_audit_time": false,
+  "architecture": {
+    "model_type": "fdt_v4",
+    "parameter_count": 424474072,
+    "parameter_class": "400M",
+    "max_seq_len": 16384,
+    "quantization": "none",
+    "exact_memory_enabled": true,
+    "generation_repetition_scope": "generated",
+    "generation_ngram_order": 3,
+    "generation_ngram_penalty": 8.0,
+    "generation_ngram_hard_block_after": 2
+  },
+  "warm_start_audit_checkpoint": {
+    "path": "runs/fdt_v4_audit_warmstart_20260823_0af5577/latest.pt",
+    "sha256": "2E9D5764CFE145CC9DEBB53540F84CC33E9CB64124BAA76920F2B5C53CAF785F",
+    "stage_status": "AUDIT_UNTRAINED_WARM_START",
+    "capability_evidence": false
+  },
+  "source_hashes": {
+    "src/fdt_rlm/models/fdt_v3.py": "18182400B53D12AD0C0E30B6EEB856E1972C2E0657C248D8BA29DB5843018B26",
+    "src/fdt_rlm/models/fdt_v4.py": "FDF483E3FDAF875495CAF7FB0BC9A846831EE914658C213B2784F4FDAE2E65E8",
+    "src/fdt_rlm/lexical_pointer.py": "C336F6E52D03FAF65007A506649BE5C63AF506BC368A8D9C24304A5F9DC2C927",
+    "scripts/train_fdt_v4_curriculum.py": "8D061D99128FDDD4E44C85751B5A7043B16FF1FD42E5992583D78489E2F47A29",
+    "configs/fdt_v4_main_426m.yaml": "E447F82E3292A0E9C57D6A79CF49816D1B0B923B3A0F6E76EA0E7AC0EEF0AAFE"
+  },
+  "tests": {
+    "focused_cpu": {
+      "status": "PASS",
+      "passed": 96
+    },
+    "cuda_component_smoke": {
+      "status": "PASS",
+      "gradient_finite": true,
+      "exact_endpoint_source": "learned_commit",
+      "sparse_output_max_abs_error": 5.7220458984375e-06
+    },
+    "main_424m_training_smoke": {
+      "status": "PASS",
+      "contexts": [512, 8192, 16384],
+      "peak_reserved_gib_at_16384": 8.15234375,
+      "finite_parameters_after_step": true
+    },
+    "cache_integrity": {
+      "status": "PASS",
+      "contexts": [4096, 8192, 16383],
+      "tolerance": 0.0003,
+      "max_raw_state_error_at_16383": 0.0001900196075439453,
+      "token_agreement": true
+    },
+    "cache_rollout": {
+      "status": "PASS",
+      "steps_per_context": 65,
+      "initial_contexts": [4096, 8192, 16319],
+      "final_contexts": [4161, 8257, 16384],
+      "token_mismatches": 0,
+      "route_mismatches": 0
+    }
+  },
+  "data": {
+    "fresh_source_manifest": "prepared_data/fdt_v4_source_base_v2_100k_ctx512_20260826/manifest.json",
+    "fresh_source_manifest_sha256": "2B7D2D144C97C6A91DEDF31142CBCF8B1F12A36D2BDD9339421935B6193E8AEA",
+    "fresh_source_rows": 100000,
+    "fresh_source_active_tokens": 31648699,
+    "fresh_source_exact_overlap": 0,
+    "contract_manifest": "prepared_data/fdt_v4_contract_sources_v3_20260826/manifest.json",
+    "contract_manifest_sha256": "F1E680F01D2542C5D732323D8FBAF4A615E59855CF0CCD359882CE1E62E35C89",
+    "unique_train_rows": 46272,
+    "cross_source_exact_overlap": 0,
+    "train_validation_exact_overlap": 0,
+    "curriculum_manifest": "prepared_data/fdt_v4_curriculum_v4/manifest.json",
+    "curriculum_manifest_sha256": "4D2DD7AB1CB0AB8787C9577BC4C8F12B6B8607890F772CCBF8350B723D929B6F",
+    "fixed_validation_sha256": "E044E8B8D2382825994A1115FC95A5553ADF556DE503CB4DBA83BFC6CDC1FFE6",
+    "has_distinct_8k_shard": true,
+    "has_exact_16k_shard": true,
+    "has_explicit_copy_mapping": true,
+    "has_generated_prefix_loop_negatives": true,
+    "conversational_sft": false
+  },
+  "training_preflight": {
+    "path": "runs/fdt_v4_main_424m_preflight_20260826_r3/training_preflight.json",
+    "sha256": "426B1FBF2BAAC517CAE8C6032218AFF25E5A55C2D73272EDDE72397D6526BB31",
+    "status": "PASS",
+    "training_launched": false
+  },
+  "limitations": [
+    "The warm-start audit checkpoint is untrained for FDT v4 Exact Memory and is not capability evidence.",
+    "Some historical payloads were previously pruned after hash journaling and cannot be rescanned.",
+    "Capability claims require the post-training corrected audited evaluation."
+  ]
+}

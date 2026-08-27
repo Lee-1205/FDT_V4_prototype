@@ -1,0 +1,837 @@
+가능합니다. 오히려 **Exact Memory를 단순히 붙이는 것보다 FDT의 기존 라우팅 경로에 기생시키는 방식으로 설계하면 추가 계산량을 아주 작게 만들 수 있습니다.** 핵심은 **두 번째 검색 시스템을 새로 만들지 않는 것**입니다.
+
+현재 Pure-FDT는 이미 각 anchor layer에서 256개 anchor와 비교해 top-8을 뽑고, 그 membership으로 장기 summary를 읽습니다.  추론 시에도 local KV와 anchor numerator/mass를 incremental하게 갱신합니다.  이 경로를 그대로 Exact Memory의 인덱스로 재사용하면 됩니다.
+
+## 가장 먼저 줄일 수 있는 부분: Exact Memory용 라우터를 만들지 않는다
+
+나이브하게 만들면:
+
+```text
+hidden
+ ├─ Fuzzy router → semantic memory
+ │
+ └─ Exact router → exact memory
+```
+
+가 되어 routing 연산을 두 번 하게 됩니다.
+
+그럴 필요가 없습니다.
+
+```text
+                   기존 계산
+hidden → 256 anchor similarity → Top-8
+                              │
+                   ┌──────────┴──────────┐
+                   ▼                     ▼
+             Semantic State        Exact Index
+            numerator/mass      chunk/span pointers
+```
+
+즉 기존에 얻은
+
+```text
+anchor 17 : 0.48
+anchor 91 : 0.21
+anchor 43 : 0.13
+...
+```
+
+를 그대로 사용합니다.
+
+그러면 Exact Memory가 추가되더라도 **semantic retrieval까지의 추가 routing 비용은 사실상 0에 가깝습니다.**
+
+이게 FDT 구조와 Exact Memory가 특히 잘 맞는 이유입니다.
+
+---
+
+# 1. Exact Memory를 매 토큰 읽지 않아도 됨
+
+이게 아마 가장 큰 최적화가 됩니다.
+
+대부분의 생성에서는 exact retrieval이 필요 없습니다.
+
+예를 들어:
+
+> 오늘 날씨는 꽤 좋았다. 그래서 학교가 끝난 뒤 친구들과...
+
+같은 자연어 생성에서 과거 UUID나 숫자를 검색할 이유가 없습니다.
+
+따라서:
+
+```text
+hidden
+   │
+   ▼
+Exact-Need Gate
+   │
+   ├─ 0 → Exact Memory 완전히 SKIP
+   │
+   └─ 1 → retrieval
+```
+
+를 둡니다.
+
+개념적으로 작은 scalar head 하나면 충분합니다.
+
+\[
+g_t=\sigma(w^\top h_t)
+\]
+
+그리고
+
+\[
+g_t < \tau
+\]
+
+이면 Exact Memory 접근 자체를 안 합니다.
+
+그러면 전체 token 중 exact retrieval이 필요한 비율을 \(p\)라고 했을 때 비용도 대략 \(p\)에 비례합니다.
+
+예를 들어 전체 생성의 5%에서만 exact retrieval이 필요하다면, 95%에서는 기존 FDT와 거의 동일하게 움직입니다.
+
+초기 프로토타입에서는 learned gate보다 다음과 같은 명확한 상황부터 supervision을 줄 수도 있습니다.
+
+```text
+숫자 복원
+identifier
+JSON value
+quoted string
+변수값 회수
+함수명/signature
+이전에 제시된 문자열
+```
+
+---
+
+# 2. 저장도 token마다 Anchor pointer를 8개씩 만들 필요 없음
+
+예를 들어 100,000 token을 저장한다고 하고 매 token마다 top-8 anchor에 posting을 넣으면:
+
+\[
+100000\times8=800000
+\]
+
+개의 index entry가 생깁니다.
+
+굳이 이렇게 할 필요가 없습니다.
+
+**32 token 단위 chunk**로 묶으면 됩니다.
+
+```text
+Token 0~31       → Chunk 0
+Token 32~63      → Chunk 1
+...
+```
+
+100,000 token이면:
+
+\[
+100000/32\approx3125
+\]
+
+chunks뿐입니다.
+
+그리고 chunk 전체의 anchor membership을 집계해서 상위 2~4개만 등록합니다.
+
+```text
+Chunk 182
+tokens 5824~5855
+
+dominant anchors:
+17
+91
+43
+```
+
+그러면:
+
+```text
+Anchor 17 → Chunk 5, 19, 182, 304...
+Anchor 91 → Chunk 41, 182, 831...
+```
+
+같은 inverted index를 만들 수 있습니다.
+
+예를 들어 chunk당 top-4만 등록하면:
+
+\[
+3125\times4=12500
+\]
+
+entry입니다.
+
+token-top8 방식의 800,000개와 비교하면 **index entry가 약 64배 감소**합니다.
+
+Raw token 자체는 그대로 보존하므로 exactness는 손상되지 않습니다.
+
+---
+
+# 3. Raw memory에는 hidden vector를 저장하지 않는 게 중요
+
+여기서 잘못 설계하면 다시 KV cache처럼 비싸집니다.
+
+저장하면 안 되는 것:
+
+```text
+token마다 1216-d hidden
+token마다 K
+token마다 V
+```
+
+Exact Memory의 목적은 이것이 아닙니다.
+
+필요한 것은 기본적으로:
+
+```text
+raw token ID
+```
+
+입니다.
+
+그리고 contiguous append buffer라면 position조차 명시적으로 저장할 필요가 없습니다.
+
+```text
+memory[0]
+memory[1]
+memory[2]
+...
+```
+
+배열 index 자체가 위치입니다.
+
+현재 tokenizer가 실제로 65,536 미만 vocab임이 확인된다면 token ID를 `uint16`으로 저장할 수도 있습니다. PDF에서는 tokenizer 이름이 `fdt_v3_bpe_24k`라고만 확인되므로 정확한 vocab 크기는 코드에서 따로 확인해야 합니다. 
+
+만약 uint16이 가능하다면:
+
+```text
+100K tokens ≈ 0.2 MB
+1M tokens   ≈ 2 MB
+10M tokens  ≈ 20 MB
+```
+
+수준입니다.
+
+**1M token의 원문 자체를 보존하는 게 GPU 메모리 관점에서는 놀랄 정도로 쌉니다.**
+
+비싼 것은 원문이 아니라 고차원 KV입니다.
+
+---
+
+# 4. 검색을 2단계로 만든다
+
+Exact Memory 전체를 검색하면 안 됩니다.
+
+FDT의 anchor를 1차 검색기로 사용합니다.
+
+```text
+Current hidden
+      │
+      ▼
+기존 Fuzzy Router
+256 → top-8
+      │
+      ▼
+8개 anchor의 posting list
+      │
+      ▼
+Candidate chunks
+예: 20개
+      │
+      ▼
+작은 reranker
+      │
+      ▼
+Top-1~2 chunks
+      │
+      ▼
+Exact span
+```
+
+그러면 전체 memory가 \(M\) token이든 1M token이든 현재 token이 직접 비교하는 대상은 몇 개 chunk뿐입니다.
+
+즉 피해야 할 것은:
+
+\[
+O(M)
+\]
+
+검색이고,
+
+목표는:
+
+\[
+O(\text{anchor lookup}+\text{small candidate rerank})
+\]
+
+입니다.
+
+외부 retrieval LM에서도 datastore를 모든 토큰에서 비싸게 검색하는 것이 큰 inference overhead가 되며, 검색 횟수·후보·표현 저장량을 줄이는 것이 중요한 최적화 축이라는 결과가 있습니다. 
+
+---
+
+# 5. reranker도 1216차원을 쓸 필요가 없음
+
+후보 chunk가 10~30개 정도 나왔다고 합시다.
+
+이를 다시 1216-dimensional hidden과 비교할 필요도 없습니다.
+
+현재 FDT에는 이미 **router dimension 256**이 있습니다. 
+
+심지어 Exact Memory의 second-stage key를:
+
+```text
+64 dim
+```
+
+정도로 더 작게 만들 수도 있습니다.
+
+예:
+
+\[
+q^{exact}=W_eh
+\]
+
+\[
+q^{exact}\in\mathbb R^{64}
+\]
+
+chunk마다 64-d key 하나만 저장하고 후보 16개를 비교하면:
+
+\[
+16\times64=1024
+\]
+
+정도의 dot-product 요소밖에 없습니다.
+
+426M 모델 전체 forward에 비하면 거의 작은 비용입니다.
+
+더 공격적으로 가면 **dense chunk key 자체를 없애고 anchor membership signature만 사용**할 수도 있습니다.
+
+예:
+
+```text
+Chunk 182:
+(17,.42), (91,.26), (43,.17), (8,.09)
+```
+
+현재 query의 top-8 membership과 이것의 overlap만 계산해서 후보를 정렬하는 겁니다.
+
+이렇게 하면 추가 dense embedding조차 거의 없습니다.
+
+---
+
+# 6. Copy가 시작되면 검색을 완전히 중지
+
+이건 효과가 상당히 클 겁니다.
+
+예를 들어 정확하게:
+
+```text
+R20261805-2
+```
+
+를 찾았다고 합시다.
+
+나쁜 설계:
+
+```text
+R 검색
+↓
+memory retrieval
+
+2 검색
+↓
+memory retrieval
+
+0 검색
+↓
+memory retrieval
+
+2 검색
+...
+```
+
+매 token마다 다시 검색합니다.
+
+그럴 필요 없습니다.
+
+처음 source span만 찾으면:
+
+```text
+source_start = 815
+source_end   = 823
+cursor       = 815
+```
+
+를 저장합니다.
+
+그 이후:
+
+```text
+output memory[cursor]
+cursor++
+```
+
+만 하면 됩니다.
+
+즉:
+
+```text
+Normal generation
+       │
+       ▼
+Exact retrieval  ← 한 번만
+       │
+       ▼
+COPY_START
+       │
+       ├─ token[i]
+       ├─ token[i+1]
+       ├─ token[i+2]
+       ├─ ...
+       │
+       ▼
+COPY_END
+       │
+       ▼
+Normal generation
+```
+
+입니다.
+
+긴 64-token UUID-like sequence를 복사한다고 하면 **64번 retrieval할 것을 1번으로 줄일 수 있습니다.**
+
+Copy 과정의 추가 계산은 사실상:
+
+\[
+O(L)
+\]
+
+의 단순 memory read가 됩니다.
+
+LM이 각 문자를 “추론해서 기억”하는 것도 아닙니다.
+
+---
+
+# 7. 모든 10개 Anchor layer에서 Exact Memory를 읽을 필요도 없음
+
+현재 fuzzy anchor는 0, 2, 4, ..., 18의 총 10층에 존재합니다. 
+
+Semantic summary는 여러 층에 반복적으로 주입되는 것이 의미가 있습니다.
+
+그런데 **exact string retrieval은 성격이 다릅니다.**
+
+예를 들어:
+
+```text
+"그때 record_id가 뭐였지?"
+```
+
+에서 모델은 먼저 질문의 의미를 이해하면 됩니다.
+
+굳이 layer 0부터 10번 같은 문자열을 검색할 필요가 없습니다.
+
+제가 처음 구현한다면 Exact Memory read를:
+
+```text
+Layer 0    X
+Layer 2    X
+Layer 4    X
+Layer 6    X
+Layer 8    X
+Layer 10   X
+Layer 12   △ 필요시
+Layer 14   X
+Layer 16   O
+Layer 18   O
+```
+
+정도로 제한해서 실험할 겁니다.
+
+더 과감하게는 **layer 16 또는 18 한 번**만 읽게 할 수도 있습니다.
+
+```text
+Layers 0~15
+→ 의미 이해/추론
+
+Layer 16
+→ exact retrieval
+
+Layers 17~19
+→ 결과를 출력에 반영
+```
+
+이러면 10개의 anchor layer마다 Exact retrieval하는 것에 비해 최대 약 10배 가까이 read 호출 수를 줄일 수 있습니다.
+
+다만 정확한 수치를 추론 중간에도 계속 사용해야 하는 문제라면 한 번만 읽는 게 부족할 수 있으므로, **mid + late의 2회 구조**가 첫 실험으로 더 안전해 보입니다.
+
+---
+
+# 8. 직전 token의 retrieval 결과도 재사용 가능
+
+자연어 생성에서 인접 token들의 의미는 갑자기 매번 완전히 달라지지 않습니다.
+
+예를 들어:
+
+```text
+"What was the exact record ID ..."
+```
+
+를 생성/처리하는 동안 여러 연속 token이 거의 같은 memory region을 요구할 수 있습니다.
+
+그래서:
+
+```text
+previous top-8 anchors
+previous candidate chunks
+previous retrieval result
+```
+
+를 cache해둡니다.
+
+새 token에서 routing이 거의 같다면:
+
+```text
+Anchor overlap 높음
+membership 변화 작음
+        ↓
+candidate retrieval SKIP
+        ↓
+기존 candidates 재사용
+```
+
+할 수 있습니다.
+
+예를 들어:
+
+```text
+Top-8(t-1) = {17, 21, 43, 56, 81, 92, 103, 201}
+Top-8(t)   = {17, 21, 43, 56, 81, 92, 104, 201}
+```
+
+이면 posting list 전체를 다시 구축할 이유가 거의 없습니다.
+
+다만 PDF에 있는 98~99%대 route agreement는 **체크포인트 사이의 route agreement**이지 인접 token 사이의 안정성을 측정한 것이 아닙니다. 
+
+따라서 이 최적화 전에 별도로:
+
+```text
+token t ↔ token t+1 top-k Jaccard
+membership drift
+candidate overlap
+```
+
+를 측정하면 됩니다.
+
+---
+
+# 9. 기존 Fuzzy Router 자체도 더 줄일 여지가 있음
+
+여기서 Exact Memory를 넘어 **현재 Pure-FDT 계산 자체**를 보면 꽤 눈에 띄는 부분이 있습니다.
+
+현재 anchor layer 하나에서:
+
+```text
+256-dimensional router query
+×
+256 anchors
+```
+
+와 비교합니다.
+
+10개 anchor layer니까 단순 원소 연산 규모만 보면 token당 대략:
+
+\[
+256\times256\times10
+=
+655,360
+\]
+
+개의 similarity dimension이 관여합니다.
+
+물론 실제 GPU 연산에서는 GEMM/GEMV 형태이므로 이 숫자가 곧 실행시간은 아닙니다.
+
+그래도 최적화 후보는 있습니다.
+
+### 계층형 Anchor routing
+
+256개를 예를 들어 16개 그룹으로 나눕니다.
+
+```text
+256 Anchors
+   ↓
+16 coarse anchor groups
+   ↓
+관련 group 2~4개 선택
+   ↓
+그 안의 fine anchors만 비교
+```
+
+예를 들어 4개 group을 검색하면:
+
+기존:
+
+\[
+256
+\]
+
+fine comparison.
+
+계층형:
+
+\[
+16+4\times16=80
+\]
+
+정도입니다.
+
+256 → 80.
+
+약 69%의 anchor comparison 후보를 줄일 수 있습니다.
+
+다만 이건 **현재 잘 작동하는 fuzzy semantic 특성을 직접 건드리는 변경**이므로 Exact Memory 최적화보다 훨씬 나중에 해야 합니다.
+
+---
+
+# 10. Adaptive top-k도 가능
+
+현재는 무조건 top-8입니다.
+
+그런데 어떤 token은:
+
+```text
+A17 = .82
+A33 = .10
+A91 = .03
+...
+```
+
+처럼 이미 2~3 anchor가 거의 모든 membership을 차지할 수 있습니다.
+
+이때 8개를 전부 읽고 업데이트할 필요가 없습니다.
+
+예:
+
+```text
+누적 membership ≥ 0.95가 될 때까지만 사용
+
+min_k = 2
+max_k = 8
+```
+
+로 하면:
+
+```text
+쉬운 token → k=2~3
+애매한 token → k=6~8
+```
+
+이 됩니다.
+
+즉:
+
+\[
+K_t \in [2,8]
+\]
+
+인 **adaptive fuzzy routing**입니다.
+
+현재 모델의 장점을 생각하면 hard top-1로 가는 것은 추천하지 않지만, fuzzy membership의 entropy에 따라 계산량을 조절하는 것은 꽤 자연스럽습니다.
+
+```text
+routing entropy 낮음
+→ 적은 anchor
+
+routing entropy 높음
+→ 많은 anchor
+```
+
+입니다.
+
+이건 FDT의 퍼지 철학도 그대로 유지합니다.
+
+---
+
+# 11. Local attention과 Recent Summary 사이에도 중복 가능성이 있음
+
+현재 구조는:
+
+```text
+Local Attention
+W=64
+
++
+
+Recency-weighted recent anchor summary
+reference length 512
+
++
+
+Long prefix anchor summary
+```
+
+입니다. 
+
+따라서 아주 최근 정보는:
+
+```text
+local attention
++
+recent fuzzy summary
+```
+
+양쪽에서 다뤄질 가능성이 있습니다.
+
+여기에도 최적화 여지가 있습니다.
+
+예를 들면 learned gate가:
+
+```text
+Local representation이 충분함
+     ↓
+recent summary read 약화/skip
+
+장거리 정보 필요
+     ↓
+recent/long summary 활성화
+```
+
+하게 만들 수 있습니다.
+
+다만 이것 역시 자연어 성능에 직접 영향을 줄 가능성이 높아서 **지금 당장 제거 대상으로 보지는 않을 것** 같습니다.
+
+Exact Memory와 달리 이건 현재 FDT가 잘하는 영역을 건드립니다.
+
+---
+
+# 12. 제가 생각하는 최종 Fast Path
+
+최적화를 최대한 적용하면 token 하나의 경로가 이렇게 됩니다.
+
+```text
+                       Token t
+                          │
+                          ▼
+                 Local Attention W=64
+                          │
+                          ▼
+                  Existing Fuzzy Router
+                   256 → adaptive K
+                          │
+              ┌───────────┴───────────┐
+              ▼                       ▼
+       Semantic Summary          Exact-Need Gate
+              │                       │
+              │                  대부분 FALSE
+              │                       │
+              │                     SKIP
+              │
+              │              TRUE인 경우에만
+              │                       ▼
+              │              existing Top-K reuse
+              │                       ▼
+              │              anchor posting lists
+              │                       ▼
+              │              ~10–20 candidate chunks
+              │                       ▼
+              │                tiny reranker
+              │                       ▼
+              │                  Top-1 span
+              │                       ▼
+              │                  Copy cursor
+              │                       │
+              └───────────┬───────────┘
+                          ▼
+                        MLP
+                          │
+                          ▼
+                       output
+```
+
+이 설계에서 Exact Memory는 **항상 돌아가는 두 번째 attention이 아닙니다.**
+
+평소에는:
+
+```text
+additional cost ≈ gate 하나
+```
+
+정도로 끝납니다.
+
+필요할 때만:
+
+```text
+기존 top-k 재사용
+→ 작은 candidate lookup
+→ 한 번 rerank
+```
+
+하고,
+
+복사가 시작되면:
+
+```text
+cursor++
+```
+
+밖에 안 합니다.
+
+---
+
+## 계산 복잡도도 꽤 예쁘게 만들 수 있음
+
+기존 프로젝트 가설은 대략:
+
+\[
+O(N(W+K))
+\]
+
+이고 \(W=64,K=8\)입니다. 
+
+Exact Memory를 잘못 붙이면:
+
+\[
+O(N(W+K+M))
+\]
+
+가 되어 \(M\)=과거 memory 크기에 비례하므로 FDT의 장점을 죽입니다.
+
+우리가 원하는 것은 대략:
+
+\[
+O\left(
+N(W+K)
++
+pN(Cd)
+\right)
+\]
+
+입니다.
+
+여기서:
+
+- \(p\) = exact retrieval을 실제 호출하는 token 비율
+- \(C\) = 후보 chunk 수, 예를 들어 8~32
+- \(d\) = 작은 reranker dimension, 예를 들어 32~64
+
+입니다.
+
+그리고 copy mode에서는 retrieval을 반복하지 않으므로 긴 문자열의 비용은 거의 단순 sequential read입니다.
+
+즉 **메모리가 10K → 100K → 1M token으로 증가하더라도, token당 retrieval 계산량을 거의 일정하게 유지하는 것이 목표**입니다.
+
+이런 방향은 외부 memory 기반 LM 연구에서도 중요한 최적화 포인트입니다. Neurocache는 매 token당 retrieval 횟수를 한 번으로 제한하고 compressed state를 사용해 비용을 줄였고, kNN-LM 계열에서도 datastore 접근을 선택적으로/효율적으로 만드는 것으로 상당한 속도 개선이 가능하다는 결과가 있습니다. 
+
+---
+
+### 우선순위를 정한다면
+
+**1순위는 `기존 Fuzzy routing 재사용 + chunk index + copy cursor`입니다.** 아키텍처 위험이 가장 낮으면서 추가 계산량을 크게 줄일 수 있습니다.
+
+**2순위는 `Exact-Need Gate`와 `retrieval result cache`입니다.** 대부분의 일반 자연어 token에서 memory path 자체를 꺼버릴 수 있습니다.
+
+**3순위가 exact read를 특정 layer 1~2개로 제한하는 것**이고,
+
+그 뒤에야 **adaptive top-k, hierarchical anchor routing, recent-summary skip**처럼 기존 FDT 경로 자체를 건드리는 게 좋습니다.
+
+특히 현재 모델에서 자연어·구조 형성이 상대적인 강점으로 보이기 때문에, 저는 **semantic path의 계산을 공격적으로 줄이기 전에 Exact Memory를 거의 공짜에 가깝게 얹는 쪽부터 검증**하겠습니다. 잘 구현하면 새 기억장치가 FDT의 장문 비용 특성을 망가뜨리는 게 아니라, 오히려 **기존 fuzzy router를 하나의 범용 의미 라우터로 재사용하면서 exact retrieval까지 해결하는 구조**가 될 수 있습니다.

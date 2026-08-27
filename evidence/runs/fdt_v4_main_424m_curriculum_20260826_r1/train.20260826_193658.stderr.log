@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "C:\Users\User\Documents\Codex\2026-06-26\dk\outputs\FDT_RLM\scripts\train_fdt_v4_curriculum.py", line 1277, in <module>
+    raise SystemExit(train(parse_args()))
+  File "C:\Users\User\Documents\Codex\2026-06-26\dk\outputs\FDT_RLM\scripts\train_fdt_v4_curriculum.py", line 820, in train
+    raise FileExistsError(f"Output directory is not fresh: {leftovers}")
+FileExistsError: Output directory is not fresh: ['supervisor_log.jsonl', 'train.20260826_193658.stderr.log', 'train.20260826_193658.stdout.log']

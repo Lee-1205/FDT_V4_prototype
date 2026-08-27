@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "C:\Users\User\Documents\Codex\2026-06-26\dk\outputs\FDT_RLM\scripts\train_fdt_v4_curriculum_speed.py", line 1411, in <module>
+    raise SystemExit(train(parse_args()))
+  File "C:\Users\User\Documents\Codex\2026-06-26\dk\outputs\FDT_RLM\scripts\train_fdt_v4_curriculum_speed.py", line 1192, in train
+    raise RuntimeError("routing active-anchor masks are missing")
+RuntimeError: routing active-anchor masks are missing

@@ -1,0 +1,660 @@
+--- a/purefdt_runtime.py
++++ b/purefdt_runtime.py
+@@ -34,6 +34,44 @@
+     if requested not in {"cuda", "cpu"}:
+         raise ValueError("device must be auto, cuda, or cpu")
+     return torch.device(requested)
++
++
++def resolve_dtype(device: torch.device, requested: str = "auto") -> torch.dtype:
++    """Pick the compute dtype.
++
++    `auto` uses bf16 only where the GPU implements it natively, meaning Ampere
++    (sm_80) or newer. Older cards emulate bf16: it measured slower than fp32 on
++    a GTX 1650, and its 8-bit mantissa spaces logits 0.125 apart near the +/-30
++    clip, which produces exact top-1/top-2 ties and makes greedy decoding pick
++    arbitrarily. fp32 is both faster and steadier there.
++
++    `fp32` is selectable on any device, because the cached-vs-recompute logit
++    tolerance quoted in MODEL_CARD.md is an fp32 result and only holds in fp32.
++    """
++    requested = requested.lower().strip()
++    if requested == "auto":
++        if device.type != "cuda":
++            return torch.float32
++        major, _ = torch.cuda.get_device_capability(device)
++        return torch.bfloat16 if major >= 8 else torch.float32
++    if requested == "bf16":
++        return torch.bfloat16
++    if requested == "fp32":
++        return torch.float32
++    raise ValueError("dtype must be auto, bf16, or fp32")
++
++
++def load_checkpoint(path: Path) -> dict[str, Any]:
++    """Load the checkpoint without granting the pickle arbitrary code execution.
++
++    This release stores only tensors, an OrderedDict, and plain Python metadata,
++    so torch's restricted unpickler is enough. Reading a redistributed file with
++    weights_only=False would let a tampered checkpoint run code at load time.
++    """
++    try:
++        return torch.load(path, map_location="cpu", weights_only=True, mmap=True)
++    except TypeError:
++        return torch.load(path, map_location="cpu", weights_only=True)
+ 
+ 
+ def first_divergence(expected: str, actual: str) -> int | None:
+@@ -90,6 +128,7 @@
+     top_p: float = 1.0
+     top_k: int = 0
+     repetition_penalty: float = 1.0
++    repetition_scope: str = "all"
+ 
+     def validate(self) -> None:
+         if not 1 <= self.max_new_tokens <= 512:
+@@ -102,11 +141,14 @@
+             raise ValueError("top_k must be between 0 and 24576")
+         if not 1.0 <= self.repetition_penalty <= 3.0:
+             raise ValueError("repetition_penalty must be between 1 and 3")
++        if self.repetition_scope not in {"all", "generated"}:
++            raise ValueError("repetition_scope must be all or generated")
+ 
+ 
+ class PureFDTRuntime:
+-    def __init__(self, device: str = "auto", verify_checkpoint: bool = False) -> None:
++    def __init__(self, device: str = "auto", verify_checkpoint: bool = False, dtype: str = "auto") -> None:
+         self.device = resolve_device(device)
++        self.dtype = resolve_dtype(self.device, dtype)
+         self.verify_checkpoint = verify_checkpoint
+         self.model = None
+         self.tokenizer = None
+@@ -142,19 +184,7 @@
+             from fdt_rlm.models import build_model
+             from fdt_rlm.tokenization import load_tokenizer
+ 
+-            try:
+-                checkpoint = torch.load(
+-                    CHECKPOINT_PATH,
+-                    map_location="cpu",
+-                    weights_only=False,
+-                    mmap=True,
+-                )
+-            except TypeError:
+-                checkpoint = torch.load(
+-                    CHECKPOINT_PATH,
+-                    map_location="cpu",
+-                    weights_only=False,
+-                )
++            checkpoint = load_checkpoint(CHECKPOINT_PATH)
+ 
+             config = ModelConfig(**dict(checkpoint["model_config"]))
+             tokenizer = load_tokenizer(TOKENIZER_PATH)
+@@ -165,10 +195,7 @@
+ 
+             model = build_model(config)
+             model.load_state_dict(checkpoint["model_state_dict"], strict=True)
+-            if self.device.type == "cuda":
+-                model = model.to(device=self.device, dtype=torch.bfloat16)
+-            else:
+-                model = model.to(device=self.device, dtype=torch.float32)
++            model = model.to(device=self.device, dtype=self.dtype)
+             model.eval()
+             torch.set_grad_enabled(False)
+ 
+@@ -195,7 +222,9 @@
+             "model": "PureFDT-V20-T1-R2",
+             "loaded": self.loaded,
+             "device": str(self.device),
++            "dtype": str(self.dtype),
+             "gpu": gpu_name,
++            "torch_version": torch.__version__,
+             "checkpoint_sha256": EXPECTED_CHECKPOINT_SHA256,
+             "load_seconds": self.load_seconds,
+             "metadata": self.checkpoint_metadata,
+@@ -242,6 +271,7 @@
+                 repetition_penalty=settings.repetition_penalty,
+                 greedy=settings.greedy,
+                 use_cache=True,
++                repetition_scope=settings.repetition_scope,
+             )
+             elapsed = time.perf_counter() - started
+             completion_ids = generated[0, prompt_tokens:].detach().cpu().tolist()
+@@ -258,6 +288,13 @@
+ 
+             return {
+                 "model": "PureFDT-V20-T1-R2",
++                # Greedy decoding is only deterministic for a fixed
++                # (device, dtype, torch build). Record them with every result so
++                # a saved run can be reproduced instead of merely re-attempted.
++                "device": str(self.device),
++                "dtype": str(self.dtype),
++                "gpu": torch.cuda.get_device_name(self.device) if self.device.type == "cuda" else None,
++                "torch_version": torch.__version__,
+                 "prompt": prompt,
+                 "completion": completion,
+                 "full_text": prompt + completion,
+--- a/infer.py
++++ b/infer.py
+@@ -14,12 +14,24 @@
+     prompt_group.add_argument("--prompt-file", type=Path)
+     parser.add_argument("--expected", default="")
+     parser.add_argument("--device", choices=("auto", "cuda", "cpu"), default="auto")
++    parser.add_argument(
++        "--dtype",
++        choices=("auto", "bf16", "fp32"),
++        default="auto",
++        help="auto uses bf16 only on Ampere (sm_80) or newer and fp32 elsewhere; pass fp32 to match the documented logit tolerance",
++    )
+     parser.add_argument("--max-new-tokens", type=int, default=96)
+     parser.add_argument("--mode", choices=("greedy", "sample"), default="greedy")
+     parser.add_argument("--temperature", type=float, default=0.7)
+     parser.add_argument("--top-p", type=float, default=0.95)
+     parser.add_argument("--top-k", type=int, default=0)
+     parser.add_argument("--repetition-penalty", type=float, default=1.0)
++    parser.add_argument(
++        "--repetition-scope",
++        choices=("all", "generated"),
++        default="all",
++        help="which tokens the penalty sees; 'generated' spares the prompt so exact copying still works",
++    )
+     parser.add_argument("--json", action="store_true")
+     parser.add_argument("--verify-checkpoint", action="store_true")
+     return parser.parse_args()
+@@ -31,7 +43,7 @@
+     if args.prompt_file:
+         prompt = args.prompt_file.read_text(encoding="utf-8")
+     assert prompt is not None
+-    runtime = PureFDTRuntime(args.device, verify_checkpoint=args.verify_checkpoint)
++    runtime = PureFDTRuntime(args.device, verify_checkpoint=args.verify_checkpoint, dtype=args.dtype)
+     result = runtime.generate(
+         prompt=prompt,
+         expected=args.expected,
+@@ -42,6 +54,7 @@
+             top_p=1.0 if args.mode == "greedy" else args.top_p,
+             top_k=args.top_k,
+             repetition_penalty=args.repetition_penalty,
++            repetition_scope=args.repetition_scope,
+         ),
+     )
+     if args.json:
+--- a/app.py
++++ b/app.py
+@@ -72,6 +72,7 @@
+                 top_p=float(payload.get("top_p", 0.95 if mode == "sample" else 1.0)),
+                 top_k=int(payload.get("top_k", 0)),
+                 repetition_penalty=float(payload.get("repetition_penalty", 1.0)),
++                repetition_scope=str(payload.get("repetition_scope", "all")),
+             )
+             result = self.runtime.generate(
+                 prompt=str(payload.get("prompt", "")),
+@@ -90,6 +91,12 @@
+     parser.add_argument("--host", default="127.0.0.1")
+     parser.add_argument("--port", type=int, default=7861)
+     parser.add_argument("--device", choices=("auto", "cuda", "cpu"), default="auto")
++    parser.add_argument(
++        "--dtype",
++        choices=("auto", "bf16", "fp32"),
++        default="auto",
++        help="auto uses bf16 only on Ampere (sm_80) or newer and fp32 elsewhere; pass fp32 to match the documented logit tolerance",
++    )
+     parser.add_argument("--verify-checkpoint", action="store_true")
+     parser.add_argument("--open-browser", action="store_true")
+     parser.add_argument("--load-now", action="store_true")
+@@ -98,7 +105,7 @@
+ 
+ def main() -> None:
+     args = parse_args()
+-    runtime = PureFDTRuntime(args.device, verify_checkpoint=args.verify_checkpoint)
++    runtime = PureFDTRuntime(args.device, verify_checkpoint=args.verify_checkpoint, dtype=args.dtype)
+     if args.load_now:
+         print("Loading PureFDT checkpoint...")
+         runtime.load()
+--- a/src/fdt_rlm/models/fdt_v3.py
++++ b/src/fdt_rlm/models/fdt_v3.py
+@@ -164,16 +164,21 @@
+     mass = chunk_mass.cumsum(1) - chunk_mass
+     selected_summaries = []
+     selected_masses = []
++    # `numerator` and `mass` are freshly built above and referenced nowhere else,
++    # so the running state is accumulated in place. The out-of-place scatter_add
++    # cloned both dense chunk tensors on every one of these chunk_size
++    # iterations, which measured as ~34% of total prefill time at 1,900 tokens
++    # (0.66 s of 1.93 s) with no effect on the result.
+     for offset in range(chunk_size):
+         current_indices = chunk_indices[:, :, offset]
+         current_numerator_index = current_indices[..., None, None].expand(-1, -1, -1, 2, dim)
+         current_mass_index = current_indices[..., None].expand(-1, -1, -1, 2)
+-        numerator = numerator.scatter_add(
++        numerator.scatter_add_(
+             2,
+             current_numerator_index,
+             contributions[:, :, offset],
+         )
+-        mass = mass.scatter_add(2, current_mass_index, weights[:, :, offset])
++        mass.scatter_add_(2, current_mass_index, weights[:, :, offset])
+         selected_numerator = torch.gather(numerator, 2, current_numerator_index)
+         selected_mass = torch.gather(mass, 2, current_mass_index).clamp_min(1e-6)
+         selected_summaries.append(selected_numerator / selected_mass.unsqueeze(-1))
+--- a/src/fdt_rlm/next_tools.py
++++ b/src/fdt_rlm/next_tools.py
+@@ -133,7 +133,20 @@
+     repetition_penalty: float = 1.0,
+     greedy: bool = False,
+     use_cache: bool = True,
++    repetition_scope: str = "all",
+ ) -> torch.Tensor:
++    """`repetition_scope` selects which tokens the repetition penalty sees.
++
++    "all" penalises the prompt as well, which is the usual convention. It is a
++    poor fit for retrieval prompts here, because copying an identifier out of
++    the context is exactly the repetition it suppresses: every penalty above 1.0
++    broke exact copying in testing. "generated" penalises only the tokens this
++    call produced, which halved the repetition rate at 1.10 while exact copying
++    and JSON validity both survived.
++    """
++    if repetition_scope not in {"all", "generated"}:
++        raise ValueError("repetition_scope must be all or generated")
++    prompt_len = input_ids.size(1)
+     generated = input_ids
+     output = None
+     cache = None
+@@ -147,8 +160,16 @@
+         else:
+             logits = model(generated, attention_mask=torch.ones_like(generated))["logits"][:, -1].float()
+         if repetition_penalty > 1.0:
++            # prefill/decode_step run under inference_mode, so their logits are
++            # inference tensors. `.float()` above is a no-op when the model is
++            # already fp32, which leaves `logits` aliasing one of them and makes
++            # the in-place write below raise. Clone only on this branch.
++            logits = logits.clone()
++            window = generated if repetition_scope == "all" else generated[:, prompt_len:]
+             for batch_index in range(logits.size(0)):
+-                seen = torch.unique(generated[batch_index])
++                if window.size(1) == 0:
++                    break
++                seen = torch.unique(window[batch_index])
+                 seen_logits = logits[batch_index, seen]
+                 logits[batch_index, seen] = torch.where(
+                     seen_logits < 0,
+--- a/install.ps1
++++ b/install.ps1
+@@ -1,17 +1,98 @@
+ $ErrorActionPreference = 'Stop'
+ Set-Location -LiteralPath $PSScriptRoot
+ 
+-$python = (Get-Command python -ErrorAction SilentlyContinue).Source
+-if (-not $python) {
+-    throw 'Python 3.10 or newer was not found in PATH.'
++function Invoke-Native {
++    <#
++        Runs an external command and returns its stdout, ignoring whatever it
++        writes to stderr. Without this, $ErrorActionPreference = 'Stop' turns a
++        single stderr line into a terminating error: `py -0p` prints its banner
++        there, and pip routinely prints warnings there. Check $LASTEXITCODE at
++        the call site to decide whether the command actually succeeded.
++    #>
++    param([string]$Executable, [string[]]$Arguments)
++
++    $ErrorActionPreference = 'Continue'
++    return & $Executable @Arguments
+ }
+ 
+-& $python -c "import sys; assert sys.version_info >= (3, 10), 'Python 3.10 or newer is required'"
++function Get-PythonCandidates {
++    <#
++        Every interpreter worth trying, newest first, as arrays of the
++        executable followed by any leading arguments.
++
++        `py -0p` is asked first because it lists every registered install,
++        including ones that are not on PATH. Plain `py -3` is not enough: the
++        launcher's default can be an older build, and this release needs 3.10+.
++        A bare `python` on PATH goes last, and the Microsoft Store stub under
++        ...\WindowsApps\ is skipped outright because it exits without running
++        anything, which would look like "no Python installed".
++    #>
++    $candidates = @()
++    if (Get-Command py -ErrorAction SilentlyContinue) {
++        $installs = @()
++        foreach ($line in (Invoke-Native 'py' @('-0p'))) {
++            if ($line -match '^\s*\*?\s*-(?:V:)?(\d+\.\d+)[^\s]*\s+\*?\s*(.+\.exe)\s*$') {
++                $installs += [pscustomobject]@{
++                    Version = [version]$matches[1]
++                    Path    = $matches[2].Trim()
++                }
++            }
++        }
++        foreach ($install in ($installs | Sort-Object Version -Descending)) {
++            $candidates += , @($install.Path)
++        }
++        $candidates += , @('py', '-3')
++    }
++    foreach ($command in Get-Command python -All -ErrorAction SilentlyContinue) {
++        if ($command.Source -notlike '*\WindowsApps\*') {
++            $candidates += , @($command.Source)
++        }
++    }
++    # The leading comma stops PowerShell from unrolling the outer array, which
++    # would flatten this list of commands into one flat list of strings.
++    return , $candidates
++}
++
++function Find-Python {
++    $probe = 'import sys; print(1 if sys.version_info >= (3, 10) else 0)'
++    foreach ($candidate in (Get-PythonCandidates)) {
++        $executable = $candidate[0]
++        $leading = if ($candidate.Length -gt 1) { $candidate[1..($candidate.Length - 1)] } else { @() }
++        $supported = Invoke-Native $executable ($leading + @('-c', $probe))
++        if ($LASTEXITCODE -eq 0 -and $supported -eq '1') {
++            return , $candidate
++        }
++    }
++    return $null
++}
++
++if ($PSScriptRoot.Length -gt 120) {
++    Write-Warning "This folder path is $($PSScriptRoot.Length) characters long."
++    Write-Warning 'Installing PyTorch can fail here because Windows limits paths to 260 characters.'
++    Write-Warning 'If it fails, move this folder somewhere short such as C:\PureFDT and run Install.cmd again.'
++}
++
++$python = Find-Python
++if (-not $python) {
++    throw 'Python 3.10 or newer was not found. Install it from python.org, then run Install.cmd again.'
++}
++$executable = $python[0]
++$leading = if ($python.Length -gt 1) { $python[1..($python.Length - 1)] } else { @() }
++Write-Host "Using Python: $executable $leading"
++
+ if (-not (Test-Path -LiteralPath '.venv\Scripts\python.exe')) {
+-    & $python -m venv .venv
++    Invoke-Native $executable ($leading + @('-m', 'venv', '.venv'))
++    if ($LASTEXITCODE -ne 0) {
++        throw 'Creating the .venv virtual environment failed.'
++    }
+ }
++
+ $venvPython = Join-Path $PSScriptRoot '.venv\Scripts\python.exe'
+-& $venvPython -m pip install --upgrade pip
+-& $venvPython -m pip install -r requirements.txt
++Invoke-Native $venvPython @('-m', 'pip', 'install', '--upgrade', 'pip')
++Invoke-Native $venvPython @('-m', 'pip', 'install', '-r', 'requirements.txt')
++if ($LASTEXITCODE -ne 0) {
++    throw 'Installing the requirements failed. If the error mentions a long path, move this folder somewhere shorter.'
++}
++
+ Write-Host ''
+ Write-Host 'Installation complete. Run "Start PureFDT.cmd".' -ForegroundColor Green
+--- a/start_purefdt.ps1
++++ b/start_purefdt.ps1
+@@ -1,20 +1,28 @@
+ param(
+     [int]$Port = 7861,
+     [ValidateSet('auto', 'cuda', 'cpu')]
+-    [string]$Device = 'auto'
++    [string]$Device = 'auto',
++    [ValidateSet('auto', 'bf16', 'fp32')]
++    [string]$Dtype = 'auto'
+ )
+ 
+ $ErrorActionPreference = 'Stop'
+ Set-Location -LiteralPath $PSScriptRoot
+ $python = Join-Path $PSScriptRoot '.venv\Scripts\python.exe'
+ if (-not (Test-Path -LiteralPath $python)) {
+-    $python = (Get-Command python -ErrorAction SilentlyContinue).Source
++    # Skip the Microsoft Store stub in ...\WindowsApps\: it exits without
++    # running anything, which would report missing dependencies incorrectly.
++    $python = (Get-Command python -All -ErrorAction SilentlyContinue |
++        Where-Object { $_.Source -notlike '*\WindowsApps\*' } |
++        Select-Object -First 1).Source
+ }
+ if (-not $python) {
+     throw 'Python was not found. Run Install.cmd first.'
+ }
+ 
+-& $python -c "import torch, transformers, tokenizers, yaml" 2>$null
++# find_spec checks availability without importing torch, which keeps startup
++# fast and keeps a missing package from printing a traceback.
++& $python -c "import importlib.util, sys; sys.exit(0 if all(importlib.util.find_spec(name) for name in ('torch', 'transformers', 'tokenizers', 'yaml')) else 1)"
+ if ($LASTEXITCODE -ne 0) {
+     throw 'Runtime dependencies are missing. Run Install.cmd first.'
+ }
+@@ -22,4 +30,4 @@
+ while (Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue) {
+     $Port++
+ }
+-& $python app.py --host 127.0.0.1 --port $Port --device $Device --open-browser
++& $python app.py --host 127.0.0.1 --port $Port --device $Device --dtype $Dtype --open-browser
+--- a/README.md
++++ b/README.md
+@@ -6,6 +6,7 @@
+ 
+ ### Windows 웹 실행기
+ 
++0. 이 폴더를 **짧은 경로**에 두십시오(예: `C:\PureFDT`). 경로가 길면 Windows의 260자 제한 때문에 PyTorch 설치가 실패합니다.
+ 1. Python 3.10 이상을 설치합니다.
+ 2. `Install.cmd`를 한 번 실행합니다.
+ 3. `Start PureFDT.cmd`를 실행합니다.
+@@ -17,8 +18,9 @@
+ 
+ ```powershell
+ .venv\Scripts\python.exe infer.py `
+-  --prompt "Context: The exact code is Q7M2X9K4P8V3N6L1.`nQuestion: What is the exact code?`nAnswer:" `
+-  --max-new-tokens 48 `
++  --prompt "Context: The archive identifier is K9R4M2Q7V8.`nQuestion: What is the exact archive identifier?`nAnswer:" `
++  --expected "K9R4M2Q7V8" `
++  --max-new-tokens 24 `
+   --mode greedy
+ ```
+ 
+@@ -31,9 +33,9 @@
+ ## 권장 환경
+ 
+ - Python 3.10 이상
+-- NVIDIA GPU 12 GiB 이상 권장, 16 GiB에서 검증
+-- CUDA에서는 bf16 추론
+-- CPU 추론도 지원하지만 매우 느리며 충분한 시스템 RAM이 필요
++- **추론에는** NVIDIA GPU 2 GiB 이상이면 충분합니다. 실측 피크 할당량은 bf16 0.81 GiB, fp32 1.67 GiB이며 4 GiB GTX 1650(sm_75)에서 확인했습니다. `TECHNICAL_OVERVIEW.md`의 12-16 GiB 수치는 학습·벤치마크 기준이지 추론 요구사항이 아닙니다.
++- dtype은 `--dtype {auto,bf16,fp32}`로 고릅니다. `auto`는 Ampere(sm_80) 이상에서만 bf16을 쓰고, 그 이전 GPU와 CPU에서는 fp32를 씁니다. 구형 GPU의 bf16은 에뮬레이션이라 fp32보다 느렸고(21.4 vs 24.8 tok/s), 로짓이 정확히 동률이 되는 스텝을 만들어 greedy 결과를 흔듭니다. 무결성·재현성 작업은 항상 `--dtype fp32`로 하십시오.
++- CPU 추론도 지원하지만 느립니다(실측 6-9 tok/s, GPU는 20-25 tok/s). 시스템 RAM은 4 GiB 이상 여유가 필요합니다.
+ - 모델 최대 문맥: 2,048 tokens
+ 
+ `torch`가 GPU를 인식하지 못하면 사용 중인 CUDA 환경에 맞는 PyTorch를 설치한 뒤 다시 실행하십시오.
+@@ -42,6 +44,8 @@
+ 
+ 이 모델은 채팅 지시보다 `Context / Question / Answer`, 코드 completion, record-to-JSON 형식에 더 가깝게 학습되었습니다.
+ 
++아래 템플릿은 `docs/evidence`의 평가에서 실제로 사용한 형식입니다. 이 형식을 벗어나면 아래 보고된 수치가 재현되지 않습니다. 특히 JSON은 형식에 매우 민감해서, 다른 형식으로 물으면 공백만 출력하는 경우가 있습니다.
++
+ ### 명시적 검색·복사
+ 
+ ```text
+@@ -49,6 +53,8 @@
+ Question: What is the exact archive identifier?
+ Answer:
+ ```
++
++10자 안팎의 짧은 코드는 정확히 복사하지만, 16자리처럼 길어지면 자릿수가 어긋납니다.
+ 
+ ### 짧은 사실 응답
+ 
+@@ -61,21 +67,28 @@
+ ### Python 구조 생성
+ 
+ ```text
+-Task: Write a Python function named clamp(value, minimum, maximum) that returns the value limited to the inclusive range.
+-Code:
++Write valid Python code for this task:
++Write a function to count bidirectional tuple pairs.
++Python:
+ ```
++
++출력은 문법적으로 파싱되는 함수 골격입니다. 함수 이름·시그니처·본문은 과제와 맞지 않습니다(평가에서 AST exact 0/25, signature exact 0/25). 구조 생성 진단용으로만 쓰십시오.
+ 
+ ### Record-to-JSON
+ 
+ ```text
+-Record:
+-name = Mina Park
+-department = research
+-level = 4
++Convert the record to one valid compact JSON object.
++record_id=R20261805-0; name=Barbara; age=74; city=Toronto; active=false
+ JSON:
+ ```
+ 
+-Greedy decoding은 재현 가능한 진단에 권장됩니다. Sampling은 문장 다양성을 높일 수 있지만 정확 복사와 구조적 정확성을 악화시킬 수 있습니다.
++이 형식에서는 JSON 문법이 안정적으로 나옵니다. 다만 값의 의미적 일치는 별개이며, 아래 평가에서 0/50입니다.
++
++### 디코딩
++
++Greedy decoding은 **동일한 device·dtype·PyTorch 빌드 안에서** 결정적입니다. 서로 다른 GPU나 정밀도에서는 같은 프롬프트라도 출력이 갈릴 수 있습니다. 디코딩 스텝의 약 11%가 top-1과 top-2 로짓 차이 0.25 미만이라, 누적 순서가 조금만 달라져도 한 토큰이 뒤집히고 이후 시퀀스 전체가 달라집니다. 진단 결과를 기록할 때는 `/api/generate` 응답에 함께 담기는 `device`·`dtype`·`torch_version`을 반드시 같이 남기십시오.
++
++Sampling은 문장 다양성을 높일 수 있지만 정확 복사와 구조적 정확성을 악화시킵니다.
+ 
+ ## 체크포인트 정체성
+ 
+--- a/MODEL_CARD.md
++++ b/MODEL_CARD.md
+@@ -71,7 +71,11 @@
+ 
+ ## Repetition and Inference Integrity
+ 
+-An independent 100-row repetition comparison against V18 did not confirm a general regression: mean repetition delta -0.0100571 and loop-free delta +0.02. Localized loops remain. Cached and full-recompute decoding matched all tested greedy token decisions through 1,400-token prompts within the predeclared logit tolerance.
++An independent 100-row repetition comparison against V18 did not confirm a general regression: mean repetition delta -0.0100571 and loop-free delta +0.02. Localized loops remain.
++
++Cached and full-recompute decoding matched all tested greedy token decisions through 1,400-token prompts **in fp32**, with maximum absolute logit error 1.4e-5 to 1.6e-5, inside the predeclared `3e-4` tolerance. That is the dtype the integrity diagnostic ran in.
++
++The claim does not carry over to bf16. Repeating the comparison in bf16 gives errors of 6.3e-2 at 64 tokens and 3.6e-1 to 3.8e-1 at 1,400 tokens, and the figure is not even stable across runs on one machine. Token identity itself failed in 1 of 5 trials at 1,400 tokens, at a step where the bf16 top-1 and top-2 logits were *exactly* equal: near the `lm_logit_clip` value of 30, bf16 spaces representable values 0.125 apart, so genuine ties are common and argmax then resolves them arbitrarily. Use `--dtype fp32` for any integrity or reproducibility work.
+ 
+ ## Known Limitations
+ 
+@@ -85,6 +89,10 @@
+ 
+ ## Reproducibility
+ 
+-Run `verify_release.py` before use. Use greedy decoding for deterministic diagnostics and keep the tokenizer bundled with this release. The checkpoint SHA-256 must be:
++Run `verify_release.py` before use and keep the tokenizer bundled with this release.
++
++Greedy decoding is deterministic **for a fixed (device, dtype, PyTorch build)**, not across machines. About 11% of decode steps have a top-1 to top-2 logit margin below 0.25, so a different accumulation order can flip one token and change everything after it. Re-running the prompts in `docs/evidence` on other hardware reproduced 13 of 19 sampled rows. Record the `device`, `dtype`, and `torch_version` fields that every `generate` result now carries whenever a diagnostic is saved.
++
++The checkpoint SHA-256 must be:
+ 
+ `7EE3F88D319928DD2D3F2542290F55FFCD036DCBB32A8AB22437C511E5890179`
+--- a/TECHNICAL_OVERVIEW.md
++++ b/TECHNICAL_OVERVIEW.md
+@@ -6,7 +6,11 @@
+ 
+ The project-level complexity hypothesis is `O(N(K + W))` for sequence length `N`, sparse anchor count `K`, and local window `W`. This expresses the intended algorithmic shape; it is not, by itself, proof of faster execution on every kernel, device, or context length.
+ 
+-Incremental generation stores local key/value state plus anchor numerator/mass state. A real-checkpoint integrity test found identical greedy tokens for all 36 tested decisions across short, 512-token, and 1,400-token prompts. The maximum cached/full-recompute logit error remained within the predeclared `3e-4` tolerance.
++Incremental generation stores local key/value state plus anchor numerator/mass state. A real-checkpoint integrity test found identical greedy tokens for all 36 tested decisions across short, 512-token, and 1,400-token prompts. The maximum cached/full-recompute logit error remained within the predeclared `3e-4` tolerance **in fp32**, which is the dtype that test ran in.
++
++Neither half of that result survives bf16. The same comparison in bf16 reaches 6.3e-2 at 64 tokens, 9.4e-2 at 512, and 3.6e-1 to 3.8e-1 at 1,400, and token identity failed in 1 of 5 trials at 1,400 tokens. The cause is representation, not the cache: bf16 carries an 8-bit mantissa, so near the `lm_logit_clip` value of 30 its representable values are 0.125 apart and the top two logits land on the same value outright. Run integrity work with `--dtype fp32`.
++
++`auto` therefore selects bf16 only on Ampere (sm_80) or newer, where the GPU implements it natively, and fp32 elsewhere. On a GTX 1650 (sm_75) emulated bf16 measured *slower* than fp32 — 21.4 against 24.8 tok/s at short context, 22.7 against 28.1 at 401 tokens — so the older path gives up nothing for the added precision beyond memory: 1.7 GiB allocated instead of 0.8 GiB.
+ 
+ ## Routing Interpretation
+ 
+--- a/static/app.js
++++ b/static/app.js
+@@ -22,12 +22,21 @@
+   return `${(value * 100).toFixed(2)}%`;
+ }
+ 
++// The server reports tokens_per_second as null when a generation is too fast to
++// time, so every numeric field here has to tolerate a missing value.
++function fixed(value, digits, suffix = "") {
++  return typeof value === "number" && Number.isFinite(value)
++    ? `${value.toFixed(digits)}${suffix}`
++    : "—";
++}
++
+ async function loadStatus() {
+   try {
+     const response = await fetch("/api/status", { cache: "no-store" });
+     const status = await response.json();
+     const state = status.loaded ? "loaded" : "loads on first generation";
+-    statusText.textContent = `${status.device} · ${state}`;
++    const precision = status.dtype ? status.dtype.replace("torch.", "") : "";
++    statusText.textContent = [status.device, precision, state].filter(Boolean).join(" · ");
+   } catch (error) {
+     statusText.textContent = "server unavailable";
+   }
+@@ -55,6 +64,7 @@
+       top_p: Number(document.querySelector("#topP").value),
+       top_k: Number(document.querySelector("#topK").value),
+       repetition_penalty: Number(document.querySelector("#repetitionPenalty").value),
++      repetition_scope: document.querySelector("#repetitionScope").value,
+     };
+     const response = await fetch("/api/generate", {
+       method: "POST",
+@@ -67,9 +77,10 @@
+     completion.textContent = result.completion || "(empty completion)";
+     metrics.append(
+       metric("Generated tokens", result.generated_tokens),
+-      metric("Speed", `${result.tokens_per_second.toFixed(2)} tok/s`),
+-      metric("Elapsed", `${result.elapsed_seconds.toFixed(2)} s`),
++      metric("Speed", fixed(result.tokens_per_second, 2, " tok/s")),
++      metric("Elapsed", fixed(result.elapsed_seconds, 2, " s")),
+       metric("Prompt tokens", result.prompt_tokens),
++      metric("Run", [result.device, (result.dtype || "").replace("torch.", "")].filter(Boolean).join(" · ")),
+     );
+     if (result.fidelity) {
+       metrics.append(
+--- a/static/index.html
++++ b/static/index.html
+@@ -26,14 +26,15 @@
+       </div>
+ 
+       <label for="prompt">Prompt</label>
+-      <textarea id="prompt" rows="9" spellcheck="false">Context: The exact access code is Q7M2X9K4P8V3N6L1.
+-Question: What is the exact access code?
++      <textarea id="prompt" rows="9" spellcheck="false">Context: The archive identifier is K9R4M2Q7V8.
++Question: What is the exact archive identifier?
+ Answer:</textarea>
++      <p class="hint">이 모델은 짧은 코드는 정확히 복사하지만 긴 코드에서는 자릿수가 어긋납니다. 한계를 보려면 위 코드를 <code>Q7M2X9K4P8V3N6L1</code> 같은 16자리로 바꿔보세요.</p>
+ 
+       <div class="input-row">
+         <div>
+           <label for="expected">Expected completion</label>
+-          <input id="expected" value="Q7M2X9K4P8V3N6L1" spellcheck="false">
++          <input id="expected" value="K9R4M2Q7V8" spellcheck="false">
+         </div>
+         <div>
+           <label for="maxTokens">Max new tokens</label>
+@@ -48,6 +49,12 @@
+           <label>Top-p <input id="topP" type="number" min="0.01" max="1" step="0.01" value="0.95"></label>
+           <label>Top-k <input id="topK" type="number" min="0" max="24576" value="0"></label>
+           <label>Repetition penalty <input id="repetitionPenalty" type="number" min="1" max="3" step="0.05" value="1"></label>
++          <label>Penalty scope
++            <select id="repetitionScope">
++              <option value="all">전체 (프롬프트 포함)</option>
++              <option value="generated">생성분만 (정확 복사 보존)</option>
++            </select>
++          </label>
+         </div>
+       </details>
+ 
+--- a/static/styles.css
++++ b/static/styles.css
+@@ -75,6 +75,19 @@
+ textarea { resize: vertical; min-height: 210px; padding: 14px; }
+ input, select { height: 42px; padding: 0 11px; }
+ textarea:focus, input:focus, select:focus { border-color: #62b8a0; box-shadow: 0 0 0 2px #21433a; }
++
++.hint {
++  margin: 10px 0 0;
++  color: #96a2a8;
++  font-size: 12px;
++  line-height: 1.6;
++}
++
++.hint code {
++  color: #c4cdd1;
++  font: 12px/1.5 ui-monospace, Consolas, monospace;
++  word-break: break-all;
++}
+ 
+ .input-row {
+   display: grid;
