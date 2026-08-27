@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-27T17:13:23.5100917+09:00",
+  "generated_at": "2026-08-27T17:18:17.0064512+09:00",
   "snapshot": "fdt_v4_step3000_20260827",
-  "file_count": 342,
-  "total_bytes": 6122379.0,
+  "file_count": 345,
+  "total_bytes": 6125427.0,
   "files": [
     {
       "path": ".gitignore",
@@ -1181,14 +1181,29 @@
       "sha256": "97ABFA49DD2978FA151FDBD7FFE97D87CB828708676B2660DB65847164B0B6E1"
     },
     {
+      "path": "release/ASSET_INDEX.json",
+      "bytes": 1263,
+      "sha256": "3B63BE8B5C348058399BFA651479B7D9C8D3A5C3883098008D40499AD567456C"
+    },
+    {
       "path": "release/RELEASE_ASSETS.md",
       "bytes": 861,
       "sha256": "E84EC65F07A8C9B1CA48770D625B3CC440CBDF81306F0D8368E0026F1FD96017"
     },
     {
+      "path": "release/RELEASE_NOTES.md",
+      "bytes": 1081,
+      "sha256": "046C8663EA776D9E5DBD18D8F25EC5A8B125599A5E83A9EF7088D064A4D8C478"
+    },
+    {
       "path": "release/Restore-FdtV4Recovery.ps1",
       "bytes": 1194,
       "sha256": "61A2D0CD63FA70E4AF48CF11F58650FBBD81693E36F06C0729654E049E74804C"
+    },
+    {
+      "path": "release/SHA256SUMS.txt",
+      "bytes": 704,
+      "sha256": "D27CEF91355A5B70B8C02725DC7F3B57B35E9C24689575FDBC65091F0A05D670"
     },
     {
       "path": "requirements.txt",
