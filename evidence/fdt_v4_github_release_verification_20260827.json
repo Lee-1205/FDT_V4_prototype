@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-08-27T17:26:55.3298776+09:00",
+  "repository": "Lee-1205/FDT_V4_prototype",
+  "visibility": "PRIVATE",
+  "branch": "main",
+  "local_commit": "f0d44c4affe675a4a1659689ab9fe99769129cc1",
+  "remote_commit": "f0d44c4affe675a4a1659689ab9fe99769129cc1",
+  "commit_match": true,
+  "release_tag": "v4-prototype-step3000-20260827",
+  "release_url": "https://github.com/Lee-1205/FDT_V4_prototype/releases/tag/v4-prototype-step3000-20260827",
+  "release_published": true,
+  "reconstructed_recovery_sha256": "4CB2AA41130177C8426444F019CBDEADE48DFA73ECC37E5F473AD082475FE381",
+  "reconstructed_recovery_match": true,
+  "dataset_archive_entries": 33,
+  "metadata_archive_entries": 4,
+  "assets": [
+    {
+      "name": "ASSET_INDEX.json",
+      "bytes": 1263,
+      "local_sha256": "3B63BE8B5C348058399BFA651479B7D9C8D3A5C3883098008D40499AD567456C",
+      "remote_digest": "sha256:3b63be8b5c348058399bfa651479b7d9c8d3a5c3883098008d40499ad567456c",
+      "size_match": true,
+      "digest_match": true
+    },
+    {
+      "name": "fdt_v4_curriculum_v4.tar.gz",
+      "bytes": 68221095,
+      "local_sha256": "F9663A8DF49AA75C4E779AC9E96D1E5A3B0621630522A3D52A8313D9C9B5EA98",
+      "remote_digest": "sha256:f9663a8df49aa75c4e779ac9e96d1e5a3b0621630522a3d52a8313d9c9b5ea98",
+      "size_match": true,
+      "digest_match": true
+    },
+    {
+      "name": "fdt_v4_step3000_metadata.tar.gz",
+      "bytes": 31969,
+      "local_sha256": "41824871CDBF0B853B722F68E4DE97927B2C241003218228018831F0B75FA0BF",
+      "remote_digest": "sha256:41824871cdbf0b853b722f68e4de97927b2c241003218228018831f0b75fa0bf",
+      "size_match": true,
+      "digest_match": true
+    },
+    {
+      "name": "fdt_v4_step3000_model.pt",
+      "bytes": 1698003147,
+      "local_sha256": "E98C1661D16EE8267EC347381416C519DE67B5AB79A8BF1838D4DCFC1F478F13",
+      "remote_digest": "sha256:e98c1661d16ee8267ec347381416c519de67b5ab79a8bf1838d4dcfc1f478f13",
+      "size_match": true,
+      "digest_match": true
+    },
+    {
+      "name": "fdt_v4_step3000_recovery.pt.part001",
+      "bytes": 1800000000,
+      "local_sha256": "105F1EF67D9FA05692323DF873F024D6AD2F9A4EE2D8F9F7473F3B5097F76B9E",
+      "remote_digest": "sha256:105f1ef67d9fa05692323df873f024d6ad2f9a4ee2d8f9f7473f3b5097f76b9e",
+      "size_match": true,
+      "digest_match": true
+    },
+    {
+      "name": "fdt_v4_step3000_recovery.pt.part002",
+      "bytes": 1800000000,
+      "local_sha256": "AE11AB91C34E8B6D60F0BF0B82905D8F3EB84A199A0E25F87794C5D8429E3888",
+      "remote_digest": "sha256:ae11ab91c34e8b6d60f0bf0b82905d8f3eb84a199a0e25f87794c5d8429e3888",
+      "size_match": true,
+      "digest_match": true
+    },
+    {
+      "name": "fdt_v4_step3000_recovery.pt.part003",
+      "bytes": 1190363926,
+      "local_sha256": "D08B64D84E6C76AADA6D62C0AD6A4EED05AA420DB16BDCD052D2D5B51AB7785F",
+      "remote_digest": "sha256:d08b64d84e6c76aada6d62c0ad6a4eed05aa420db16bdcd052d2d5b51ab7785f",
+      "size_match": true,
+      "digest_match": true
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "bytes": 704,
+      "local_sha256": "D27CEF91355A5B70B8C02725DC7F3B57B35E9C24689575FDBC65091F0A05D670",
+      "remote_digest": "sha256:d27cef91355a5b70b8c02725dc7f3b57b35e9c24689575fdbc65091f0a05d670",
+      "size_match": true,
+      "digest_match": true
+    }
+  ],
+  "all_asset_digests_match": true,
+  "all_asset_sizes_match": true
+}

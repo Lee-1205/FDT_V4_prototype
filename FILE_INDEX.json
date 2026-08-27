@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-27T17:18:17.0064512+09:00",
+  "generated_at": "2026-08-27T17:26:55.4337010+09:00",
   "snapshot": "fdt_v4_step3000_20260827",
-  "file_count": 345,
-  "total_bytes": 6125427.0,
+  "file_count": 346,
+  "total_bytes": 6128904.0,
   "files": [
     {
       "path": ".gitignore",
@@ -369,6 +369,11 @@
       "path": "evidence/artifacts/fdt_v4_training_speed_benchmark_20260827.json",
       "bytes": 8438,
       "sha256": "C33980D0EBD1F20379D38B4D450A8FDFA26B96742F2A0BE20053C6487E3069E9"
+    },
+    {
+      "path": "evidence/fdt_v4_github_release_verification_20260827.json",
+      "bytes": 3477,
+      "sha256": "2ECD928EBEB01A509A52F1BF384799B34EC46812E75D203B32F0879366872707"
     },
     {
       "path": "evidence/runs/fdt_v4_audit_warmstart_20260823_0af5577/conversion_manifest.json",
