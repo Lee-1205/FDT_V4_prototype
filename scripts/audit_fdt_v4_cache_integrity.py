@@ -394,6 +394,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--contexts", type=int, nargs="+", default=[512, 1024, 2048, 4096, 8192, 16383])
     parser.add_argument("--tolerance", type=float, default=3e-4)
+    parser.add_argument("--inference-prefix-stable-group-size", type=int, default=0)
     parser.add_argument("--git-commit")
     args = parser.parse_args()
     if not torch.cuda.is_available():
@@ -403,6 +404,11 @@ def main() -> None:
     checkpoint = args.checkpoint.resolve()
     payload = torch.load(checkpoint, map_location="cpu", mmap=True, weights_only=False)
     config = ModelConfig(**payload["model_config"])
+    if args.inference_prefix_stable_group_size < 0:
+        raise ValueError("inference prefix stable group size cannot be negative")
+    config.inference_prefix_stable_group_size = int(
+        args.inference_prefix_stable_group_size
+    )
     model = build_model(config)
     model.load_state_dict(payload["model_state_dict"], strict=True)
     model.to(device="cuda", dtype=torch.float32).eval()
@@ -413,6 +419,9 @@ def main() -> None:
         "checkpoint_stage_status": payload.get("stage_status"),
         "dtype": "float32",
         "quantization": "none",
+        "inference_prefix_stable_group_size": int(
+            config.inference_prefix_stable_group_size
+        ),
         "gpu": torch.cuda.get_device_name(0),
         "evaluator": {"path": str(Path(__file__).resolve()), "sha256": sha256_file(Path(__file__).resolve()), "git_commit": args.git_commit or "UNKNOWN"},
         "contexts": rows,

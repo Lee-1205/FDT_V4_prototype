@@ -268,18 +268,40 @@ def validate_shard_contract(
             _validate_tensor_field(payload, name, shape, path)
         negative_ids = payload["loop_negative_ids"]
         negative_mask = payload["loop_negative_mask"].bool()
+        unlikelihood_only = payload.get("loop_unlikelihood_only")
+        if unlikelihood_only is not None:
+            if not isinstance(unlikelihood_only, torch.Tensor) or tuple(
+                unlikelihood_only.shape
+            ) != (ids.size(0),):
+                raise ValueError(
+                    f"loop_unlikelihood_only must have shape [rows]: {path}"
+                )
+            if not bool(unlikelihood_only.bool().all()):
+                raise ValueError(
+                    f"mixed generated-prefix objective contracts are forbidden: {path}"
+                )
         if not bool(negative_mask.any()):
             raise ValueError(f"generated-prefix shard has no loop-negative positions: {path}")
         if not bool((negative_ids.masked_select(negative_mask) >= 0).all()):
             raise ValueError(f"generated-prefix loop-negative token ids must be nonnegative: {path}")
-        if bool(labels.masked_select(negative_mask).eq(-100).any()):
+        if unlikelihood_only is None and bool(
+            labels.masked_select(negative_mask).eq(-100).any()
+        ):
             raise ValueError(f"generated-prefix negatives require supervised recovery labels: {path}")
-        if bool(
+        if unlikelihood_only is None and bool(
             negative_ids.masked_select(negative_mask).eq(
                 labels.masked_select(negative_mask)
             ).any()
         ):
             raise ValueError(f"loop-negative ids must differ from clean labels: {path}")
+        if unlikelihood_only is not None and bool(
+            negative_ids.masked_select(negative_mask).ne(
+                ids.masked_select(negative_mask)
+            ).any()
+        ):
+            raise ValueError(
+                f"trajectory loop negatives must equal generated input tokens: {path}"
+            )
     return {
         "rows": int(ids.size(0)),
         "sequence_length": int(ids.size(1)),
@@ -446,9 +468,13 @@ def chunked_weighted_lm_loss(
         target_attention = attention_mask[:, start + 1 : stop + 1]
 
         def chunk_terms(hidden_chunk, target_chunk, attention_chunk):
-            logits = model.lm_head(hidden_chunk).clamp(
-                -model.config.lm_logit_clip,
-                model.config.lm_logit_clip,
+            logits = (
+                model._language_logits(hidden_chunk)
+                if hasattr(model, "_language_logits")
+                else model.lm_head(hidden_chunk).clamp(
+                    -model.config.lm_logit_clip,
+                    model.config.lm_logit_clip,
+                )
             ).float()
             valid = (
                 attention_chunk.bool()
@@ -524,6 +550,9 @@ def generated_prefix_recovery_objective(
     eos_weight: float,
     recovery_weight: float,
     unlikelihood_weight: float,
+    logit_margin_weight: float = 0.0,
+    logit_margin: float = 1.0,
+    force_unlikelihood_only: bool = False,
 ):
     """Recover a clean continuation and suppress recorded loop closures."""
     required = (
@@ -536,22 +565,82 @@ def generated_prefix_recovery_objective(
     missing = [name for name in required if name not in batch]
     if missing:
         raise ValueError(f"generated-prefix batch lacks explicit fields: {missing}")
-    output = model(batch["input_ids"], attention_mask=batch["attention_mask"])
-    recovery = weighted_lm_loss(
-        output["logits"],
-        batch["labels"],
-        batch["attention_mask"],
-        pad_token_id,
-        eos_token_id,
-        eos_weight,
+    unlikelihood_only = batch.get("loop_unlikelihood_only")
+    trajectory_only = bool(force_unlikelihood_only or unlikelihood_only is not None)
+    if trajectory_only:
+        if unlikelihood_only is not None and not bool(unlikelihood_only.bool().all()):
+            raise ValueError("mixed generated-prefix objective contracts are forbidden")
+        negative_positions = batch["loop_negative_mask"].bool().nonzero(as_tuple=False)
+        if negative_positions.numel() == 0:
+            raise ValueError("generated-prefix batch has no loop-negative positions")
+        active_end = int(negative_positions[:, 1].max().item()) + 1
+        objective_batch = {
+            name: value[:, :active_end]
+            if isinstance(value, torch.Tensor) and value.ndim == 2
+            else value
+            for name, value in batch.items()
+        }
+    else:
+        objective_batch = batch
+    output = model(
+        objective_batch["input_ids"],
+        attention_mask=objective_batch["attention_mask"],
     )
+    if trajectory_only:
+        recovery = output["logits"].sum() * 0.0
+    else:
+        recovery = weighted_lm_loss(
+            output["logits"],
+            objective_batch["labels"],
+            objective_batch["attention_mask"],
+            pad_token_id,
+            eos_token_id,
+            eos_weight,
+        )
     shifted_logits = output["logits"][:, :-1].float()
-    negative_ids = batch["loop_negative_ids"][:, 1:].long()
+    if "loop_candidate_ids" in objective_batch:
+        positions = objective_batch["loop_contrast_position"].long()
+        row_indices = torch.arange(positions.size(0), device=positions.device)
+        state_logits = output["logits"].float()[row_indices, positions - 1]
+        candidate_ids = objective_batch["loop_candidate_ids"].long()
+        candidate_mask = objective_batch["loop_candidate_mask"].bool()
+        escape_ids = objective_batch["loop_escape_ids"].long()
+        safe_candidates = candidate_ids.masked_fill(~candidate_mask, 0)
+        candidate_logits = state_logits.gather(-1, safe_candidates).masked_fill(
+            ~candidate_mask, float("-inf")
+        )
+        candidate_mass = torch.softmax(state_logits, dim=-1).gather(
+            -1, safe_candidates
+        ).masked_fill(~candidate_mask, 0.0).sum(dim=-1)
+        unlikelihood = -torch.log1p(
+            -candidate_mass.clamp(max=1.0 - 1e-6)
+        ).mean()
+        escape_logits = state_logits.gather(-1, escape_ids.unsqueeze(-1)).squeeze(-1)
+        clean_minus_negative = escape_logits - candidate_logits.max(dim=-1).values
+        margin_loss = torch.relu(float(logit_margin) - clean_minus_negative).mean()
+        total = (
+            float(unlikelihood_weight) * unlikelihood
+            + float(logit_margin_weight) * margin_loss
+        )
+        return total, {
+            "recovery_lm": total.detach() * 0.0,
+            "loop_unlikelihood": unlikelihood.detach(),
+            "loop_logit_margin": margin_loss.detach(),
+            "loop_clean_minus_negative_logit": clean_minus_negative.mean().detach(),
+            "loop_candidate_probability_mass": candidate_mass.mean().detach(),
+            "loop_escape_top1_rate": state_logits.argmax(dim=-1)
+            .eq(escape_ids)
+            .float()
+            .mean()
+            .detach(),
+        }
+    negative_ids = objective_batch["loop_negative_ids"][:, 1:].long()
     negative_mask = (
-        batch["loop_negative_mask"][:, 1:].bool()
-        & batch["attention_mask"][:, 1:].bool()
-        & batch["labels"][:, 1:].ne(-100)
+        objective_batch["loop_negative_mask"][:, 1:].bool()
+        & objective_batch["attention_mask"][:, 1:].bool()
     )
+    if not trajectory_only:
+        negative_mask = negative_mask & objective_batch["labels"][:, 1:].ne(-100)
     if not bool(negative_mask.any()):
         raise ValueError("generated-prefix batch has no supervised loop-negative positions")
     selected_negative_ids = negative_ids.masked_select(negative_mask)
@@ -559,9 +648,9 @@ def generated_prefix_recovery_objective(
         (selected_negative_ids >= shifted_logits.size(-1)).any()
     ):
         raise ValueError("generated-prefix loop-negative token id is outside the vocabulary")
-    if bool(
+    if not trajectory_only and bool(
         selected_negative_ids.eq(
-            batch["labels"][:, 1:].masked_select(negative_mask)
+            objective_batch["labels"][:, 1:].masked_select(negative_mask)
         ).any()
     ):
         raise ValueError("loop-negative token id conflicts with its clean target")
@@ -572,10 +661,28 @@ def generated_prefix_recovery_objective(
     ).squeeze(-1)
     unlikelihood = -torch.log1p(-negative_probs.clamp(max=1.0 - 1e-6))
     unlikelihood = unlikelihood.masked_select(negative_mask).mean()
-    total = float(recovery_weight) * recovery + float(unlikelihood_weight) * unlikelihood
+    negative_logits = shifted_logits.gather(
+        -1,
+        safe_negative_ids.unsqueeze(-1),
+    ).squeeze(-1)
+    if trajectory_only:
+        clean_minus_negative = negative_logits.masked_select(negative_mask) * 0.0
+        margin_loss = negative_logits.sum() * 0.0
+    else:
+        clean_ids = objective_batch["labels"][:, 1:].long().masked_fill(~negative_mask, 0)
+        clean_logits = shifted_logits.gather(-1, clean_ids.unsqueeze(-1)).squeeze(-1)
+        clean_minus_negative = (clean_logits - negative_logits).masked_select(negative_mask)
+        margin_loss = torch.relu(float(logit_margin) - clean_minus_negative).mean()
+    total = (
+        float(recovery_weight) * recovery
+        + float(unlikelihood_weight) * unlikelihood
+        + float(logit_margin_weight) * margin_loss
+    )
     return total, {
         "recovery_lm": recovery.detach(),
         "loop_unlikelihood": unlikelihood.detach(),
+        "loop_logit_margin": margin_loss.detach(),
+        "loop_clean_minus_negative_logit": clean_minus_negative.mean().detach(),
     }
 
 
@@ -1164,7 +1271,14 @@ def train(args: argparse.Namespace) -> int:
             )
             if generated_prefix_due:
                 prefix_batch = move_batch(
-                    pools["generated_prefix"].next_batch(int(train_cfg.get("batch_size", 1))),
+                    pools["generated_prefix"].next_batch(
+                        int(
+                            train_cfg.get(
+                                "generated_prefix_batch_size",
+                                train_cfg.get("batch_size", 1),
+                            )
+                        )
+                    ),
                     device,
                 )
                 with torch.autocast(
@@ -1181,6 +1295,12 @@ def train(args: argparse.Namespace) -> int:
                         recovery_weight=generated_prefix_weight,
                         unlikelihood_weight=float(
                             train_cfg.get("generated_prefix_unlikelihood_weight", 0.01)
+                        ),
+                        logit_margin_weight=float(
+                            train_cfg.get("generated_prefix_logit_margin_weight", 0.0)
+                        ),
+                        logit_margin=float(
+                            train_cfg.get("generated_prefix_logit_margin", 1.0)
                         ),
                     )
                 if not torch.isfinite(prefix_loss):

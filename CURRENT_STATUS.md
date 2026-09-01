@@ -1,33 +1,56 @@
-# Current Snapshot Status
+# Current FDT v4.1 Status
 
-Snapshot time: 2026-08-27 KST
+Snapshot date: 2026-09-01 KST
 
-## Model
+## Decision
 
-- Exact parameter count: 424,474,072
-- Model type: `fdt_v4`
-- Maximum configured context: 16K
-- Core routing: frozen-shape fuzzy anchor path with 256 anchors and top-8 membership
-- Exact Memory: enabled in copy mode, candidate cap 16, cursor continuation enabled
-- Repetition control: generated-text-only trigram penalty 8.0, 96-token window, hard block after the second repeat
+`PRODUCT_RUNTIME_CANDIDATE_VALIDATED__HOLD_STAGE_B_RAW_GENERATION_GATE`
 
-## Training Evidence
+The repaired runtime is suitable for controlled testing, but the raw model is
+not promoted and large-scale Stage B training is not authorized.
 
-- Immutable release snapshot: optimizer step 3,000
-- Tokens seen: 17,362,528
-- Fixed validation loss: 4.7819013595581055
-- Validation history in the snapshot: 4.8148013, 4.7969342, 4.7819014
-- Overfit trigger: false
-- Dead-anchor hard gate: 1% over a complete 25-step routing window
-- Short-sequence optimized path: activation checkpointing disabled only up to 512 tokens
-- Long-context path: activation checkpointing retained at 8K and 16K
-- Verified short-path benchmark: 1,267 tokens/s with sampled update maximum absolute difference 0
-- Live session throughput around the snapshot: approximately 1,369 tokens/s
+## Selected Checkpoint
 
-## Important Limits
+- Model: FDT v4.1 Exact Pointer pilot
+- Parameters: 426M class
+- Local path: `runs/fdt_v4_1_exact_pointer_pilot_20260831_r3/latest.pt`
+- SHA-256: `96439F598724C34F76270D614B43097547BD9E75D39D3659F62668BA5F541BFE`
+- Parent Stage A SHA-256: `08A9CCF9CAD6C6145BAFD623FEE818A0A03D2BAD0D13524D409D788523FFFBF8`
+- State difference from Stage A: eight `exact_pointer.*` tensors only; all
+  base-language tensors are bit-identical.
 
-- The model is still early in the planned one-billion-token V4 curriculum.
-- A single metric batch is not sufficient to judge Exact Memory proposal recall; use the recorded metric series and strict copy audit.
-- Partial routing windows do not establish dead-anchor failure.
-- The current curriculum contains 512, 8K, and 16K data. A future 512 -> 2K -> 4K -> 8K -> 16K bridge remains a planned improvement and is not silently claimed as present.
+## Verified Capabilities
 
+- Alpha-zero FP32 transition starts bit-exact to V20.
+- Cache boundary fixtures pass at 63/64/65, 511/512/513, 2K, 4K, 8K, and 16K.
+- Exact Memory passes 60/60 retrieval and 60/60 whole-string exact tests under
+  an explicit identity/span contract.
+- Exact copy is disabled on ordinary prompts unless an explicit span map is
+  supplied.
+- Generated-only trigram control with calibrated strength 13 passes 100/100
+  loop-free runtime generations without modifying verified copy-cursor tokens.
+- Focused implementation verification passes 110 tests with zero failures.
+
+## Unresolved Model Limits
+
+- Stage A paired FP32 NLL remains 0.974% worse than V20.
+- Raw generation with loop controls disabled is loop-free on only 6/100 prompts.
+- Direct output review still finds generic, weakly grounded, and semantically
+  repetitive natural-language continuations.
+- A 16.15M-token full-model unlikelihood intervention reached only 8/100
+  loop-free outputs.
+- A frozen-base 1.65M-parameter loop controller safety-stopped at 6.70M tokens
+  and reached only 9/100 loop-free outputs.
+
+Runtime controls solve the product loop failure transparently; they do not add
+knowledge, factual correctness, or raw autonomous generation capability.
+
+## Training Boundary
+
+Do not resume Stage B or a large curriculum from either rejected loop-training
+experiment. The next training step must be a fresh, isolated objective pilot
+that materially improves raw penalty-off natural generation while preserving
+the V20 loss, top-1, routing, cache, Exact Memory, and validation gates.
+
+The earlier step-3000 V4 release remains an immutable historical snapshot. The
+current v4.1 compact evidence is under `evidence/v4_1_20260901/`.

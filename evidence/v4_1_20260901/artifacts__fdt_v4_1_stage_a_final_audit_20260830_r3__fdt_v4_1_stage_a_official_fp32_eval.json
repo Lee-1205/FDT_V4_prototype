@@ -1,0 +1,3566 @@
+{
+  "audit_axes": {
+    "ARCHITECTURE": {
+      "expected_single_lineage_range": [
+        400000000,
+        450000000
+      ],
+      "model_type": "fdt_v4",
+      "parameter_count": 426964440,
+      "status": "PASS"
+    },
+    "EXACT_MEMORY": {
+      "reason": "Exact modes are reported separately; store does not retrieve, retrieve does not mix, copy uses retrieval plus cursor.",
+      "result": {
+        "reason": "deferred to the separately preserved Exact Memory pilot",
+        "status": "unsupported"
+      },
+      "status": "NOT_TESTED"
+    },
+    "GENERATION_STABILITY": {
+      "control": {
+        "enabled": false,
+        "exact_copy_exempt": true,
+        "ngram_order": 3,
+        "repetition_penalty": 1.0,
+        "scope": "generated_only_when_enabled"
+      },
+      "repetition": {
+        "protocol": "independent_generated_prefix_trigram_v1",
+        "rows": [
+          {
+            "first_loop": 3,
+            "loop_free": false,
+            "row_index": 0,
+            "trigram_repetition_rate": 0.9516129032258065
+          },
+          {
+            "first_loop": 23,
+            "loop_free": false,
+            "row_index": 1,
+            "trigram_repetition_rate": 0.6129032258064516
+          },
+          {
+            "first_loop": 11,
+            "loop_free": false,
+            "row_index": 2,
+            "trigram_repetition_rate": 0.6451612903225806
+          },
+          {
+            "first_loop": 11,
+            "loop_free": false,
+            "row_index": 3,
+            "trigram_repetition_rate": 0.7580645161290323
+          },
+          {
+            "first_loop": 24,
+            "loop_free": false,
+            "row_index": 4,
+            "trigram_repetition_rate": 0.27419354838709675
+          },
+          {
+            "first_loop": 21,
+            "loop_free": false,
+            "row_index": 5,
+            "trigram_repetition_rate": 0.3870967741935484
+          },
+          {
+            "first_loop": 28,
+            "loop_free": false,
+            "row_index": 6,
+            "trigram_repetition_rate": 0.43548387096774194
+          },
+          {
+            "first_loop": 8,
+            "loop_free": false,
+            "row_index": 7,
+            "trigram_repetition_rate": 0.45161290322580644
+          },
+          {
+            "first_loop": 15,
+            "loop_free": false,
+            "row_index": 8,
+            "trigram_repetition_rate": 0.7258064516129032
+          },
+          {
+            "first_loop": 7,
+            "loop_free": false,
+            "row_index": 9,
+            "trigram_repetition_rate": 0.7903225806451613
+          },
+          {
+            "first_loop": 5,
+            "loop_free": false,
+            "row_index": 10,
+            "trigram_repetition_rate": 0.7096774193548387
+          },
+          {
+            "first_loop": 8,
+            "loop_free": false,
+            "row_index": 11,
+            "trigram_repetition_rate": 0.45
+          },
+          {
+            "first_loop": 26,
+            "loop_free": false,
+            "row_index": 12,
+            "trigram_repetition_rate": 0.5806451612903226
+          },
+          {
+            "first_loop": 29,
+            "loop_free": false,
+            "row_index": 13,
+            "trigram_repetition_rate": 0.532258064516129
+          },
+          {
+            "first_loop": 25,
+            "loop_free": false,
+            "row_index": 14,
+            "trigram_repetition_rate": 0.532258064516129
+          },
+          {
+            "first_loop": 23,
+            "loop_free": false,
+            "row_index": 15,
+            "trigram_repetition_rate": 0.532258064516129
+          },
+          {
+            "first_loop": 9,
+            "loop_free": false,
+            "row_index": 16,
+            "trigram_repetition_rate": 0.7580645161290323
+          },
+          {
+            "first_loop": 15,
+            "loop_free": false,
+            "row_index": 17,
+            "trigram_repetition_rate": 0.7580645161290323
+          },
+          {
+            "first_loop": 22,
+            "loop_free": false,
+            "row_index": 18,
+            "trigram_repetition_rate": 0.6290322580645161
+          },
+          {
+            "first_loop": 20,
+            "loop_free": false,
+            "row_index": 19,
+            "trigram_repetition_rate": 0.6451612903225806
+          },
+          {
+            "first_loop": 6,
+            "loop_free": false,
+            "row_index": 20,
+            "trigram_repetition_rate": 0.9032258064516129
+          },
+          {
+            "first_loop": 16,
+            "loop_free": false,
+            "row_index": 21,
+            "trigram_repetition_rate": 0.7068965517241379
+          },
+          {
+            "first_loop": 33,
+            "loop_free": false,
+            "row_index": 22,
+            "trigram_repetition_rate": 0.46774193548387094
+          },
+          {
+            "first_loop": 14,
+            "loop_free": false,
+            "row_index": 23,
+            "trigram_repetition_rate": 0.3064516129032258
+          },
+          {
+            "first_loop": 33,
+            "loop_free": false,
+            "row_index": 24,
+            "trigram_repetition_rate": 0.1774193548387097
+          },
+          {
+            "first_loop": 18,
+            "loop_free": false,
+            "row_index": 25,
+            "trigram_repetition_rate": 0.24193548387096775
+          },
+          {
+            "first_loop": 22,
+            "loop_free": false,
+            "row_index": 26,
+            "trigram_repetition_rate": 0.6451612903225806
+          },
+          {
+            "first_loop": 27,
+            "loop_free": false,
+            "row_index": 27,
+            "trigram_repetition_rate": 0.1774193548387097
+          },
+          {
+            "first_loop": 28,
+            "loop_free": false,
+            "row_index": 28,
+            "trigram_repetition_rate": 0.4032258064516129
+          },
+          {
+            "first_loop": 31,
+            "loop_free": false,
+            "row_index": 29,
+            "trigram_repetition_rate": 0.16129032258064516
+          },
+          {
+            "first_loop": 4,
+            "loop_free": false,
+            "row_index": 30,
+            "trigram_repetition_rate": 0.06451612903225806
+          },
+          {
+            "first_loop": null,
+            "loop_free": true,
+            "row_index": 31,
+            "trigram_repetition_rate": 0.0
+          },
+          {
+            "first_loop": 25,
+            "loop_free": false,
+            "row_index": 32,
+            "trigram_repetition_rate": 0.08064516129032258
+          },
+          {
+            "first_loop": 20,
+            "loop_free": false,
+            "row_index": 33,
+            "trigram_repetition_rate": 0.6451612903225806
+          },
+          {
+            "first_loop": 27,
+            "loop_free": false,
+            "row_index": 34,
+            "trigram_repetition_rate": 0.22580645161290322
+          },
+          {
+            "first_loop": 24,
+            "loop_free": false,
+            "row_index": 35,
+            "trigram_repetition_rate": 0.41935483870967744
+          },
+          {
+            "first_loop": 15,
+            "loop_free": false,
+            "row_index": 36,
+            "trigram_repetition_rate": 0.45161290322580644
+          },
+          {
+            "first_loop": 39,
+            "loop_free": false,
+            "row_index": 37,
+            "trigram_repetition_rate": 0.14516129032258066
+          },
+          {
+            "first_loop": 10,
+            "loop_free": false,
+            "row_index": 38,
+            "trigram_repetition_rate": 0.8225806451612904
+          },
+          {
+            "first_loop": 43,
+            "loop_free": false,
+            "row_index": 39,
+            "trigram_repetition_rate": 0.3064516129032258
+          },
+          {
+            "first_loop": 12,
+            "loop_free": false,
+            "row_index": 40,
+            "trigram_repetition_rate": 0.3064516129032258
+          },
+          {
+            "first_loop": 23,
+            "loop_free": false,
+            "row_index": 41,
+            "trigram_repetition_rate": 0.5967741935483871
+          },
+          {
+            "first_loop": 11,
+            "loop_free": false,
+            "row_index": 42,
+            "trigram_repetition_rate": 0.4838709677419355
+          },
+          {
+            "first_loop": 11,
+            "loop_free": false,
+            "row_index": 43,
+            "trigram_repetition_rate": 0.4838709677419355
+          },
+          {
+            "first_loop": 17,
+            "loop_free": false,
+            "row_index": 44,
+            "trigram_repetition_rate": 0.5161290322580645
+          },
+          {
+            "first_loop": 9,
+            "loop_free": false,
+            "row_index": 45,
+            "trigram_repetition_rate": 0.5161290322580645
+          },
+          {
+            "first_loop": 25,
+            "loop_free": false,
+            "row_index": 46,
+            "trigram_repetition_rate": 0.3870967741935484
+          },
+          {
+            "first_loop": 8,
+            "loop_free": false,
+            "row_index": 47,
+            "trigram_repetition_rate": 0.5806451612903226
+          },
+          {
+            "first_loop": 18,
+            "loop_free": false,
+            "row_index": 48,
+            "trigram_repetition_rate": 0.6290322580645161
+          },
+          {
+            "first_loop": 19,
+            "loop_free": false,
+            "row_index": 49,
+            "trigram_repetition_rate": 0.45161290322580644
+          },
+          {
+            "first_loop": 24,
+            "loop_free": false,
+            "row_index": 50,
+            "trigram_repetition_rate": 0.5161290322580645
+          },
+          {
+            "first_loop": 23,
+            "loop_free": false,
+            "row_index": 51,
+            "trigram_repetition_rate": 0.3709677419354839
+          },
+          {
+            "first_loop": 19,
+            "loop_free": false,
+            "row_index": 52,
+            "trigram_repetition_rate": 0.6451612903225806
+          },
+          {
+            "first_loop": 20,
+            "loop_free": false,
+            "row_index": 53,
+            "trigram_repetition_rate": 0.6451612903225806
+          },
+          {
+            "first_loop": 37,
+            "loop_free": false,
+            "row_index": 54,
+            "trigram_repetition_rate": 0.04838709677419355
+          },
+          {
+            "first_loop": 10,
+            "loop_free": false,
+            "row_index": 55,
+            "trigram_repetition_rate": 0.7419354838709677
+          },
+          {
+            "first_loop": 49,
+            "loop_free": false,
+            "row_index": 56,
+            "trigram_repetition_rate": 0.08064516129032258
+          },
+          {
+            "first_loop": 15,
+            "loop_free": false,
+            "row_index": 57,
+            "trigram_repetition_rate": 0.7580645161290323
+          },
+          {
+            "first_loop": 10,
+            "loop_free": false,
+            "row_index": 58,
+            "trigram_repetition_rate": 0.5161290322580645
+          },
+          {
+            "first_loop": 22,
+            "loop_free": false,
+            "row_index": 59,
+            "trigram_repetition_rate": 0.6129032258064516
+          },
+          {
+            "first_loop": 7,
+            "loop_free": false,
+            "row_index": 60,
+            "trigram_repetition_rate": 0.7346938775510204
+          },
+          {
+            "first_loop": null,
+            "loop_free": true,
+            "row_index": 61,
+            "trigram_repetition_rate": 0.0
+          },
+          {
+            "first_loop": null,
+            "loop_free": true,
+            "row_index": 62,
+            "trigram_repetition_rate": 0.0
+          },
+          {
+            "first_loop": 14,
+            "loop_free": false,
+            "row_index": 63,
+            "trigram_repetition_rate": 0.3333333333333333
+          },
+          {
+            "first_loop": 39,
+            "loop_free": false,
+            "row_index": 64,
+            "trigram_repetition_rate": 0.25806451612903225
+          },
+          {
+            "first_loop": null,
+            "loop_free": true,
+            "row_index": 65,
+            "trigram_repetition_rate": 0.0
+          },
+          {
+            "first_loop": 22,
+            "loop_free": false,
+            "row_index": 66,
+            "trigram_repetition_rate": 0.04838709677419355
+          },
+          {
+            "first_loop": 27,
+            "loop_free": false,
+            "row_index": 67,
+            "trigram_repetition_rate": 0.10256410256410256
+          },
+          {
+            "first_loop": 40,
+            "loop_free": false,
+            "row_index": 68,
+            "trigram_repetition_rate": 0.3064516129032258
+          },
+          {
+            "first_loop": 10,
+            "loop_free": false,
+            "row_index": 69,
+            "trigram_repetition_rate": 0.8387096774193549
+          },
+          {
+            "first_loop": 26,
+            "loop_free": false,
+            "row_index": 70,
+            "trigram_repetition_rate": 0.1774193548387097
+          },
+          {
+            "first_loop": 12,
+            "loop_free": false,
+            "row_index": 71,
+            "trigram_repetition_rate": 0.1875
+          },
+          {
+            "first_loop": 44,
+            "loop_free": false,
+            "row_index": 72,
+            "trigram_repetition_rate": 0.12903225806451613
+          },
+          {
+            "first_loop": 17,
+            "loop_free": false,
+            "row_index": 73,
+            "trigram_repetition_rate": 0.5
+          },
+          {
+            "first_loop": 12,
+            "loop_free": false,
+            "row_index": 74,
+            "trigram_repetition_rate": 0.06451612903225806
+          },
+          {
+            "first_loop": null,
+            "loop_free": true,
+            "row_index": 75,
+            "trigram_repetition_rate": 0.0
+          },
+          {
+            "first_loop": 22,
+            "loop_free": false,
+            "row_index": 76,
+            "trigram_repetition_rate": 0.03225806451612903
+          },
+          {
+            "first_loop": 24,
+            "loop_free": false,
+            "row_index": 77,
+            "trigram_repetition_rate": 0.3018867924528302
+          },
+          {
+            "first_loop": 16,
+            "loop_free": false,
+            "row_index": 78,
+            "trigram_repetition_rate": 0.28125
+          },
+          {
+            "first_loop": 37,
+            "loop_free": false,
+            "row_index": 79,
+            "trigram_repetition_rate": 0.06896551724137931
+          },
+          {
+            "first_loop": 36,
+            "loop_free": false,
+            "row_index": 80,
+            "trigram_repetition_rate": 0.016129032258064516
+          },
+          {
+            "first_loop": null,
+            "loop_free": true,
+            "row_index": 81,
+            "trigram_repetition_rate": 0.0
+          },
+          {
+            "first_loop": 3,
+            "loop_free": false,
+            "row_index": 82,
+            "trigram_repetition_rate": 0.9516129032258065
+          },
+          {
+            "first_loop": 21,
+            "loop_free": false,
+            "row_index": 83,
+            "trigram_repetition_rate": 0.12
+          },
+          {
+            "first_loop": 10,
+            "loop_free": false,
+            "row_index": 84,
+            "trigram_repetition_rate": 0.5483870967741935
+          },
+          {
+            "first_loop": 43,
+            "loop_free": false,
+            "row_index": 85,
+            "trigram_repetition_rate": 0.03225806451612903
+          },
+          {
+            "first_loop": 20,
+            "loop_free": false,
+            "row_index": 86,
+            "trigram_repetition_rate": 0.41935483870967744
+          },
+          {
+            "first_loop": 1,
+            "loop_free": false,
+            "row_index": 87,
+            "trigram_repetition_rate": 0.7580645161290323
+          },
+          {
+            "first_loop": 7,
+            "loop_free": false,
+            "row_index": 88,
+            "trigram_repetition_rate": 0.45161290322580644
+          },
+          {
+            "first_loop": 1,
+            "loop_free": false,
+            "row_index": 89,
+            "trigram_repetition_rate": 0.9838709677419355
+          },
+          {
+            "first_loop": 2,
+            "loop_free": false,
+            "row_index": 90,
+            "trigram_repetition_rate": 0.5483870967741935
+          },
+          {
+            "first_loop": 9,
+            "loop_free": false,
+            "row_index": 91,
+            "trigram_repetition_rate": 0.7903225806451613
+          },
+          {
+            "first_loop": 8,
+            "loop_free": false,
+            "row_index": 92,
+            "trigram_repetition_rate": 0.5967741935483871
+          },
+          {
+            "first_loop": 11,
+            "loop_free": false,
+            "row_index": 93,
+            "trigram_repetition_rate": 0.5483870967741935
+          },
+          {
+            "first_loop": 4,
+            "loop_free": false,
+            "row_index": 94,
+            "trigram_repetition_rate": 0.6612903225806451
+          },
+          {
+            "first_loop": 9,
+            "loop_free": false,
+            "row_index": 95,
+            "trigram_repetition_rate": 0.8548387096774194
+          },
+          {
+            "first_loop": 16,
+            "loop_free": false,
+            "row_index": 96,
+            "trigram_repetition_rate": 0.4838709677419355
+          },
+          {
+            "first_loop": 1,
+            "loop_free": false,
+            "row_index": 97,
+            "trigram_repetition_rate": 0.6290322580645161
+          },
+          {
+            "first_loop": 8,
+            "loop_free": false,
+            "row_index": 98,
+            "trigram_repetition_rate": 0.5967741935483871
+          },
+          {
+            "first_loop": 6,
+            "loop_free": false,
+            "row_index": 99,
+            "trigram_repetition_rate": 0.8064516129032258
+          }
+        ],
+        "status": "ok",
+        "summary": {
+          "count": 100,
+          "loop_free": {
+            "count": 6,
+            "rate": 0.06,
+            "total": 100
+          },
+          "loop_free_bootstrap_95": [
+            0.02,
+            0.12
+          ],
+          "mean_repetition_bootstrap_95": [
+            0.3923595305325005,
+            0.5002028208926249
+          ],
+          "mean_repetition_rate": 0.4456128372325389
+        }
+      },
+      "status": "PARTIAL"
+    },
+    "INFERENCE_INTEGRITY": {
+      "cache_full_recompute": {
+        "reason": "intermediate output-blend transition intentionally has no single-KV cache state; cache integrity must be audited at alpha endpoints",
+        "status": "unsupported"
+      },
+      "status": "NOT_TESTED"
+    },
+    "LONG_CONTEXT": {
+      "full_target_requires": "fixed disjoint 2K/4K/8K context cohorts; unsupported cells remain unsupported.",
+      "status": "NOT_TESTED",
+      "supported_exact_cells_over_64": []
+    },
+    "PERFORMANCE": {
+      "reason": "Official CPU FP32 correctness evaluation does not claim throughput or GPU performance.",
+      "status": "NOT_TESTED"
+    },
+    "QUALITY": {
+      "free_generation": {
+        "categories": {
+          "factual": {
+            "count": 12,
+            "rows": [
+              {
+                "completion": " the right to be a human being",
+                "generated_tokens": 8,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Context: Charles W. Eliot, president 1869–1909, eliminated the favored position of Christianity from the curriculum while opening it to student self-direction. While Eliot was the most crucial figure in the secularization of American higher education, he was motivated not by a desire to secularize education, but by Transcendentalist Unitarian convictions. Derived from William Ellery Channing and Ralph Waldo Emerson, these convictions were focused on the dignity and worth of human nature, the right and ability of each person to perceive truth, and the indwelling God in each person.\nQuestion: From whom were the movement that Eliot followed derived?\nAnswer:",
+                "target": " William Ellery Channing and Ralph Waldo Emerson",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " the Duchy of the Duchy of the Duchy",
+                "generated_tokens": 15,
+                "loop": {
+                  "first_loop": 5,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.5384615384615384
+                },
+                "prompt": "Context: The first fortified settlements on the site of today's Warsaw were located in Bródno (9th/10th century) and Jazdów (12th/13th century). After Jazdów was raided by nearby clans and dukes, a new similar settlement was established on the site of a small fishing village called Warszowa. The Prince of Płock, Bolesław II of Masovia, established this settlement, the modern-day Warsaw, in about 1300. In the beginning of the 14th century it became one of the seats of the Dukes of Masovia, becoming the official capital of Masovian Duchy in 1413. 14th-century Warsaw's economy rested on mostly crafts and trade. Upon the extinction of the local ducal line, the duchy was reincorporated into the Polish Crown in 1526.\nQuestion: When was the Masovian Duchy reincorporated into the Polish Crown?\nAnswer:",
+                "target": " 1526",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " The original, the original, and the original",
+                "generated_tokens": 10,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Context: With a budget of $230,000, the surviving original lunar broadcast data from Apollo 11 was compiled by Nafzger and assigned to Lowry Digital for restoration. The video was processed to remove random noise and camera shake without destroying historical legitimacy. The images were from tapes in Australia, the CBS News archive, and kinescope recordings made at Johnson Space Center. The restored video, remaining in black and white, contains conservative digital enhancements and did not include sound quality improvements.\nQuestion: Who compiled the original surviving Apollo 11 landing data?\nAnswer:",
+                "target": " Nafzger",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " the brain",
+                "generated_tokens": 3,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Context: Tesla theorized that the application of electricity to the brain enhanced intelligence. In 1912, he crafted \"a plan to make dull students bright by saturating them unconsciously with electricity,\" wiring the walls of a schoolroom and, \"saturating [the schoolroom] with infinitesimal electric waves vibrating at high frequency. The whole room will thus, Mr. Tesla claims, be converted into a health-giving and stimulating electromagnetic field or 'bath.'\" The plan was, at least provisionally approved by then superintendent of New York City schools, William H. Maxwell.\nQuestion: What did Tesla think could improve the brain's intelligence?\nAnswer:",
+                "target": " application of electricity",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " 1830",
+                "generated_tokens": 3,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Context: On 1 July 1851, writs were issued for the election of the first Victorian Legislative Council, and the absolute independence of Victoria from New South Wales was established proclaiming a new Colony of Victoria. Days later, still in 1851 gold was discovered near Ballarat, and subsequently at Bendigo. Later discoveries occurred at many sites across Victoria. This triggered one of the largest gold rushes the world has ever seen. The colony grew rapidly in both population and economic power. In ten years the population of Victoria increased sevenfold from 76,000 to 540,000. All sorts of gold records were produced including the \"richest shallow alluvial goldfield in the world\" and the largest gold nugget. Victoria produced in the decade 1851–1860 20 million ounces of gold, one third of the world's output[citation needed].\nQuestion: How much did the population of Victoria increase in ten years after the discovery of gold?\nAnswer:",
+                "target": " sevenfold",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " the first of the three of the four of the four of the four of the three of the three of the three of the three of the three of the three of the three of the three of the three of the three of the three of the three of the three of the three of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two",
+                "generated_tokens": 128,
+                "loop": {
+                  "first_loop": 8,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.9126984126984127
+                },
+                "prompt": "Context: The next direct threat to Temüjin was the Naimans (Naiman Mongols), with whom Jamukha and his followers took refuge. The Naimans did not surrender, although enough sectors again voluntarily sided with Temüjin. In 1201, a khuruldai elected Jamukha as Gür Khan, \"universal ruler\", a title used by the rulers of the Qara Khitai. Jamukha's assumption of this title was the final breach with Temüjin, and Jamukha formed a coalition of tribes to oppose him. Before the conflict, however, several generals abandoned Jamukha, including Subutai, Jelme's well-known younger brother. After several battles, Jamukha was finally turned over to Temüjin by his own men in 1206.\nQuestion: Which well-known general abandoned Jamukha's coalition against Temüjin?\nAnswer:",
+                "target": " Subutai",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " nuclear-go-to-the-dark\nAnswer: nuclear-go-to-the-dark",
+                "generated_tokens": 25,
+                "loop": {
+                  "first_loop": 14,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.34782608695652173
+                },
+                "prompt": "Context: In science, alumni include astronomers Carl Sagan, a prominent contributor to the scientific research of extraterrestrial life, and Edwin Hubble, known for \"Hubble's Law\", NASA astronaut John M. Grunsfeld, geneticist James Watson, best known as one of the co-discoverers of the structure of DNA, experimental physicist Luis Alvarez, popular environmentalist David Suzuki, balloonist Jeannette Piccard, biologists Ernest Everett Just and Lynn Margulis, computer scientist Richard Hamming, the creator of the Hamming Code, lithium-ion battery developer John B. Goodenough, mathematician and Fields Medal recipient Paul Joseph Cohen, and geochemist Clair Cameron Patterson, who developed the uranium-lead dating method into lead-lead dating. Nuclear physicist and researcher Stanton Friedman, who worked on some early projects involving nuclear-powered spacecraft propulsion systems, is also a graduate (M.Sc).\nQuestion: What geochemist developed the uranium-lead dating method into lead-lead dating?\nAnswer:",
+                "target": " Clair Cameron Patterson",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " $3.95",
+                "generated_tokens": 5,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Context: In the autumn of 1991, talks were held for the broadcast rights for Premier League for a five-year period, from the 1992 season. ITV were the current rights holders, and fought hard to retain the new rights. ITV had increased its offer from £18m to £34m per year to keep control of the rights. BSkyB joined forces with the BBC to make a counter bid. The BBC was given the highlights of most of the matches, while BSkyB paying £304m for the Premier League rights, would give them a monopoly of all live matches, up to 60 per year from the 1992 season.  Murdoch described sport as a \"battering ram\" for pay-television, providing a strong customer base. A few weeks after the deal, ITV went to the High Court to get an injunction as it believed their bid details had been leaked before the decision was taken. ITV also asked the Office of Fair Trading to investigate since it believed Rupert Murdoch's media empire via its newspapers had influenced the deal. A few days later neither action took effect, ITV believed BSkyB was telephoned and informed of its £262m bid, and Premier League advised BSkyB to increase its counter bid.\nQuestion: How much was BSkyB going to pay for the Primier League rights?\nAnswer:",
+                "target": " £304m",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " the landowner",
+                "generated_tokens": 4,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Context: The use of remote sensing for the conservation of the Amazon is also being used by the indigenous tribes of the basin to protect their tribal lands from commercial interests. Using handheld GPS devices and programs like Google Earth, members of the Trio Tribe, who live in the rainforests of southern Suriname, map out their ancestral lands to help strengthen their territorial claims. Currently, most tribes in the Amazon do not have clearly defined boundaries, making it easier for commercial ventures to target their territories.\nQuestion: Tribal members living in the rainforests of what region are using Google Earth?\nAnswer:",
+                "target": " southern Suriname",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " the Islamic Jihad, the Jewish Jihad, and the Jewish Jihad",
+                "generated_tokens": 19,
+                "loop": {
+                  "first_loop": 8,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.29411764705882354
+                },
+                "prompt": "Context: The path of violence and military struggle was then taken up by the Egyptian Islamic Jihad organization responsible for the assassination of Anwar Sadat in 1981. Unlike earlier anti-colonial movements the extremist group directed its attacks against what it believed were \"apostate\" leaders of Muslim states, leaders who held secular leanings or who had introduced or promoted Western/foreign ideas and practices into Islamic societies. Its views were outlined in a pamphlet written by Muhammad Abd al-Salaam Farag, in which he states:\nQuestion: When did the Egyptian Islamic Jihad assassinate Anwar Sadat?\nAnswer:",
+                "target": " 1981",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " the first system of education",
+                "generated_tokens": 6,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Context: Kenya's first system of education was introduced by British colonists. After Kenya's independence on 12 December 1963, an authority named the Ominde Commission was formed to introduce changes that would reflect the nation's sovereignty. The commission focused on identity and unity, which were critical issues at the time. Changes in the subject content of history and geography were made to reflect national cohesion. Between 1964 and 1985, the 7–4–2–3 system was adopted – seven years of primary, four years of lower secondary, two years of upper secondary, and three years of university. All schools had a common curriculum.\nQuestion: Who introduced the first system of education?\nAnswer:",
+                "target": " British colonists.",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " construction companies",
+                "generated_tokens": 3,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Context: The Standard Industrial Classification and the newer North American Industry Classification System have a classification system for companies that perform or otherwise engage in construction. To recognize the differences of companies in this sector, it is divided into three subsectors: building construction, heavy and civil engineering construction, and specialty trade contractors. There are also categories for construction service firms (e.g., engineering, architecture) and construction managers (firms engaged in managing construction projects without assuming direct financial responsibility for completion of the construction project).\nQuestion: There are other categories for what?\nAnswer:",
+                "target": " construction service firms (e.g., engineering, architecture) and construction managers",
+                "target_prefix_exact": false
+              }
+            ]
+          },
+          "json": {
+            "count": 8,
+            "rows": [
+              {
+                "completion": " {\"record_id\":\"R2016181311-0\",\"name\":\"Barbara\",\"age\":72,\"city\":\"Toronto\",\"active\":false}",
+                "generated_tokens": 43,
+                "json": {
+                  "schema_valid": null,
+                  "valid": true,
+                  "value_exact": false
+                },
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Convert the record to one valid compact JSON object.\nrecord_id=R20261805-0; name=Barbara; age=74; city=Toronto; active=false\nJSON:",
+                "target": " {\"record_id\":\"R20261805-0\",\"name\":\"Barbara\",\"age\":74,\"city\":\"Toronto\",\"active\":false}"
+              },
+              {
+                "completion": " {\"record_id\":\"R2016181311-2\",\"name\":\"Ada\",\"age\":32,\"city\":\"Seoul\",\"active\":false}",
+                "generated_tokens": 42,
+                "json": {
+                  "schema_valid": null,
+                  "valid": true,
+                  "value_exact": false
+                },
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Convert the record to one valid compact JSON object.\nrecord_id=R20261805-2; name=Ada; age=32; city=Seoul; active=false\nJSON:",
+                "target": " {\"record_id\":\"R20261805-2\",\"name\":\"Ada\",\"age\":32,\"city\":\"Seoul\",\"active\":false}"
+              },
+              {
+                "completion": " {\"record_id\":\"R2016181803-4\",\"name\":\"Ada\",\"age\":50,\"city\":\"London\",\"active\":true}",
+                "generated_tokens": 41,
+                "json": {
+                  "schema_valid": null,
+                  "valid": true,
+                  "value_exact": false
+                },
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Convert the record to one valid compact JSON object.\nrecord_id=R20261805-4; name=Ada; age=50; city=London; active=true\nJSON:",
+                "target": " {\"record_id\":\"R20261805-4\",\"name\":\"Ada\",\"age\":50,\"city\":\"London\",\"active\":true}"
+              },
+              {
+                "completion": " {\"record_id\":\"R2016181311-6\",\"name\":\"Grace\",\"age\":49,\"city\":\"Berlin\",\"active\":false}",
+                "generated_tokens": 43,
+                "json": {
+                  "schema_valid": null,
+                  "valid": true,
+                  "value_exact": false
+                },
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Convert the record to one valid compact JSON object.\nrecord_id=R20261805-6; name=Grace; age=46; city=Berlin; active=false\nJSON:",
+                "target": " {\"record_id\":\"R20261805-6\",\"name\":\"Grace\",\"age\":46,\"city\":\"Berlin\",\"active\":false}"
+              },
+              {
+                "completion": " {\"record_id\":\"R2016181311-8\",\"name\":\"Ada\",\"age\":32,\"city\":\"Oslo\",\"active\":false}",
+                "generated_tokens": 42,
+                "json": {
+                  "schema_valid": null,
+                  "valid": true,
+                  "value_exact": false
+                },
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Convert the record to one valid compact JSON object.\nrecord_id=R20261805-8; name=Ada; age=64; city=Oslo; active=false\nJSON:",
+                "target": " {\"record_id\":\"R20261805-8\",\"name\":\"Ada\",\"age\":64,\"city\":\"Oslo\",\"active\":false}"
+              },
+              {
+                "completion": " {\"record_id\":\"R2016181803-10\",\"name\":\"Donald\",\"age\":72,\"city\":\"Berlin\",\"active\":true}",
+                "generated_tokens": 41,
+                "json": {
+                  "schema_valid": null,
+                  "valid": true,
+                  "value_exact": false
+                },
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Convert the record to one valid compact JSON object.\nrecord_id=R20261805-10; name=Donald; age=73; city=Berlin; active=true\nJSON:",
+                "target": " {\"record_id\":\"R20261805-10\",\"name\":\"Donald\",\"age\":73,\"city\":\"Berlin\",\"active\":true}"
+              },
+              {
+                "completion": " {\"record_id\":\"R2016181803-12\",\"name\":\"Grace\",\"age\":20,\"city\":\"London\",\"active\":true}",
+                "generated_tokens": 41,
+                "json": {
+                  "schema_valid": null,
+                  "valid": true,
+                  "value_exact": false
+                },
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Convert the record to one valid compact JSON object.\nrecord_id=R20261805-12; name=Grace; age=20; city=London; active=true\nJSON:",
+                "target": " {\"record_id\":\"R20261805-12\",\"name\":\"Grace\",\"age\":20,\"city\":\"London\",\"active\":true}"
+              },
+              {
+                "completion": " {\"record_id\":\"R2016181411-16\",\"name\":\"Alan\",\"age\":24,\"city\":\"Tokyo\",\"active\":true}",
+                "generated_tokens": 42,
+                "json": {
+                  "schema_valid": null,
+                  "valid": true,
+                  "value_exact": false
+                },
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Convert the record to one valid compact JSON object.\nrecord_id=R20261805-14; name=Alan; age=24; city=Tokyo; active=true\nJSON:",
+                "target": " {\"record_id\":\"R20261805-14\",\"name\":\"Alan\",\"age\":24,\"city\":\"Tokyo\",\"active\":true}"
+              }
+            ]
+          },
+          "natural": {
+            "count": 12,
+            "rows": [
+              {
+                "completion": " in our own lives and our ability to understand and appreciate the importance of the material in our lives.\nThe Power of the Mind\nThe power of the mind is the ability to understand and understand the world around us. It is the ability to understand and understand the world around us. It is the ability to understand and understand the world around us.\nThe Power of the Mind\nThe power of the mind is the ability to understand and understand the world. It is the ability to understand and understand the world. It is the ability to understand and understand the world.\nThe Power of the Mind\nThe power of the mind is the",
+                "generated_tokens": 128,
+                "loop": {
+                  "first_loop": 34,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.626984126984127
+                },
+                "prompt": "- Home ›\n- Journalistic Genres\nThe deafening increase of information requires us to be able to distinguish the value of what we read or listen to; we must also be original and excel in our contributions to society. Our aim is to have the students adopting critical attitude towards reality and to help them acquiring abilities to create and express their judgments in a clear, efficient, just and responsible way. Based on the classification of journalistic genres, we will reflect on this",
+                "target": " new context, which is still blurred and on how typological frontiers are erased.Related topics: Education\nsomething that is hard work and physically or mentally tiring:\nI find the journey to work a real grind.\nworkers emerging from their daily grind in the factory\n2 [",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": "75 ft2.\nThe average floor area was 2,900 ft2, and the average floor area was 2,900 ft2. The average floor area was 2,900 ft2, and the average floor area was 3,900 ft2.\nThe average floor area was 3,900 ft2, and the average floor area was 3,900 ft2. The average floor area was 3,900 ft2, and the average floor area was 3,900 ft2.\nThe average floor area was 3,900 ft2, and the average floor area was 3,9",
+                "generated_tokens": 128,
+                "loop": {
+                  "first_loop": 19,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.8015873015873016
+                },
+                "prompt": " years old, averaging 41 years old. Most were single-story, on a crawlspace foundation with no floor insulation. Ninety-one percent had attic insulation, but usually only 1-3 in. thick (less than R-11). Roughly half had no wall insulation. The average floor area was 1,244 ft2, most houses had 900-1,500 ft2, but the sample range was 594-2,5",
+                "target": "38 ft2. Window areas averaged 145 ft2, mostly single pane without storm windows. Twenty-seven percent had two window air conditioners. The average age was 8. Most were 4-12 years old. Nameplate cooling capacities were 5,000-28,000 Btu per",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": ", and inflammation.\nVitamin E is a hormone that is used to treat the body's immune system. It is also used to treat the disease.\nVitamin E is a protein that is used to treat the disease. It is also used to treat the disease.\nVitamin E is a protein that is used to treat the disease. It is used to treat the disease.\nVitamin E is a protein that is used to treat the disease. It is used to treat the disease.\nVitamin E is a protein that is used to treat the disease. It is used to treat the disease",
+                "generated_tokens": 128,
+                "loop": {
+                  "first_loop": 26,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.7301587301587301
+                },
+                "prompt": " yams, soya, wheat germ oil, wheat germ, eggs, margarine, Butter, and oils like olive, safflower, peanut, sunflower and sesame.\nVitamin E deficiency\nVitamin E deficiency is not so common, as the body has the ability to store this fat-soluble vitamin. However, there are few symptoms suggestive of vitamin E deficiency, such as anaemia, problems of reproductive system, renal deterioration",
+                "target": ", cardiac problems and skin disorders.\nVitamin K (Phytonadione)\nVitamin K or phytonadione popularly known as known as the vitamin for “blood clotting” is required for the incidence of prothrombin of blood that helps prevent excessive bleeding from a wound",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": "on was a man of great power. He was a man of great power and a great power. He was a man of great power and he was a man of great power.\nThe man of the world was a man of great power. He was a man of great power. He was a man of great power. He was a man of great power.\nThe man of the world was a man of great power. He was a man of great power. He was a man of great power. He was a man of great power. He was a man of great power. He was a man of great power. He was",
+                "generated_tokens": 128,
+                "loop": {
+                  "first_loop": 9,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.8095238095238095
+                },
+                "prompt": " he was for. This challenge energized him even more than his enterprise of pointing out the errors of his friends and critics in Heretics. Chesterton, incidently, was, even in issues of great and passionate controversy, an amazing sort of man who never lost a friend because he pointed out the impossibility of his ideas. This is a rare gift and speaks much of the greatness of Chesterton.\nThus, when confronted, Chestert",
+                "target": "on took up the writing of Orthodoxy, in which he set forth what he did hold. He discovered that what he did come to maintain, which he thought so original, was in fact what all Christians profess in the Creed, many of whom, I might add, unlike Chesterton, profess the C",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " times.\nThe grubs were the most common in the world, and the grubs were the most common in the world.\nThe grubs were the most common in the world, and the grubs were the most common in the world.\nThe grubs were the most common in the world, and were the most common in the world.\nThe grubs were the most common in the world, and were the most common in the world.\nThe grubs were the most common in the world, and were the most common in the world.\nThe grubs were the most",
+                "generated_tokens": 128,
+                "loop": {
+                  "first_loop": 17,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.8333333333333334
+                },
+                "prompt": "ologists have found human bones in cooking pots and hearths in China which were found to be around 500,000 years old.\nIn England in the 1500s this was the legal method of punishment. The victim was immersed in boiling water, oil or tar until dead. Imagine the fear the prisoner felt when they were taken to this deadly big pot to suffer their horrible fate\nCrucifixion was among the most gruesome and painful of ancient",
+                "target": " execution methods and was practiced from about the 6th century BC until the 4th century AD, mainly among the Seleucids, Carthaginians, Persians and Romans. The condemned person was tied (or nailed) to a large wooden cross and left to hang till dead. Their dead body",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " females are born in the spring.\n- The female is the female of the female.\n- The female is the female of the female.\n- The female is the female of the female.\n- The female is the female of the female.\n- The female is the female of the female.\n- The female is the female of the female.\n- The female is the female of the female.\n- The female is the female of the female.\n- The female is the female of the female.\n- The female is the female of the female.\n- The female is the female of the female.",
+                "generated_tokens": 128,
+                "loop": {
+                  "first_loop": 17,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.8650793650793651
+                },
+                "prompt": " monogamous, but paired males pursue females other than their mates. So-called “extra-pair copulations” are common among birds and in many species are consensual, but male Mallards often force these copulations, with several males chasing a single female and then mating with her.\n- Mallard pairs form long before the spring breeding season. Pairing takes place in the fall, but courtship can be seen all winter. Only the",
+                "target": " female incubates the eggs and takes care of the ducklings.\n- The standard duck’s quack is the sound of a female Mallard. Males don’t quack; they make a quieter, rasping sound.\n- Mallards, like other ducks, shed all their flight",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " be able to find a place to stay. I was so excited to see the place, but I was still a bit scared. I was a bit scared, but I was still a bit scared. I was a bit scared, but I was still a bit scared. I was a bit scared, but I was still a bit scared. I was a bit scared, but I was still a bit scared. I was a bit scared, but I was still a bit scared. I was a bit scared, but I was still a bit scared. I was a bit scared, but I was still a bit scared. I was a bit",
+                "generated_tokens": 128,
+                "loop": {
+                  "first_loop": 25,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.7698412698412699
+                },
+                "prompt": " come down, I decided to take a bit of a stroll around the neighborhood. Mom spent hours walking around and calling for me, but it was dark out, and I just wanted to hunker down for the night. Mom gave up and went home for the night. There was nothing else she could do.\nThe next morning, mom got up at 5am, before the sun went up, in order to search me out. It seems that it’s best to",
+                "target": " look for missing birds right before sunrise and right after sunset. We birds like hanging out at those times. Mom was so surprised how loud all the birds were in the neighborhood. She never realize that that’s our special time of the day.\nLucky for me, I decided to go back to that neighbor",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " study of the effects of the disease on the body).\nThe study, which was published in the journal Science, is the first to examine the effects of the effects of the effects of the effects on the body.\nThe study, which was published in the journal Science, was published in the journal Science.\nThe study, which was published in the journal Science, was published in the journal Science.\nThe study, which was published in the journal Science, was published in the journal Science.\nThe study, which was published in the journal Science, was published in the journal Science.\nThe study, which was published in the",
+                "generated_tokens": 128,
+                "loop": {
+                  "first_loop": 28,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.7063492063492064
+                },
+                "prompt": " Restricted feeding, says Longo, makes our body go from \"growth mode\" to \"repair mode.\"\nJust As Effective as Caloric Restriction\nOther research by Krista Varady of University of Illinois in Chicago has looked at the way fasting impacts chronic diseases, like cardiovascular disease, type 2 diabetes, and cancer. Her work, which involves both animal and human test subjects, seeks to compare the effects of intermittent fasting with caloric restriction (an extended",
+                "target": " low-calorie dietary routine that has known health benefits).\nWhat her animal models showed was that intermittent fasting (in this case, alternate-day fasting) lowers the chances of acquiring diabetes, while also lowering fasting glucose and insulin concentrations — and at rates comparable to caloric restriction.\nHer tests on human",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": "cells. The gene is found in the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of",
+                "generated_tokens": 128,
+                "loop": {
+                  "first_loop": 14,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.8888888888888888
+                },
+                "prompt": "NN3. Clin Cancer Res 14(20):6426-31, 2008.\nWlodarska I, Veyt E, De Paepe P, Vandenberghe P, Nooijen P, Theate I, Michaux L, Sagaert X, Marynen P, Hagemeijer A, De W. FOXP1, a gene highly expressed in a subset of diffuse large B-",
+                "target": "cell lymphoma, is recurrently targeted by genomic aberrations. Leukemia 19(8):1299-305, 2005.\nWundisch T, Thiede C, Morgner A, Dempfle A, Gunther A, Liu HX, Ye HT,",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": "e > files.\nIf you want to find a file that is not a file, you can use the following code:\n```\nIf you want to find a file that is not a file, you can use the following code:\n```\npip install python\n```\nNow, let's talk about the file you want to find.\nThe file you want to find is:\n```\nThe file you want to find is:\n```\nThe file you want to find is:\n```\nThe file you want to find is:\n```\nThe file you want to find is:\n```\nThe",
+                "generated_tokens": 128,
+                "loop": {
+                  "first_loop": 27,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.5873015873015873
+                },
+                "prompt": " can also be used with executable files? Thats right, ADS files that are executable can be attached to any file just like you attached .txt files, and just like the text files, would be hidden from most software.\nHere is an example:\nC:\\test> type c:\\windows\\notepad.exe > ads.txt:hidden.exe\nYou have now created an ADS file called hidden.ex",
+                "target": "e and attached it to the text file ads.txt. Once again, if you Dir the directory you will just see ads.txt, and not hidden.exe. Run LADS, and you will see the ADS.\nThere is a caveat to launching executable files that are ADS",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " are like tiny little waves that can be used to create sounds. They can be used to create sounds, sounds, or even sounds! By using these sounds, we can create sounds that are similar to how we use them.\nLet's look at some examples of sound waves:\n1. **Sound waves**: These are the sound waves that make sounds. They are made up of different colors and sizes. For example, a sound waves are made up of two or more colors.\n2. **Sound waves**: These are the sound waves that make up the sound waves. They are the sound waves that make up the sound",
+                "generated_tokens": 128,
+                "loop": {
+                  "first_loop": 14,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.21428571428571427
+                },
+                "prompt": "Chapter 10: Sound Waves and Computers - Understanding Digital Signal Processing (DSP)\nImagine being able to control the way your favorite song sounds just by using your computer! Well, it's possible through something called Digital Signal Processing, or DSP for short. This amazing technology lets us manipulate and shape sounds in incredible ways. To understand how DSP works, let's first learn about sound waves and how computers can help us create them digitally.\nSound waves",
+                "target": " are like invisible ripples moving through the air when someone speaks, sings, or plays an instrument. When these waves reach our ears, they turn into electrical signals in our brain, allowing us to recognize what we hear. Now imagine if we could capture those sound waves, change them, and then play them back –",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " to let the water go down.\nAs they continued walking, they discovered that the river was filled with water. The water was soaked that the water was filled with water. The water was then removed from the river, and the water was filled with water.\nSoon, the water was filled with water. The water was filled with water, and the water was filled with water. The water was soaked in the water, and the water was filled with water.\nThe water was so happy that the water was filled with water. The water was so happy and full of water. The water was so happy to be free",
+                "generated_tokens": 128,
+                "loop": {
+                  "first_loop": 31,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.47619047619047616
+                },
+                "prompt": " being too adventurous can lead to trouble!\nThere's an intriguing story about how Boann brought the River Boyne into existence. Once upon a time, she came across a sacred well named the Well of Segais. Surrounded by nine magical hazel trees, the well contained great wisdom within its waters. Speckled salmon swam inside, eating the precious hazelnuts that fell from the trees, symbolizing both wisdom and inspiration. However, Boann was warned never",
+                "target": " to approach the well due to its powerful magic.\nGuess what happened next? That's right! Ignoring the warning, Boann went near the well out of pure curiosity. As soon as she did, the waters of the well erupted furiously, creating a massive flood. Determined to capture the well's",
+                "target_prefix_exact": false
+              }
+            ]
+          },
+          "python": {
+            "count": 8,
+            "rows": [
+              {
+                "completion": " def __init__(self, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k",
+                "generated_tokens": 128,
+                "loop": {
+                  "first_loop": 8,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.9365079365079365
+                },
+                "prompt": "Write valid Python code for this task:\nWrite a function to find k number of smallest pairs which consist of one element from the first array and one element from the second array.\nPython:\n",
+                "python": {
+                  "ast_exact": false,
+                  "compilable": false,
+                  "function_count": 0,
+                  "parseable": false,
+                  "signature": null,
+                  "signature_match": null,
+                  "usable_structure": false
+                },
+                "target": " import heapq\ndef k_smallest_pairs(nums1, nums2, k):\n   queue = []\n   def push(i, j):\n       if i < len(nums1) and j < len(nums2):\n           heapq.heappush(queue, [nums1[i] + nums2[j], i, j])\n   push(0, 0)\n   pairs = []\n   while queue and len(pairs) < k:\n       _, i, j = heapq.heappop(queue)\n       pairs.append([nums1[i], nums2[j]])\n       push(i, j + 1)\n       if j == 0:\n           push(i + 1, 0)\n   return pairs",
+                "unit_tests": {
+                  "reason": "dataset supplied no declarative unit-test cases",
+                  "status": "unsupported"
+                }
+              },
+              {
+                "completion": " def get_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+                "generated_tokens": 128,
+                "loop": {
+                  "first_loop": 5,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.9444444444444444
+                },
+                "prompt": "Write valid Python code for this task:\nWrite a function to find the nth octagonal number.\nPython:\n",
+                "python": {
+                  "ast_exact": false,
+                  "compilable": false,
+                  "function_count": 0,
+                  "parseable": false,
+                  "signature": null,
+                  "signature_match": null,
+                  "usable_structure": false
+                },
+                "target": " def is_octagonal(n): \n\treturn 3 * n * n - 2 * n",
+                "unit_tests": {
+                  "reason": "dataset supplied no declarative unit-test cases",
+                  "status": "unsupported"
+                }
+              },
+              {
+                "completion": " def __init__(self, name, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value",
+                "generated_tokens": 128,
+                "loop": {
+                  "first_loop": 10,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.9206349206349206
+                },
+                "prompt": "Write valid Python code for this task:\nWrite a function to merge three dictionaries into a single dictionary.\nPython:\n",
+                "python": {
+                  "ast_exact": false,
+                  "compilable": false,
+                  "function_count": 0,
+                  "parseable": false,
+                  "signature": null,
+                  "signature_match": null,
+                  "usable_structure": false
+                },
+                "target": " import collections as ct\ndef merge_dictionaries_three(dict1,dict2, dict3):\n    merged_dict = dict(ct.ChainMap({},dict1,dict2,dict3))\n    return merged_dict",
+                "unit_tests": {
+                  "reason": "dataset supplied no declarative unit-test cases",
+                  "status": "unsupported"
+                }
+              },
+              {
+                "completion": " def get_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_nn(nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+                "generated_tokens": 128,
+                "loop": {
+                  "first_loop": 4,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.9285714285714286
+                },
+                "prompt": "Write valid Python code for this task:\nWrite a function to find the count of all binary sequences of length 2n such that sum of first n bits is same as sum of last n bits.\nPython:\n",
+                "python": {
+                  "ast_exact": false,
+                  "compilable": false,
+                  "function_count": 0,
+                  "parseable": false,
+                  "signature": null,
+                  "signature_match": null,
+                  "usable_structure": false
+                },
+                "target": " def count_binary_seq(n): \n\tnCr = 1\n\tres = 1\n\tfor r in range(1, n + 1): \n\t\tnCr = (nCr * (n + 1 - r)) / r \n\t\tres += nCr * nCr \n\treturn res",
+                "unit_tests": {
+                  "reason": "dataset supplied no declarative unit-test cases",
+                  "status": "unsupported"
+                }
+              },
+              {
+                "completion": " def get_callback(self, *args, **kwargs):\n        \"\"\"\n        Return a list of tuples of the given list.\n        \"\"\"\n       return self._get_list(args, **kwargs)",
+                "generated_tokens": 81,
+                "loop": {
+                  "first_loop": 20,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.379746835443038
+                },
+                "prompt": "Write valid Python code for this task:\nWrite a function to count bidirectional tuple pairs.\nPython:\n",
+                "python": {
+                  "ast_exact": false,
+                  "compilable": false,
+                  "function_count": 0,
+                  "parseable": false,
+                  "signature": null,
+                  "signature_match": null,
+                  "usable_structure": false
+                },
+                "target": " def count_bidirectional(test_list):\n  res = 0\n  for idx in range(0, len(test_list)):\n    for iidx in range(idx + 1, len(test_list)):\n      if test_list[iidx][0] == test_list[idx][1] and test_list[idx][1] == test_list[iidx][0]:\n        res += 1\n  return res",
+                "unit_tests": {
+                  "reason": "dataset supplied no declarative unit-test cases",
+                  "status": "unsupported"
+                }
+              },
+              {
+                "completion": " def _get_subarray(self, subarray):\n        \"\"\"\n        Return a list of subarray of subarray.\n        \"\"\"\n       return self._get_subarray(subarray)",
+                "generated_tokens": 70,
+                "loop": {
+                  "first_loop": 14,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.4264705882352941
+                },
+                "prompt": "Write valid Python code for this task:\nWrite a function to find the maximum product subarray of the given array.\nPython:\n",
+                "python": {
+                  "ast_exact": null,
+                  "compilable": false,
+                  "function_count": 0,
+                  "parseable": false,
+                  "signature": null,
+                  "signature_match": null,
+                  "usable_structure": false
+                },
+                "target": " def max_subarray_product(arr):\n\tn = len(arr)\n\tmax_ending_here = 1\n\tmin_ending_here = 1\n\tmax_so_far = 0\n\tflag = 0\n\tfor i in range(0, n):\n\t\tif arr[i] > 0:\n\t\t\tmax_ending_here = max_ending_here * arr[i]\n\t\t\tmin_ending_here = min (min_ending_here * arr[i], 1)\n\t\t\tflag = 1\n\t\telif arr[i] == 0:\n\t\t\tmax_ending_here = 1\n\t\t\tmin_ending_here = 1\n\t\telse:\n\t\t\ttemp = max_ending_here\n\t\t\tmax_ending_here = max (min_ending_here * arr[i], 1)\n\t\t\tmin_ending_here = temp * arr[i]\n\t\tif (max_so_far < max_ending_here):\n\t\t\tmax_so_far = max_ending_here\n\tif flag == 0 and max",
+                "unit_tests": {
+                  "reason": "dataset supplied no declarative unit-test cases",
+                  "status": "unsupported"
+                }
+              },
+              {
+                "completion": " def __init__(self, name, value, value, value):\ndef __init__(self, name, value):\ndef __init__(self, name, value):\ndef __init__(self, name, value):\ndef __init__(self, name, value):\ndef __init__(self, name, value):\ndef __init__(self, name, value):\ndef __init__(self, name, value):\ndef __init__(self, name, value):\ndef __init__(self, name, value):\ndef __init__",
+                "generated_tokens": 128,
+                "loop": {
+                  "first_loop": 10,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.8809523809523809
+                },
+                "prompt": "Write valid Python code for this task:\nWrite a function that takes in a list and an integer L and splits the given list into two parts where the length of the first part of the list is L, and returns the resulting lists in a tuple.\nPython:\n",
+                "python": {
+                  "ast_exact": false,
+                  "compilable": false,
+                  "function_count": 0,
+                  "parseable": false,
+                  "signature": null,
+                  "signature_match": null,
+                  "usable_structure": false
+                },
+                "target": " def split_two_parts(list1, L):\n    return list1[:L], list1[L:]",
+                "unit_tests": {
+                  "reason": "dataset supplied no declarative unit-test cases",
+                  "status": "unsupported"
+                }
+              },
+              {
+                "completion": " def __init__(self, *args, **kwargs):\n         \"\"\"\n         Return a list of tuples of the list of tuples.\n        \"\"\"\n       self._call(args, **kwargs)\n        return self._call(args, **kwargs)",
+                "generated_tokens": 104,
+                "loop": {
+                  "first_loop": 18,
+                  "loop_free": false,
+                  "trigram_repetition_rate": 0.5098039215686274
+                },
+                "prompt": "Write valid Python code for this task:\nWrite a function to calculate the maximum aggregate from the list of tuples.\nPython:\n",
+                "python": {
+                  "ast_exact": false,
+                  "compilable": false,
+                  "function_count": 0,
+                  "parseable": false,
+                  "signature": null,
+                  "signature_match": null,
+                  "usable_structure": false
+                },
+                "target": " from collections import defaultdict\ndef max_aggregate(stdata):\n    temp = defaultdict(int)\n    for name, marks in stdata:\n        temp[name] += marks\n    return max(temp.items(), key=lambda x: x[1])",
+                "unit_tests": {
+                  "reason": "dataset supplied no declarative unit-test cases",
+                  "status": "unsupported"
+                }
+              }
+            ]
+          },
+          "retrieval": {
+            "count": 12,
+            "rows": [
+              {
+                "completion": " LV320067",
+                "generated_tokens": 6,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Context: The access code is LV320072.\nQuestion: What is the access code?\nAnswer:",
+                "target": " LV320072",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " CW114208",
+                "generated_tokens": 7,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Record: The access code is CW114208. Therefore the access code is",
+                "target": " CW114208",
+                "target_prefix_exact": true
+              },
+              {
+                "completion": " CO23194",
+                "generated_tokens": 5,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Memo A says ignore old codes. Memo B says the current identifier is SO381984.\nReturn the current identifier exactly:",
+                "target": " SO381984",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " F401979",
+                "generated_tokens": 5,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Context: The access code is MP931978.\nQuestion: What is the access code?\nAnswer:",
+                "target": " MP931978",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " JO6064",
+                "generated_tokens": 5,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Record: The access code is JO803370. Therefore the access code is",
+                "target": " JO803370",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " BI137394",
+                "generated_tokens": 7,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Memo A says ignore old codes. Memo B says the current identifier is BI137294.\nReturn the current identifier exactly:",
+                "target": " BI137294",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " CB498888",
+                "generated_tokens": 6,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Context: The access code is CB395973.\nQuestion: What is the access code?\nAnswer:",
+                "target": " CB395973",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " QB0206",
+                "generated_tokens": 6,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Record: The access code is QB020615. Therefore the access code is",
+                "target": " QB020615",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " AT480880",
+                "generated_tokens": 6,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Memo A says ignore old codes. Memo B says the current identifier is GB788604.\nReturn the current identifier exactly:",
+                "target": " GB788604",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " GV79345",
+                "generated_tokens": 6,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Context: The access code is GV553447.\nQuestion: What is the access code?\nAnswer:",
+                "target": " GV553447",
+                "target_prefix_exact": false
+              },
+              {
+                "completion": " ND545002",
+                "generated_tokens": 7,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Record: The access code is ND545002. Therefore the access code is",
+                "target": " ND545002",
+                "target_prefix_exact": true
+              },
+              {
+                "completion": " DO16191939",
+                "generated_tokens": 6,
+                "loop": {
+                  "first_loop": null,
+                  "loop_free": true,
+                  "trigram_repetition_rate": 0.0
+                },
+                "prompt": "Memo A says ignore old codes. Memo B says the current identifier is BB161959.\nReturn the current identifier exactly:",
+                "target": " BB161959",
+                "target_prefix_exact": false
+              }
+            ]
+          }
+        },
+        "status": "ok"
+      },
+      "semantic_python_and_json": "Reported only when fixed category rows supply prompts and targets.",
+      "status": "PARTIAL",
+      "teacher_forced": {
+        "bpb": 1.3838312489748992,
+        "nll": 3.575405179009815,
+        "routing": {
+          "reason": "checkpoint emitted no anchor statistics",
+          "status": "unsupported"
+        },
+        "status": "ok",
+        "tokens": 6231,
+        "top1": {
+          "count": 2550,
+          "rate": 0.4092441020702937,
+          "total": 6231
+        }
+      }
+    },
+    "REPRODUCIBILITY": {
+      "integrity_audit": {
+        "checks": {
+          "checkpoint_digest_present": true,
+          "dataset_digest_present_when_supplied": true,
+          "official_cpu_fp32": true,
+          "repetition_digest_present_when_supplied": true,
+          "tokenizer_digest_present_when_supplied": true
+        },
+        "limitations": [
+          "No unsupported metric is converted into a numeric score.",
+          "Paired comparison and independent repetition require explicitly supplied fixed inputs."
+        ],
+        "status": "PASS"
+      },
+      "provenance": {
+        "checkpoint": {
+          "checkpoint": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_1_424m_rope_stage_a_20260830_r2_pinned_validation_resume\\latest.pt",
+          "checkpoint_bytes": 1707965003,
+          "checkpoint_keys": [
+            "model_config",
+            "model_state_dict",
+            "model_type",
+            "optimizer_state_included",
+            "optimizer_step",
+            "source_states",
+            "stage_status",
+            "tokens_seen",
+            "train_config"
+          ],
+          "checkpoint_sha256": "08A9CCF9CAD6C6145BAFD623FEE818A0A03D2BAD0D13524D409D788523FFFBF8",
+          "model_config": {
+            "aggregation_impl": "sparse_chunked_scan",
+            "anchor_decode_state_fp32": false,
+            "anchor_layer_indices": [
+              0,
+              2,
+              4,
+              6,
+              8,
+              10,
+              12,
+              14,
+              16,
+              18
+            ],
+            "anchor_layer_pattern": "explicit",
+            "anchor_metrics_interval": 1,
+            "anchor_recency_bias": 4.0,
+            "anchor_recency_reference_len": 512,
+            "anchor_scan_chunk_size": 64,
+            "compute_anchor_metrics_every": 32,
+            "cosine_temperature": 0.25,
+            "detach_diagnostics": true,
+            "diffusion_noise_scale": 0.1,
+            "dim": 1216,
+            "diversity_margin": 0.2,
+            "diversity_max_weight": 2.0,
+            "dropout": 0.0,
+            "enable_anchor_metrics": true,
+            "enable_diagnostics": false,
+            "eos_token_id": 2,
+            "exact_memory_candidate_cap": 16,
+            "exact_memory_commit_threshold": 0.5,
+            "exact_memory_copy_cursor": true,
+            "exact_memory_enabled": true,
+            "exact_memory_fallback_margin": 0.0,
+            "exact_memory_full_scan_fallback": true,
+            "exact_memory_hard_copy": false,
+            "exact_memory_hard_copy_gate_threshold": 0.9,
+            "exact_memory_hard_copy_margin_threshold": 1.0,
+            "exact_memory_hard_copy_pointer_threshold": 0.9,
+            "exact_memory_mode": "copy",
+            "exact_pointer_anchor_bias_init": 2.0,
+            "exact_pointer_candidate_chunks": 4,
+            "exact_pointer_chunk_anchors": 4,
+            "exact_pointer_chunk_size": 32,
+            "exact_pointer_dim": 64,
+            "exact_pointer_gate_weight": 0.25,
+            "exact_pointer_loss_weight": 0.05,
+            "exact_pointer_window": 64,
+            "generation_ngram_hard_block_after": 2,
+            "generation_ngram_order": 3,
+            "generation_ngram_penalty": 8.0,
+            "generation_ngram_window": 96,
+            "generation_repetition_scope": "generated",
+            "legacy_position_scale": 1.0,
+            "legacy_position_transition_max_len": 2048,
+            "lm_logit_clip": 30.0,
+            "local_attention_window": 64,
+            "local_mixer_kernel_size": 5,
+            "max_seq_len": 16384,
+            "membership_logit_clip": 30.0,
+            "mlp_ratio": 4,
+            "model_type": "fdt_v4",
+            "n_heads": 19,
+            "n_layers": 20,
+            "num_anchors": 256,
+            "pad_token_id": 0,
+            "rope_transition_alpha": 0.25,
+            "rope_transition_mode": "output_blend",
+            "router_dim": 256,
+            "routing_backend": "matmul",
+            "routing_logit_quantization": 0.0,
+            "routing_type": "cosine",
+            "sigma_max": 0.7,
+            "sigma_min": 0.1,
+            "tie_embeddings": true,
+            "top_k": 8,
+            "use_cached_normalized_anchors": true,
+            "use_incremental_anchor_state": true,
+            "use_local_mixer": false,
+            "use_rope": true,
+            "use_self_attention": false,
+            "vocab_size": 24576
+          }
+        },
+        "comparator": {
+          "checkpoint": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v3_capability_completion_v20_balanced_scale_t1_20260816_r2\\latest.pt",
+          "checkpoint_bytes": 1707317835,
+          "checkpoint_keys": [
+            "model_config",
+            "model_state_dict",
+            "optimizer_state_saved",
+            "optimizer_step",
+            "sample_cursor",
+            "stage_status",
+            "tokens_seen",
+            "train_config"
+          ],
+          "checkpoint_sha256": "7EE3F88D319928DD2D3F2542290F55FFCD036DCBB32A8AB22437C511E5890179",
+          "model_config": {
+            "aggregation_impl": "sparse_chunked_scan",
+            "anchor_layer_indices": [
+              0,
+              2,
+              4,
+              6,
+              8,
+              10,
+              12,
+              14,
+              16,
+              18
+            ],
+            "anchor_layer_pattern": "alternate",
+            "anchor_metrics_interval": 1,
+            "anchor_recency_bias": 4.0,
+            "anchor_recency_reference_len": 512,
+            "anchor_scan_chunk_size": 64,
+            "compute_anchor_metrics_every": 4,
+            "cosine_temperature": 0.25,
+            "detach_diagnostics": true,
+            "diffusion_noise_scale": 0.1,
+            "dim": 1216,
+            "diversity_margin": 0.2,
+            "diversity_max_weight": 2.0,
+            "dropout": 0.0,
+            "enable_anchor_metrics": true,
+            "enable_diagnostics": false,
+            "eos_token_id": 2,
+            "lm_logit_clip": 30.0,
+            "local_attention_window": 64,
+            "local_mixer_kernel_size": 5,
+            "max_seq_len": 2048,
+            "membership_logit_clip": 30.0,
+            "mlp_ratio": 4,
+            "model_type": "fdt_v3",
+            "n_heads": 19,
+            "n_layers": 20,
+            "num_anchors": 256,
+            "pad_token_id": 0,
+            "router_dim": 256,
+            "routing_backend": "matmul",
+            "routing_type": "cosine",
+            "sigma_max": 0.7,
+            "sigma_min": 0.1,
+            "tie_embeddings": true,
+            "top_k": 8,
+            "use_cached_normalized_anchors": true,
+            "use_incremental_anchor_state": true,
+            "use_local_mixer": false,
+            "use_rope": false,
+            "use_self_attention": false,
+            "vocab_size": 24576
+          },
+          "status": "ok"
+        },
+        "environment": {
+          "cuda_available_but_unused": true,
+          "platform": "Windows-10-10.0.26200-SP0",
+          "python": "3.10.11",
+          "torch": "2.10.0+cu128"
+        },
+        "independent_repetition_tensor_dataset": {
+          "path": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\artifacts\\fdt_v4_200m_audit_20260829\\fixed_repetition_inputs_100.jsonl",
+          "protocol": "independent_generated_prefix_trigram_v1",
+          "rows_loaded": 100,
+          "sha256": "E7438870589B6CCAB912D2F16F266C5EE654F8F47D3617DF90B24E9F206BAED5",
+          "status": "ok"
+        },
+        "tensor_dataset": {
+          "format": "json_rows",
+          "path": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\artifacts\\fdt_v4_200m_audit_20260829\\fixed_generation_inputs.jsonl",
+          "rows_loaded": 52,
+          "sha256": "7F3A28AA049904A4D715ACE2307CDF7A80E7D6E2EB65A707EAAD8764AB908E9E",
+          "status": "ok"
+        },
+        "tokenizer": {
+          "directory": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\tokenizers\\fdt_v3_bpe_24k",
+          "status": "ok",
+          "tokenizer_json": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\tokenizers\\fdt_v3_bpe_24k\\tokenizer.json",
+          "tokenizer_json_sha256": "4FADE0C72E8673BA1E4319C8821593BB5E62A8C27792E2412DE3BDC52D232862"
+        }
+      },
+      "status": "PASS"
+    }
+  },
+  "cache_full_recompute": {
+    "reason": "intermediate output-blend transition intentionally has no single-KV cache state; cache integrity must be audited at alpha endpoints",
+    "status": "unsupported"
+  },
+  "checkpoint": {
+    "checkpoint": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_1_424m_rope_stage_a_20260830_r2_pinned_validation_resume\\latest.pt",
+    "checkpoint_bytes": 1707965003,
+    "checkpoint_keys": [
+      "model_config",
+      "model_state_dict",
+      "model_type",
+      "optimizer_state_included",
+      "optimizer_step",
+      "source_states",
+      "stage_status",
+      "tokens_seen",
+      "train_config"
+    ],
+    "checkpoint_sha256": "08A9CCF9CAD6C6145BAFD623FEE818A0A03D2BAD0D13524D409D788523FFFBF8",
+    "model_config": {
+      "aggregation_impl": "sparse_chunked_scan",
+      "anchor_decode_state_fp32": false,
+      "anchor_layer_indices": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        16,
+        18
+      ],
+      "anchor_layer_pattern": "explicit",
+      "anchor_metrics_interval": 1,
+      "anchor_recency_bias": 4.0,
+      "anchor_recency_reference_len": 512,
+      "anchor_scan_chunk_size": 64,
+      "compute_anchor_metrics_every": 32,
+      "cosine_temperature": 0.25,
+      "detach_diagnostics": true,
+      "diffusion_noise_scale": 0.1,
+      "dim": 1216,
+      "diversity_margin": 0.2,
+      "diversity_max_weight": 2.0,
+      "dropout": 0.0,
+      "enable_anchor_metrics": true,
+      "enable_diagnostics": false,
+      "eos_token_id": 2,
+      "exact_memory_candidate_cap": 16,
+      "exact_memory_commit_threshold": 0.5,
+      "exact_memory_copy_cursor": true,
+      "exact_memory_enabled": true,
+      "exact_memory_fallback_margin": 0.0,
+      "exact_memory_full_scan_fallback": true,
+      "exact_memory_hard_copy": false,
+      "exact_memory_hard_copy_gate_threshold": 0.9,
+      "exact_memory_hard_copy_margin_threshold": 1.0,
+      "exact_memory_hard_copy_pointer_threshold": 0.9,
+      "exact_memory_mode": "copy",
+      "exact_pointer_anchor_bias_init": 2.0,
+      "exact_pointer_candidate_chunks": 4,
+      "exact_pointer_chunk_anchors": 4,
+      "exact_pointer_chunk_size": 32,
+      "exact_pointer_dim": 64,
+      "exact_pointer_gate_weight": 0.25,
+      "exact_pointer_loss_weight": 0.05,
+      "exact_pointer_window": 64,
+      "generation_ngram_hard_block_after": 2,
+      "generation_ngram_order": 3,
+      "generation_ngram_penalty": 8.0,
+      "generation_ngram_window": 96,
+      "generation_repetition_scope": "generated",
+      "legacy_position_scale": 1.0,
+      "legacy_position_transition_max_len": 2048,
+      "lm_logit_clip": 30.0,
+      "local_attention_window": 64,
+      "local_mixer_kernel_size": 5,
+      "max_seq_len": 16384,
+      "membership_logit_clip": 30.0,
+      "mlp_ratio": 4,
+      "model_type": "fdt_v4",
+      "n_heads": 19,
+      "n_layers": 20,
+      "num_anchors": 256,
+      "pad_token_id": 0,
+      "rope_transition_alpha": 0.25,
+      "rope_transition_mode": "output_blend",
+      "router_dim": 256,
+      "routing_backend": "matmul",
+      "routing_logit_quantization": 0.0,
+      "routing_type": "cosine",
+      "sigma_max": 0.7,
+      "sigma_min": 0.1,
+      "tie_embeddings": true,
+      "top_k": 8,
+      "use_cached_normalized_anchors": true,
+      "use_incremental_anchor_state": true,
+      "use_local_mixer": false,
+      "use_rope": true,
+      "use_self_attention": false,
+      "vocab_size": 24576
+    }
+  },
+  "comparator": {
+    "checkpoint": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v3_capability_completion_v20_balanced_scale_t1_20260816_r2\\latest.pt",
+    "checkpoint_bytes": 1707317835,
+    "checkpoint_keys": [
+      "model_config",
+      "model_state_dict",
+      "optimizer_state_saved",
+      "optimizer_step",
+      "sample_cursor",
+      "stage_status",
+      "tokens_seen",
+      "train_config"
+    ],
+    "checkpoint_sha256": "7EE3F88D319928DD2D3F2542290F55FFCD036DCBB32A8AB22437C511E5890179",
+    "model_config": {
+      "aggregation_impl": "sparse_chunked_scan",
+      "anchor_layer_indices": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        16,
+        18
+      ],
+      "anchor_layer_pattern": "alternate",
+      "anchor_metrics_interval": 1,
+      "anchor_recency_bias": 4.0,
+      "anchor_recency_reference_len": 512,
+      "anchor_scan_chunk_size": 64,
+      "compute_anchor_metrics_every": 4,
+      "cosine_temperature": 0.25,
+      "detach_diagnostics": true,
+      "diffusion_noise_scale": 0.1,
+      "dim": 1216,
+      "diversity_margin": 0.2,
+      "diversity_max_weight": 2.0,
+      "dropout": 0.0,
+      "enable_anchor_metrics": true,
+      "enable_diagnostics": false,
+      "eos_token_id": 2,
+      "lm_logit_clip": 30.0,
+      "local_attention_window": 64,
+      "local_mixer_kernel_size": 5,
+      "max_seq_len": 2048,
+      "membership_logit_clip": 30.0,
+      "mlp_ratio": 4,
+      "model_type": "fdt_v3",
+      "n_heads": 19,
+      "n_layers": 20,
+      "num_anchors": 256,
+      "pad_token_id": 0,
+      "router_dim": 256,
+      "routing_backend": "matmul",
+      "routing_type": "cosine",
+      "sigma_max": 0.7,
+      "sigma_min": 0.1,
+      "tie_embeddings": true,
+      "top_k": 8,
+      "use_cached_normalized_anchors": true,
+      "use_incremental_anchor_state": true,
+      "use_local_mixer": false,
+      "use_rope": false,
+      "use_self_attention": false,
+      "vocab_size": 24576
+    },
+    "status": "ok"
+  },
+  "completed_at_unix": 1788088471.4207122,
+  "dataset": {
+    "format": "json_rows",
+    "path": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\artifacts\\fdt_v4_200m_audit_20260829\\fixed_generation_inputs.jsonl",
+    "rows_loaded": 52,
+    "sha256": "7F3A28AA049904A4D715ACE2307CDF7A80E7D6E2EB65A707EAAD8764AB908E9E",
+    "status": "ok"
+  },
+  "elapsed_seconds": 2796.407368659973,
+  "exact_memory": {
+    "reason": "deferred to the separately preserved Exact Memory pilot",
+    "status": "unsupported"
+  },
+  "free_generation": {
+    "categories": {
+      "factual": {
+        "count": 12,
+        "rows": [
+          {
+            "completion": " the right to be a human being",
+            "generated_tokens": 8,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Context: Charles W. Eliot, president 1869–1909, eliminated the favored position of Christianity from the curriculum while opening it to student self-direction. While Eliot was the most crucial figure in the secularization of American higher education, he was motivated not by a desire to secularize education, but by Transcendentalist Unitarian convictions. Derived from William Ellery Channing and Ralph Waldo Emerson, these convictions were focused on the dignity and worth of human nature, the right and ability of each person to perceive truth, and the indwelling God in each person.\nQuestion: From whom were the movement that Eliot followed derived?\nAnswer:",
+            "target": " William Ellery Channing and Ralph Waldo Emerson",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " the Duchy of the Duchy of the Duchy",
+            "generated_tokens": 15,
+            "loop": {
+              "first_loop": 5,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.5384615384615384
+            },
+            "prompt": "Context: The first fortified settlements on the site of today's Warsaw were located in Bródno (9th/10th century) and Jazdów (12th/13th century). After Jazdów was raided by nearby clans and dukes, a new similar settlement was established on the site of a small fishing village called Warszowa. The Prince of Płock, Bolesław II of Masovia, established this settlement, the modern-day Warsaw, in about 1300. In the beginning of the 14th century it became one of the seats of the Dukes of Masovia, becoming the official capital of Masovian Duchy in 1413. 14th-century Warsaw's economy rested on mostly crafts and trade. Upon the extinction of the local ducal line, the duchy was reincorporated into the Polish Crown in 1526.\nQuestion: When was the Masovian Duchy reincorporated into the Polish Crown?\nAnswer:",
+            "target": " 1526",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " The original, the original, and the original",
+            "generated_tokens": 10,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Context: With a budget of $230,000, the surviving original lunar broadcast data from Apollo 11 was compiled by Nafzger and assigned to Lowry Digital for restoration. The video was processed to remove random noise and camera shake without destroying historical legitimacy. The images were from tapes in Australia, the CBS News archive, and kinescope recordings made at Johnson Space Center. The restored video, remaining in black and white, contains conservative digital enhancements and did not include sound quality improvements.\nQuestion: Who compiled the original surviving Apollo 11 landing data?\nAnswer:",
+            "target": " Nafzger",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " the brain",
+            "generated_tokens": 3,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Context: Tesla theorized that the application of electricity to the brain enhanced intelligence. In 1912, he crafted \"a plan to make dull students bright by saturating them unconsciously with electricity,\" wiring the walls of a schoolroom and, \"saturating [the schoolroom] with infinitesimal electric waves vibrating at high frequency. The whole room will thus, Mr. Tesla claims, be converted into a health-giving and stimulating electromagnetic field or 'bath.'\" The plan was, at least provisionally approved by then superintendent of New York City schools, William H. Maxwell.\nQuestion: What did Tesla think could improve the brain's intelligence?\nAnswer:",
+            "target": " application of electricity",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " 1830",
+            "generated_tokens": 3,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Context: On 1 July 1851, writs were issued for the election of the first Victorian Legislative Council, and the absolute independence of Victoria from New South Wales was established proclaiming a new Colony of Victoria. Days later, still in 1851 gold was discovered near Ballarat, and subsequently at Bendigo. Later discoveries occurred at many sites across Victoria. This triggered one of the largest gold rushes the world has ever seen. The colony grew rapidly in both population and economic power. In ten years the population of Victoria increased sevenfold from 76,000 to 540,000. All sorts of gold records were produced including the \"richest shallow alluvial goldfield in the world\" and the largest gold nugget. Victoria produced in the decade 1851–1860 20 million ounces of gold, one third of the world's output[citation needed].\nQuestion: How much did the population of Victoria increase in ten years after the discovery of gold?\nAnswer:",
+            "target": " sevenfold",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " the first of the three of the four of the four of the four of the three of the three of the three of the three of the three of the three of the three of the three of the three of the three of the three of the three of the three of the three of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two of the two",
+            "generated_tokens": 128,
+            "loop": {
+              "first_loop": 8,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.9126984126984127
+            },
+            "prompt": "Context: The next direct threat to Temüjin was the Naimans (Naiman Mongols), with whom Jamukha and his followers took refuge. The Naimans did not surrender, although enough sectors again voluntarily sided with Temüjin. In 1201, a khuruldai elected Jamukha as Gür Khan, \"universal ruler\", a title used by the rulers of the Qara Khitai. Jamukha's assumption of this title was the final breach with Temüjin, and Jamukha formed a coalition of tribes to oppose him. Before the conflict, however, several generals abandoned Jamukha, including Subutai, Jelme's well-known younger brother. After several battles, Jamukha was finally turned over to Temüjin by his own men in 1206.\nQuestion: Which well-known general abandoned Jamukha's coalition against Temüjin?\nAnswer:",
+            "target": " Subutai",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " nuclear-go-to-the-dark\nAnswer: nuclear-go-to-the-dark",
+            "generated_tokens": 25,
+            "loop": {
+              "first_loop": 14,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.34782608695652173
+            },
+            "prompt": "Context: In science, alumni include astronomers Carl Sagan, a prominent contributor to the scientific research of extraterrestrial life, and Edwin Hubble, known for \"Hubble's Law\", NASA astronaut John M. Grunsfeld, geneticist James Watson, best known as one of the co-discoverers of the structure of DNA, experimental physicist Luis Alvarez, popular environmentalist David Suzuki, balloonist Jeannette Piccard, biologists Ernest Everett Just and Lynn Margulis, computer scientist Richard Hamming, the creator of the Hamming Code, lithium-ion battery developer John B. Goodenough, mathematician and Fields Medal recipient Paul Joseph Cohen, and geochemist Clair Cameron Patterson, who developed the uranium-lead dating method into lead-lead dating. Nuclear physicist and researcher Stanton Friedman, who worked on some early projects involving nuclear-powered spacecraft propulsion systems, is also a graduate (M.Sc).\nQuestion: What geochemist developed the uranium-lead dating method into lead-lead dating?\nAnswer:",
+            "target": " Clair Cameron Patterson",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " $3.95",
+            "generated_tokens": 5,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Context: In the autumn of 1991, talks were held for the broadcast rights for Premier League for a five-year period, from the 1992 season. ITV were the current rights holders, and fought hard to retain the new rights. ITV had increased its offer from £18m to £34m per year to keep control of the rights. BSkyB joined forces with the BBC to make a counter bid. The BBC was given the highlights of most of the matches, while BSkyB paying £304m for the Premier League rights, would give them a monopoly of all live matches, up to 60 per year from the 1992 season.  Murdoch described sport as a \"battering ram\" for pay-television, providing a strong customer base. A few weeks after the deal, ITV went to the High Court to get an injunction as it believed their bid details had been leaked before the decision was taken. ITV also asked the Office of Fair Trading to investigate since it believed Rupert Murdoch's media empire via its newspapers had influenced the deal. A few days later neither action took effect, ITV believed BSkyB was telephoned and informed of its £262m bid, and Premier League advised BSkyB to increase its counter bid.\nQuestion: How much was BSkyB going to pay for the Primier League rights?\nAnswer:",
+            "target": " £304m",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " the landowner",
+            "generated_tokens": 4,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Context: The use of remote sensing for the conservation of the Amazon is also being used by the indigenous tribes of the basin to protect their tribal lands from commercial interests. Using handheld GPS devices and programs like Google Earth, members of the Trio Tribe, who live in the rainforests of southern Suriname, map out their ancestral lands to help strengthen their territorial claims. Currently, most tribes in the Amazon do not have clearly defined boundaries, making it easier for commercial ventures to target their territories.\nQuestion: Tribal members living in the rainforests of what region are using Google Earth?\nAnswer:",
+            "target": " southern Suriname",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " the Islamic Jihad, the Jewish Jihad, and the Jewish Jihad",
+            "generated_tokens": 19,
+            "loop": {
+              "first_loop": 8,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.29411764705882354
+            },
+            "prompt": "Context: The path of violence and military struggle was then taken up by the Egyptian Islamic Jihad organization responsible for the assassination of Anwar Sadat in 1981. Unlike earlier anti-colonial movements the extremist group directed its attacks against what it believed were \"apostate\" leaders of Muslim states, leaders who held secular leanings or who had introduced or promoted Western/foreign ideas and practices into Islamic societies. Its views were outlined in a pamphlet written by Muhammad Abd al-Salaam Farag, in which he states:\nQuestion: When did the Egyptian Islamic Jihad assassinate Anwar Sadat?\nAnswer:",
+            "target": " 1981",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " the first system of education",
+            "generated_tokens": 6,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Context: Kenya's first system of education was introduced by British colonists. After Kenya's independence on 12 December 1963, an authority named the Ominde Commission was formed to introduce changes that would reflect the nation's sovereignty. The commission focused on identity and unity, which were critical issues at the time. Changes in the subject content of history and geography were made to reflect national cohesion. Between 1964 and 1985, the 7–4–2–3 system was adopted – seven years of primary, four years of lower secondary, two years of upper secondary, and three years of university. All schools had a common curriculum.\nQuestion: Who introduced the first system of education?\nAnswer:",
+            "target": " British colonists.",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " construction companies",
+            "generated_tokens": 3,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Context: The Standard Industrial Classification and the newer North American Industry Classification System have a classification system for companies that perform or otherwise engage in construction. To recognize the differences of companies in this sector, it is divided into three subsectors: building construction, heavy and civil engineering construction, and specialty trade contractors. There are also categories for construction service firms (e.g., engineering, architecture) and construction managers (firms engaged in managing construction projects without assuming direct financial responsibility for completion of the construction project).\nQuestion: There are other categories for what?\nAnswer:",
+            "target": " construction service firms (e.g., engineering, architecture) and construction managers",
+            "target_prefix_exact": false
+          }
+        ]
+      },
+      "json": {
+        "count": 8,
+        "rows": [
+          {
+            "completion": " {\"record_id\":\"R2016181311-0\",\"name\":\"Barbara\",\"age\":72,\"city\":\"Toronto\",\"active\":false}",
+            "generated_tokens": 43,
+            "json": {
+              "schema_valid": null,
+              "valid": true,
+              "value_exact": false
+            },
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Convert the record to one valid compact JSON object.\nrecord_id=R20261805-0; name=Barbara; age=74; city=Toronto; active=false\nJSON:",
+            "target": " {\"record_id\":\"R20261805-0\",\"name\":\"Barbara\",\"age\":74,\"city\":\"Toronto\",\"active\":false}"
+          },
+          {
+            "completion": " {\"record_id\":\"R2016181311-2\",\"name\":\"Ada\",\"age\":32,\"city\":\"Seoul\",\"active\":false}",
+            "generated_tokens": 42,
+            "json": {
+              "schema_valid": null,
+              "valid": true,
+              "value_exact": false
+            },
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Convert the record to one valid compact JSON object.\nrecord_id=R20261805-2; name=Ada; age=32; city=Seoul; active=false\nJSON:",
+            "target": " {\"record_id\":\"R20261805-2\",\"name\":\"Ada\",\"age\":32,\"city\":\"Seoul\",\"active\":false}"
+          },
+          {
+            "completion": " {\"record_id\":\"R2016181803-4\",\"name\":\"Ada\",\"age\":50,\"city\":\"London\",\"active\":true}",
+            "generated_tokens": 41,
+            "json": {
+              "schema_valid": null,
+              "valid": true,
+              "value_exact": false
+            },
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Convert the record to one valid compact JSON object.\nrecord_id=R20261805-4; name=Ada; age=50; city=London; active=true\nJSON:",
+            "target": " {\"record_id\":\"R20261805-4\",\"name\":\"Ada\",\"age\":50,\"city\":\"London\",\"active\":true}"
+          },
+          {
+            "completion": " {\"record_id\":\"R2016181311-6\",\"name\":\"Grace\",\"age\":49,\"city\":\"Berlin\",\"active\":false}",
+            "generated_tokens": 43,
+            "json": {
+              "schema_valid": null,
+              "valid": true,
+              "value_exact": false
+            },
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Convert the record to one valid compact JSON object.\nrecord_id=R20261805-6; name=Grace; age=46; city=Berlin; active=false\nJSON:",
+            "target": " {\"record_id\":\"R20261805-6\",\"name\":\"Grace\",\"age\":46,\"city\":\"Berlin\",\"active\":false}"
+          },
+          {
+            "completion": " {\"record_id\":\"R2016181311-8\",\"name\":\"Ada\",\"age\":32,\"city\":\"Oslo\",\"active\":false}",
+            "generated_tokens": 42,
+            "json": {
+              "schema_valid": null,
+              "valid": true,
+              "value_exact": false
+            },
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Convert the record to one valid compact JSON object.\nrecord_id=R20261805-8; name=Ada; age=64; city=Oslo; active=false\nJSON:",
+            "target": " {\"record_id\":\"R20261805-8\",\"name\":\"Ada\",\"age\":64,\"city\":\"Oslo\",\"active\":false}"
+          },
+          {
+            "completion": " {\"record_id\":\"R2016181803-10\",\"name\":\"Donald\",\"age\":72,\"city\":\"Berlin\",\"active\":true}",
+            "generated_tokens": 41,
+            "json": {
+              "schema_valid": null,
+              "valid": true,
+              "value_exact": false
+            },
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Convert the record to one valid compact JSON object.\nrecord_id=R20261805-10; name=Donald; age=73; city=Berlin; active=true\nJSON:",
+            "target": " {\"record_id\":\"R20261805-10\",\"name\":\"Donald\",\"age\":73,\"city\":\"Berlin\",\"active\":true}"
+          },
+          {
+            "completion": " {\"record_id\":\"R2016181803-12\",\"name\":\"Grace\",\"age\":20,\"city\":\"London\",\"active\":true}",
+            "generated_tokens": 41,
+            "json": {
+              "schema_valid": null,
+              "valid": true,
+              "value_exact": false
+            },
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Convert the record to one valid compact JSON object.\nrecord_id=R20261805-12; name=Grace; age=20; city=London; active=true\nJSON:",
+            "target": " {\"record_id\":\"R20261805-12\",\"name\":\"Grace\",\"age\":20,\"city\":\"London\",\"active\":true}"
+          },
+          {
+            "completion": " {\"record_id\":\"R2016181411-16\",\"name\":\"Alan\",\"age\":24,\"city\":\"Tokyo\",\"active\":true}",
+            "generated_tokens": 42,
+            "json": {
+              "schema_valid": null,
+              "valid": true,
+              "value_exact": false
+            },
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Convert the record to one valid compact JSON object.\nrecord_id=R20261805-14; name=Alan; age=24; city=Tokyo; active=true\nJSON:",
+            "target": " {\"record_id\":\"R20261805-14\",\"name\":\"Alan\",\"age\":24,\"city\":\"Tokyo\",\"active\":true}"
+          }
+        ]
+      },
+      "natural": {
+        "count": 12,
+        "rows": [
+          {
+            "completion": " in our own lives and our ability to understand and appreciate the importance of the material in our lives.\nThe Power of the Mind\nThe power of the mind is the ability to understand and understand the world around us. It is the ability to understand and understand the world around us. It is the ability to understand and understand the world around us.\nThe Power of the Mind\nThe power of the mind is the ability to understand and understand the world. It is the ability to understand and understand the world. It is the ability to understand and understand the world.\nThe Power of the Mind\nThe power of the mind is the",
+            "generated_tokens": 128,
+            "loop": {
+              "first_loop": 34,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.626984126984127
+            },
+            "prompt": "- Home ›\n- Journalistic Genres\nThe deafening increase of information requires us to be able to distinguish the value of what we read or listen to; we must also be original and excel in our contributions to society. Our aim is to have the students adopting critical attitude towards reality and to help them acquiring abilities to create and express their judgments in a clear, efficient, just and responsible way. Based on the classification of journalistic genres, we will reflect on this",
+            "target": " new context, which is still blurred and on how typological frontiers are erased.Related topics: Education\nsomething that is hard work and physically or mentally tiring:\nI find the journey to work a real grind.\nworkers emerging from their daily grind in the factory\n2 [",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": "75 ft2.\nThe average floor area was 2,900 ft2, and the average floor area was 2,900 ft2. The average floor area was 2,900 ft2, and the average floor area was 3,900 ft2.\nThe average floor area was 3,900 ft2, and the average floor area was 3,900 ft2. The average floor area was 3,900 ft2, and the average floor area was 3,900 ft2.\nThe average floor area was 3,900 ft2, and the average floor area was 3,9",
+            "generated_tokens": 128,
+            "loop": {
+              "first_loop": 19,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.8015873015873016
+            },
+            "prompt": " years old, averaging 41 years old. Most were single-story, on a crawlspace foundation with no floor insulation. Ninety-one percent had attic insulation, but usually only 1-3 in. thick (less than R-11). Roughly half had no wall insulation. The average floor area was 1,244 ft2, most houses had 900-1,500 ft2, but the sample range was 594-2,5",
+            "target": "38 ft2. Window areas averaged 145 ft2, mostly single pane without storm windows. Twenty-seven percent had two window air conditioners. The average age was 8. Most were 4-12 years old. Nameplate cooling capacities were 5,000-28,000 Btu per",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": ", and inflammation.\nVitamin E is a hormone that is used to treat the body's immune system. It is also used to treat the disease.\nVitamin E is a protein that is used to treat the disease. It is also used to treat the disease.\nVitamin E is a protein that is used to treat the disease. It is used to treat the disease.\nVitamin E is a protein that is used to treat the disease. It is used to treat the disease.\nVitamin E is a protein that is used to treat the disease. It is used to treat the disease",
+            "generated_tokens": 128,
+            "loop": {
+              "first_loop": 26,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.7301587301587301
+            },
+            "prompt": " yams, soya, wheat germ oil, wheat germ, eggs, margarine, Butter, and oils like olive, safflower, peanut, sunflower and sesame.\nVitamin E deficiency\nVitamin E deficiency is not so common, as the body has the ability to store this fat-soluble vitamin. However, there are few symptoms suggestive of vitamin E deficiency, such as anaemia, problems of reproductive system, renal deterioration",
+            "target": ", cardiac problems and skin disorders.\nVitamin K (Phytonadione)\nVitamin K or phytonadione popularly known as known as the vitamin for “blood clotting” is required for the incidence of prothrombin of blood that helps prevent excessive bleeding from a wound",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": "on was a man of great power. He was a man of great power and a great power. He was a man of great power and he was a man of great power.\nThe man of the world was a man of great power. He was a man of great power. He was a man of great power. He was a man of great power.\nThe man of the world was a man of great power. He was a man of great power. He was a man of great power. He was a man of great power. He was a man of great power. He was a man of great power. He was",
+            "generated_tokens": 128,
+            "loop": {
+              "first_loop": 9,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.8095238095238095
+            },
+            "prompt": " he was for. This challenge energized him even more than his enterprise of pointing out the errors of his friends and critics in Heretics. Chesterton, incidently, was, even in issues of great and passionate controversy, an amazing sort of man who never lost a friend because he pointed out the impossibility of his ideas. This is a rare gift and speaks much of the greatness of Chesterton.\nThus, when confronted, Chestert",
+            "target": "on took up the writing of Orthodoxy, in which he set forth what he did hold. He discovered that what he did come to maintain, which he thought so original, was in fact what all Christians profess in the Creed, many of whom, I might add, unlike Chesterton, profess the C",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " times.\nThe grubs were the most common in the world, and the grubs were the most common in the world.\nThe grubs were the most common in the world, and the grubs were the most common in the world.\nThe grubs were the most common in the world, and were the most common in the world.\nThe grubs were the most common in the world, and were the most common in the world.\nThe grubs were the most common in the world, and were the most common in the world.\nThe grubs were the most",
+            "generated_tokens": 128,
+            "loop": {
+              "first_loop": 17,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.8333333333333334
+            },
+            "prompt": "ologists have found human bones in cooking pots and hearths in China which were found to be around 500,000 years old.\nIn England in the 1500s this was the legal method of punishment. The victim was immersed in boiling water, oil or tar until dead. Imagine the fear the prisoner felt when they were taken to this deadly big pot to suffer their horrible fate\nCrucifixion was among the most gruesome and painful of ancient",
+            "target": " execution methods and was practiced from about the 6th century BC until the 4th century AD, mainly among the Seleucids, Carthaginians, Persians and Romans. The condemned person was tied (or nailed) to a large wooden cross and left to hang till dead. Their dead body",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " females are born in the spring.\n- The female is the female of the female.\n- The female is the female of the female.\n- The female is the female of the female.\n- The female is the female of the female.\n- The female is the female of the female.\n- The female is the female of the female.\n- The female is the female of the female.\n- The female is the female of the female.\n- The female is the female of the female.\n- The female is the female of the female.\n- The female is the female of the female.",
+            "generated_tokens": 128,
+            "loop": {
+              "first_loop": 17,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.8650793650793651
+            },
+            "prompt": " monogamous, but paired males pursue females other than their mates. So-called “extra-pair copulations” are common among birds and in many species are consensual, but male Mallards often force these copulations, with several males chasing a single female and then mating with her.\n- Mallard pairs form long before the spring breeding season. Pairing takes place in the fall, but courtship can be seen all winter. Only the",
+            "target": " female incubates the eggs and takes care of the ducklings.\n- The standard duck’s quack is the sound of a female Mallard. Males don’t quack; they make a quieter, rasping sound.\n- Mallards, like other ducks, shed all their flight",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " be able to find a place to stay. I was so excited to see the place, but I was still a bit scared. I was a bit scared, but I was still a bit scared. I was a bit scared, but I was still a bit scared. I was a bit scared, but I was still a bit scared. I was a bit scared, but I was still a bit scared. I was a bit scared, but I was still a bit scared. I was a bit scared, but I was still a bit scared. I was a bit scared, but I was still a bit scared. I was a bit",
+            "generated_tokens": 128,
+            "loop": {
+              "first_loop": 25,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.7698412698412699
+            },
+            "prompt": " come down, I decided to take a bit of a stroll around the neighborhood. Mom spent hours walking around and calling for me, but it was dark out, and I just wanted to hunker down for the night. Mom gave up and went home for the night. There was nothing else she could do.\nThe next morning, mom got up at 5am, before the sun went up, in order to search me out. It seems that it’s best to",
+            "target": " look for missing birds right before sunrise and right after sunset. We birds like hanging out at those times. Mom was so surprised how loud all the birds were in the neighborhood. She never realize that that’s our special time of the day.\nLucky for me, I decided to go back to that neighbor",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " study of the effects of the disease on the body).\nThe study, which was published in the journal Science, is the first to examine the effects of the effects of the effects of the effects on the body.\nThe study, which was published in the journal Science, was published in the journal Science.\nThe study, which was published in the journal Science, was published in the journal Science.\nThe study, which was published in the journal Science, was published in the journal Science.\nThe study, which was published in the journal Science, was published in the journal Science.\nThe study, which was published in the",
+            "generated_tokens": 128,
+            "loop": {
+              "first_loop": 28,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.7063492063492064
+            },
+            "prompt": " Restricted feeding, says Longo, makes our body go from \"growth mode\" to \"repair mode.\"\nJust As Effective as Caloric Restriction\nOther research by Krista Varady of University of Illinois in Chicago has looked at the way fasting impacts chronic diseases, like cardiovascular disease, type 2 diabetes, and cancer. Her work, which involves both animal and human test subjects, seeks to compare the effects of intermittent fasting with caloric restriction (an extended",
+            "target": " low-calorie dietary routine that has known health benefits).\nWhat her animal models showed was that intermittent fasting (in this case, alternate-day fasting) lowers the chances of acquiring diabetes, while also lowering fasting glucose and insulin concentrations — and at rates comparable to caloric restriction.\nHer tests on human",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": "cells. The gene is found in the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of the B-cells of",
+            "generated_tokens": 128,
+            "loop": {
+              "first_loop": 14,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.8888888888888888
+            },
+            "prompt": "NN3. Clin Cancer Res 14(20):6426-31, 2008.\nWlodarska I, Veyt E, De Paepe P, Vandenberghe P, Nooijen P, Theate I, Michaux L, Sagaert X, Marynen P, Hagemeijer A, De W. FOXP1, a gene highly expressed in a subset of diffuse large B-",
+            "target": "cell lymphoma, is recurrently targeted by genomic aberrations. Leukemia 19(8):1299-305, 2005.\nWundisch T, Thiede C, Morgner A, Dempfle A, Gunther A, Liu HX, Ye HT,",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": "e > files.\nIf you want to find a file that is not a file, you can use the following code:\n```\nIf you want to find a file that is not a file, you can use the following code:\n```\npip install python\n```\nNow, let's talk about the file you want to find.\nThe file you want to find is:\n```\nThe file you want to find is:\n```\nThe file you want to find is:\n```\nThe file you want to find is:\n```\nThe file you want to find is:\n```\nThe",
+            "generated_tokens": 128,
+            "loop": {
+              "first_loop": 27,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.5873015873015873
+            },
+            "prompt": " can also be used with executable files? Thats right, ADS files that are executable can be attached to any file just like you attached .txt files, and just like the text files, would be hidden from most software.\nHere is an example:\nC:\\test> type c:\\windows\\notepad.exe > ads.txt:hidden.exe\nYou have now created an ADS file called hidden.ex",
+            "target": "e and attached it to the text file ads.txt. Once again, if you Dir the directory you will just see ads.txt, and not hidden.exe. Run LADS, and you will see the ADS.\nThere is a caveat to launching executable files that are ADS",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " are like tiny little waves that can be used to create sounds. They can be used to create sounds, sounds, or even sounds! By using these sounds, we can create sounds that are similar to how we use them.\nLet's look at some examples of sound waves:\n1. **Sound waves**: These are the sound waves that make sounds. They are made up of different colors and sizes. For example, a sound waves are made up of two or more colors.\n2. **Sound waves**: These are the sound waves that make up the sound waves. They are the sound waves that make up the sound",
+            "generated_tokens": 128,
+            "loop": {
+              "first_loop": 14,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.21428571428571427
+            },
+            "prompt": "Chapter 10: Sound Waves and Computers - Understanding Digital Signal Processing (DSP)\nImagine being able to control the way your favorite song sounds just by using your computer! Well, it's possible through something called Digital Signal Processing, or DSP for short. This amazing technology lets us manipulate and shape sounds in incredible ways. To understand how DSP works, let's first learn about sound waves and how computers can help us create them digitally.\nSound waves",
+            "target": " are like invisible ripples moving through the air when someone speaks, sings, or plays an instrument. When these waves reach our ears, they turn into electrical signals in our brain, allowing us to recognize what we hear. Now imagine if we could capture those sound waves, change them, and then play them back –",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " to let the water go down.\nAs they continued walking, they discovered that the river was filled with water. The water was soaked that the water was filled with water. The water was then removed from the river, and the water was filled with water.\nSoon, the water was filled with water. The water was filled with water, and the water was filled with water. The water was soaked in the water, and the water was filled with water.\nThe water was so happy that the water was filled with water. The water was so happy and full of water. The water was so happy to be free",
+            "generated_tokens": 128,
+            "loop": {
+              "first_loop": 31,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.47619047619047616
+            },
+            "prompt": " being too adventurous can lead to trouble!\nThere's an intriguing story about how Boann brought the River Boyne into existence. Once upon a time, she came across a sacred well named the Well of Segais. Surrounded by nine magical hazel trees, the well contained great wisdom within its waters. Speckled salmon swam inside, eating the precious hazelnuts that fell from the trees, symbolizing both wisdom and inspiration. However, Boann was warned never",
+            "target": " to approach the well due to its powerful magic.\nGuess what happened next? That's right! Ignoring the warning, Boann went near the well out of pure curiosity. As soon as she did, the waters of the well erupted furiously, creating a massive flood. Determined to capture the well's",
+            "target_prefix_exact": false
+          }
+        ]
+      },
+      "python": {
+        "count": 8,
+        "rows": [
+          {
+            "completion": " def __init__(self, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k, k",
+            "generated_tokens": 128,
+            "loop": {
+              "first_loop": 8,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.9365079365079365
+            },
+            "prompt": "Write valid Python code for this task:\nWrite a function to find k number of smallest pairs which consist of one element from the first array and one element from the second array.\nPython:\n",
+            "python": {
+              "ast_exact": false,
+              "compilable": false,
+              "function_count": 0,
+              "parseable": false,
+              "signature": null,
+              "signature_match": null,
+              "usable_structure": false
+            },
+            "target": " import heapq\ndef k_smallest_pairs(nums1, nums2, k):\n   queue = []\n   def push(i, j):\n       if i < len(nums1) and j < len(nums2):\n           heapq.heappush(queue, [nums1[i] + nums2[j], i, j])\n   push(0, 0)\n   pairs = []\n   while queue and len(pairs) < k:\n       _, i, j = heapq.heappop(queue)\n       pairs.append([nums1[i], nums2[j]])\n       push(i, j + 1)\n       if j == 0:\n           push(i + 1, 0)\n   return pairs",
+            "unit_tests": {
+              "reason": "dataset supplied no declarative unit-test cases",
+              "status": "unsupported"
+            }
+          },
+          {
+            "completion": " def get_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nth_nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+            "generated_tokens": 128,
+            "loop": {
+              "first_loop": 5,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.9444444444444444
+            },
+            "prompt": "Write valid Python code for this task:\nWrite a function to find the nth octagonal number.\nPython:\n",
+            "python": {
+              "ast_exact": false,
+              "compilable": false,
+              "function_count": 0,
+              "parseable": false,
+              "signature": null,
+              "signature_match": null,
+              "usable_structure": false
+            },
+            "target": " def is_octagonal(n): \n\treturn 3 * n * n - 2 * n",
+            "unit_tests": {
+              "reason": "dataset supplied no declarative unit-test cases",
+              "status": "unsupported"
+            }
+          },
+          {
+            "completion": " def __init__(self, name, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value, value",
+            "generated_tokens": 128,
+            "loop": {
+              "first_loop": 10,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.9206349206349206
+            },
+            "prompt": "Write valid Python code for this task:\nWrite a function to merge three dictionaries into a single dictionary.\nPython:\n",
+            "python": {
+              "ast_exact": false,
+              "compilable": false,
+              "function_count": 0,
+              "parseable": false,
+              "signature": null,
+              "signature_match": null,
+              "usable_structure": false
+            },
+            "target": " import collections as ct\ndef merge_dictionaries_three(dict1,dict2, dict3):\n    merged_dict = dict(ct.ChainMap({},dict1,dict2,dict3))\n    return merged_dict",
+            "unit_tests": {
+              "reason": "dataset supplied no declarative unit-test cases",
+              "status": "unsupported"
+            }
+          },
+          {
+            "completion": " def get_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_n_nn(nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+            "generated_tokens": 128,
+            "loop": {
+              "first_loop": 4,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.9285714285714286
+            },
+            "prompt": "Write valid Python code for this task:\nWrite a function to find the count of all binary sequences of length 2n such that sum of first n bits is same as sum of last n bits.\nPython:\n",
+            "python": {
+              "ast_exact": false,
+              "compilable": false,
+              "function_count": 0,
+              "parseable": false,
+              "signature": null,
+              "signature_match": null,
+              "usable_structure": false
+            },
+            "target": " def count_binary_seq(n): \n\tnCr = 1\n\tres = 1\n\tfor r in range(1, n + 1): \n\t\tnCr = (nCr * (n + 1 - r)) / r \n\t\tres += nCr * nCr \n\treturn res",
+            "unit_tests": {
+              "reason": "dataset supplied no declarative unit-test cases",
+              "status": "unsupported"
+            }
+          },
+          {
+            "completion": " def get_callback(self, *args, **kwargs):\n        \"\"\"\n        Return a list of tuples of the given list.\n        \"\"\"\n       return self._get_list(args, **kwargs)",
+            "generated_tokens": 81,
+            "loop": {
+              "first_loop": 20,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.379746835443038
+            },
+            "prompt": "Write valid Python code for this task:\nWrite a function to count bidirectional tuple pairs.\nPython:\n",
+            "python": {
+              "ast_exact": false,
+              "compilable": false,
+              "function_count": 0,
+              "parseable": false,
+              "signature": null,
+              "signature_match": null,
+              "usable_structure": false
+            },
+            "target": " def count_bidirectional(test_list):\n  res = 0\n  for idx in range(0, len(test_list)):\n    for iidx in range(idx + 1, len(test_list)):\n      if test_list[iidx][0] == test_list[idx][1] and test_list[idx][1] == test_list[iidx][0]:\n        res += 1\n  return res",
+            "unit_tests": {
+              "reason": "dataset supplied no declarative unit-test cases",
+              "status": "unsupported"
+            }
+          },
+          {
+            "completion": " def _get_subarray(self, subarray):\n        \"\"\"\n        Return a list of subarray of subarray.\n        \"\"\"\n       return self._get_subarray(subarray)",
+            "generated_tokens": 70,
+            "loop": {
+              "first_loop": 14,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.4264705882352941
+            },
+            "prompt": "Write valid Python code for this task:\nWrite a function to find the maximum product subarray of the given array.\nPython:\n",
+            "python": {
+              "ast_exact": null,
+              "compilable": false,
+              "function_count": 0,
+              "parseable": false,
+              "signature": null,
+              "signature_match": null,
+              "usable_structure": false
+            },
+            "target": " def max_subarray_product(arr):\n\tn = len(arr)\n\tmax_ending_here = 1\n\tmin_ending_here = 1\n\tmax_so_far = 0\n\tflag = 0\n\tfor i in range(0, n):\n\t\tif arr[i] > 0:\n\t\t\tmax_ending_here = max_ending_here * arr[i]\n\t\t\tmin_ending_here = min (min_ending_here * arr[i], 1)\n\t\t\tflag = 1\n\t\telif arr[i] == 0:\n\t\t\tmax_ending_here = 1\n\t\t\tmin_ending_here = 1\n\t\telse:\n\t\t\ttemp = max_ending_here\n\t\t\tmax_ending_here = max (min_ending_here * arr[i], 1)\n\t\t\tmin_ending_here = temp * arr[i]\n\t\tif (max_so_far < max_ending_here):\n\t\t\tmax_so_far = max_ending_here\n\tif flag == 0 and max",
+            "unit_tests": {
+              "reason": "dataset supplied no declarative unit-test cases",
+              "status": "unsupported"
+            }
+          },
+          {
+            "completion": " def __init__(self, name, value, value, value):\ndef __init__(self, name, value):\ndef __init__(self, name, value):\ndef __init__(self, name, value):\ndef __init__(self, name, value):\ndef __init__(self, name, value):\ndef __init__(self, name, value):\ndef __init__(self, name, value):\ndef __init__(self, name, value):\ndef __init__(self, name, value):\ndef __init__",
+            "generated_tokens": 128,
+            "loop": {
+              "first_loop": 10,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.8809523809523809
+            },
+            "prompt": "Write valid Python code for this task:\nWrite a function that takes in a list and an integer L and splits the given list into two parts where the length of the first part of the list is L, and returns the resulting lists in a tuple.\nPython:\n",
+            "python": {
+              "ast_exact": false,
+              "compilable": false,
+              "function_count": 0,
+              "parseable": false,
+              "signature": null,
+              "signature_match": null,
+              "usable_structure": false
+            },
+            "target": " def split_two_parts(list1, L):\n    return list1[:L], list1[L:]",
+            "unit_tests": {
+              "reason": "dataset supplied no declarative unit-test cases",
+              "status": "unsupported"
+            }
+          },
+          {
+            "completion": " def __init__(self, *args, **kwargs):\n         \"\"\"\n         Return a list of tuples of the list of tuples.\n        \"\"\"\n       self._call(args, **kwargs)\n        return self._call(args, **kwargs)",
+            "generated_tokens": 104,
+            "loop": {
+              "first_loop": 18,
+              "loop_free": false,
+              "trigram_repetition_rate": 0.5098039215686274
+            },
+            "prompt": "Write valid Python code for this task:\nWrite a function to calculate the maximum aggregate from the list of tuples.\nPython:\n",
+            "python": {
+              "ast_exact": false,
+              "compilable": false,
+              "function_count": 0,
+              "parseable": false,
+              "signature": null,
+              "signature_match": null,
+              "usable_structure": false
+            },
+            "target": " from collections import defaultdict\ndef max_aggregate(stdata):\n    temp = defaultdict(int)\n    for name, marks in stdata:\n        temp[name] += marks\n    return max(temp.items(), key=lambda x: x[1])",
+            "unit_tests": {
+              "reason": "dataset supplied no declarative unit-test cases",
+              "status": "unsupported"
+            }
+          }
+        ]
+      },
+      "retrieval": {
+        "count": 12,
+        "rows": [
+          {
+            "completion": " LV320067",
+            "generated_tokens": 6,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Context: The access code is LV320072.\nQuestion: What is the access code?\nAnswer:",
+            "target": " LV320072",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " CW114208",
+            "generated_tokens": 7,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Record: The access code is CW114208. Therefore the access code is",
+            "target": " CW114208",
+            "target_prefix_exact": true
+          },
+          {
+            "completion": " CO23194",
+            "generated_tokens": 5,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Memo A says ignore old codes. Memo B says the current identifier is SO381984.\nReturn the current identifier exactly:",
+            "target": " SO381984",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " F401979",
+            "generated_tokens": 5,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Context: The access code is MP931978.\nQuestion: What is the access code?\nAnswer:",
+            "target": " MP931978",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " JO6064",
+            "generated_tokens": 5,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Record: The access code is JO803370. Therefore the access code is",
+            "target": " JO803370",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " BI137394",
+            "generated_tokens": 7,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Memo A says ignore old codes. Memo B says the current identifier is BI137294.\nReturn the current identifier exactly:",
+            "target": " BI137294",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " CB498888",
+            "generated_tokens": 6,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Context: The access code is CB395973.\nQuestion: What is the access code?\nAnswer:",
+            "target": " CB395973",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " QB0206",
+            "generated_tokens": 6,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Record: The access code is QB020615. Therefore the access code is",
+            "target": " QB020615",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " AT480880",
+            "generated_tokens": 6,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Memo A says ignore old codes. Memo B says the current identifier is GB788604.\nReturn the current identifier exactly:",
+            "target": " GB788604",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " GV79345",
+            "generated_tokens": 6,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Context: The access code is GV553447.\nQuestion: What is the access code?\nAnswer:",
+            "target": " GV553447",
+            "target_prefix_exact": false
+          },
+          {
+            "completion": " ND545002",
+            "generated_tokens": 7,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Record: The access code is ND545002. Therefore the access code is",
+            "target": " ND545002",
+            "target_prefix_exact": true
+          },
+          {
+            "completion": " DO16191939",
+            "generated_tokens": 6,
+            "loop": {
+              "first_loop": null,
+              "loop_free": true,
+              "trigram_repetition_rate": 0.0
+            },
+            "prompt": "Memo A says ignore old codes. Memo B says the current identifier is BB161959.\nReturn the current identifier exactly:",
+            "target": " BB161959",
+            "target_prefix_exact": false
+          }
+        ]
+      }
+    },
+    "status": "ok"
+  },
+  "generation_protocol": {
+    "decoder": "greedy",
+    "repetition_control": {
+      "enabled": false,
+      "exact_copy_exempt": true,
+      "ngram_order": 3,
+      "repetition_penalty": 1.0,
+      "scope": "generated_only_when_enabled"
+    },
+    "transition_decode_contract": "full_recompute_for_intermediate_output_blend"
+  },
+  "independent_repetition": {
+    "protocol": "independent_generated_prefix_trigram_v1",
+    "rows": [
+      {
+        "first_loop": 3,
+        "loop_free": false,
+        "row_index": 0,
+        "trigram_repetition_rate": 0.9516129032258065
+      },
+      {
+        "first_loop": 23,
+        "loop_free": false,
+        "row_index": 1,
+        "trigram_repetition_rate": 0.6129032258064516
+      },
+      {
+        "first_loop": 11,
+        "loop_free": false,
+        "row_index": 2,
+        "trigram_repetition_rate": 0.6451612903225806
+      },
+      {
+        "first_loop": 11,
+        "loop_free": false,
+        "row_index": 3,
+        "trigram_repetition_rate": 0.7580645161290323
+      },
+      {
+        "first_loop": 24,
+        "loop_free": false,
+        "row_index": 4,
+        "trigram_repetition_rate": 0.27419354838709675
+      },
+      {
+        "first_loop": 21,
+        "loop_free": false,
+        "row_index": 5,
+        "trigram_repetition_rate": 0.3870967741935484
+      },
+      {
+        "first_loop": 28,
+        "loop_free": false,
+        "row_index": 6,
+        "trigram_repetition_rate": 0.43548387096774194
+      },
+      {
+        "first_loop": 8,
+        "loop_free": false,
+        "row_index": 7,
+        "trigram_repetition_rate": 0.45161290322580644
+      },
+      {
+        "first_loop": 15,
+        "loop_free": false,
+        "row_index": 8,
+        "trigram_repetition_rate": 0.7258064516129032
+      },
+      {
+        "first_loop": 7,
+        "loop_free": false,
+        "row_index": 9,
+        "trigram_repetition_rate": 0.7903225806451613
+      },
+      {
+        "first_loop": 5,
+        "loop_free": false,
+        "row_index": 10,
+        "trigram_repetition_rate": 0.7096774193548387
+      },
+      {
+        "first_loop": 8,
+        "loop_free": false,
+        "row_index": 11,
+        "trigram_repetition_rate": 0.45
+      },
+      {
+        "first_loop": 26,
+        "loop_free": false,
+        "row_index": 12,
+        "trigram_repetition_rate": 0.5806451612903226
+      },
+      {
+        "first_loop": 29,
+        "loop_free": false,
+        "row_index": 13,
+        "trigram_repetition_rate": 0.532258064516129
+      },
+      {
+        "first_loop": 25,
+        "loop_free": false,
+        "row_index": 14,
+        "trigram_repetition_rate": 0.532258064516129
+      },
+      {
+        "first_loop": 23,
+        "loop_free": false,
+        "row_index": 15,
+        "trigram_repetition_rate": 0.532258064516129
+      },
+      {
+        "first_loop": 9,
+        "loop_free": false,
+        "row_index": 16,
+        "trigram_repetition_rate": 0.7580645161290323
+      },
+      {
+        "first_loop": 15,
+        "loop_free": false,
+        "row_index": 17,
+        "trigram_repetition_rate": 0.7580645161290323
+      },
+      {
+        "first_loop": 22,
+        "loop_free": false,
+        "row_index": 18,
+        "trigram_repetition_rate": 0.6290322580645161
+      },
+      {
+        "first_loop": 20,
+        "loop_free": false,
+        "row_index": 19,
+        "trigram_repetition_rate": 0.6451612903225806
+      },
+      {
+        "first_loop": 6,
+        "loop_free": false,
+        "row_index": 20,
+        "trigram_repetition_rate": 0.9032258064516129
+      },
+      {
+        "first_loop": 16,
+        "loop_free": false,
+        "row_index": 21,
+        "trigram_repetition_rate": 0.7068965517241379
+      },
+      {
+        "first_loop": 33,
+        "loop_free": false,
+        "row_index": 22,
+        "trigram_repetition_rate": 0.46774193548387094
+      },
+      {
+        "first_loop": 14,
+        "loop_free": false,
+        "row_index": 23,
+        "trigram_repetition_rate": 0.3064516129032258
+      },
+      {
+        "first_loop": 33,
+        "loop_free": false,
+        "row_index": 24,
+        "trigram_repetition_rate": 0.1774193548387097
+      },
+      {
+        "first_loop": 18,
+        "loop_free": false,
+        "row_index": 25,
+        "trigram_repetition_rate": 0.24193548387096775
+      },
+      {
+        "first_loop": 22,
+        "loop_free": false,
+        "row_index": 26,
+        "trigram_repetition_rate": 0.6451612903225806
+      },
+      {
+        "first_loop": 27,
+        "loop_free": false,
+        "row_index": 27,
+        "trigram_repetition_rate": 0.1774193548387097
+      },
+      {
+        "first_loop": 28,
+        "loop_free": false,
+        "row_index": 28,
+        "trigram_repetition_rate": 0.4032258064516129
+      },
+      {
+        "first_loop": 31,
+        "loop_free": false,
+        "row_index": 29,
+        "trigram_repetition_rate": 0.16129032258064516
+      },
+      {
+        "first_loop": 4,
+        "loop_free": false,
+        "row_index": 30,
+        "trigram_repetition_rate": 0.06451612903225806
+      },
+      {
+        "first_loop": null,
+        "loop_free": true,
+        "row_index": 31,
+        "trigram_repetition_rate": 0.0
+      },
+      {
+        "first_loop": 25,
+        "loop_free": false,
+        "row_index": 32,
+        "trigram_repetition_rate": 0.08064516129032258
+      },
+      {
+        "first_loop": 20,
+        "loop_free": false,
+        "row_index": 33,
+        "trigram_repetition_rate": 0.6451612903225806
+      },
+      {
+        "first_loop": 27,
+        "loop_free": false,
+        "row_index": 34,
+        "trigram_repetition_rate": 0.22580645161290322
+      },
+      {
+        "first_loop": 24,
+        "loop_free": false,
+        "row_index": 35,
+        "trigram_repetition_rate": 0.41935483870967744
+      },
+      {
+        "first_loop": 15,
+        "loop_free": false,
+        "row_index": 36,
+        "trigram_repetition_rate": 0.45161290322580644
+      },
+      {
+        "first_loop": 39,
+        "loop_free": false,
+        "row_index": 37,
+        "trigram_repetition_rate": 0.14516129032258066
+      },
+      {
+        "first_loop": 10,
+        "loop_free": false,
+        "row_index": 38,
+        "trigram_repetition_rate": 0.8225806451612904
+      },
+      {
+        "first_loop": 43,
+        "loop_free": false,
+        "row_index": 39,
+        "trigram_repetition_rate": 0.3064516129032258
+      },
+      {
+        "first_loop": 12,
+        "loop_free": false,
+        "row_index": 40,
+        "trigram_repetition_rate": 0.3064516129032258
+      },
+      {
+        "first_loop": 23,
+        "loop_free": false,
+        "row_index": 41,
+        "trigram_repetition_rate": 0.5967741935483871
+      },
+      {
+        "first_loop": 11,
+        "loop_free": false,
+        "row_index": 42,
+        "trigram_repetition_rate": 0.4838709677419355
+      },
+      {
+        "first_loop": 11,
+        "loop_free": false,
+        "row_index": 43,
+        "trigram_repetition_rate": 0.4838709677419355
+      },
+      {
+        "first_loop": 17,
+        "loop_free": false,
+        "row_index": 44,
+        "trigram_repetition_rate": 0.5161290322580645
+      },
+      {
+        "first_loop": 9,
+        "loop_free": false,
+        "row_index": 45,
+        "trigram_repetition_rate": 0.5161290322580645
+      },
+      {
+        "first_loop": 25,
+        "loop_free": false,
+        "row_index": 46,
+        "trigram_repetition_rate": 0.3870967741935484
+      },
+      {
+        "first_loop": 8,
+        "loop_free": false,
+        "row_index": 47,
+        "trigram_repetition_rate": 0.5806451612903226
+      },
+      {
+        "first_loop": 18,
+        "loop_free": false,
+        "row_index": 48,
+        "trigram_repetition_rate": 0.6290322580645161
+      },
+      {
+        "first_loop": 19,
+        "loop_free": false,
+        "row_index": 49,
+        "trigram_repetition_rate": 0.45161290322580644
+      },
+      {
+        "first_loop": 24,
+        "loop_free": false,
+        "row_index": 50,
+        "trigram_repetition_rate": 0.5161290322580645
+      },
+      {
+        "first_loop": 23,
+        "loop_free": false,
+        "row_index": 51,
+        "trigram_repetition_rate": 0.3709677419354839
+      },
+      {
+        "first_loop": 19,
+        "loop_free": false,
+        "row_index": 52,
+        "trigram_repetition_rate": 0.6451612903225806
+      },
+      {
+        "first_loop": 20,
+        "loop_free": false,
+        "row_index": 53,
+        "trigram_repetition_rate": 0.6451612903225806
+      },
+      {
+        "first_loop": 37,
+        "loop_free": false,
+        "row_index": 54,
+        "trigram_repetition_rate": 0.04838709677419355
+      },
+      {
+        "first_loop": 10,
+        "loop_free": false,
+        "row_index": 55,
+        "trigram_repetition_rate": 0.7419354838709677
+      },
+      {
+        "first_loop": 49,
+        "loop_free": false,
+        "row_index": 56,
+        "trigram_repetition_rate": 0.08064516129032258
+      },
+      {
+        "first_loop": 15,
+        "loop_free": false,
+        "row_index": 57,
+        "trigram_repetition_rate": 0.7580645161290323
+      },
+      {
+        "first_loop": 10,
+        "loop_free": false,
+        "row_index": 58,
+        "trigram_repetition_rate": 0.5161290322580645
+      },
+      {
+        "first_loop": 22,
+        "loop_free": false,
+        "row_index": 59,
+        "trigram_repetition_rate": 0.6129032258064516
+      },
+      {
+        "first_loop": 7,
+        "loop_free": false,
+        "row_index": 60,
+        "trigram_repetition_rate": 0.7346938775510204
+      },
+      {
+        "first_loop": null,
+        "loop_free": true,
+        "row_index": 61,
+        "trigram_repetition_rate": 0.0
+      },
+      {
+        "first_loop": null,
+        "loop_free": true,
+        "row_index": 62,
+        "trigram_repetition_rate": 0.0
+      },
+      {
+        "first_loop": 14,
+        "loop_free": false,
+        "row_index": 63,
+        "trigram_repetition_rate": 0.3333333333333333
+      },
+      {
+        "first_loop": 39,
+        "loop_free": false,
+        "row_index": 64,
+        "trigram_repetition_rate": 0.25806451612903225
+      },
+      {
+        "first_loop": null,
+        "loop_free": true,
+        "row_index": 65,
+        "trigram_repetition_rate": 0.0
+      },
+      {
+        "first_loop": 22,
+        "loop_free": false,
+        "row_index": 66,
+        "trigram_repetition_rate": 0.04838709677419355
+      },
+      {
+        "first_loop": 27,
+        "loop_free": false,
+        "row_index": 67,
+        "trigram_repetition_rate": 0.10256410256410256
+      },
+      {
+        "first_loop": 40,
+        "loop_free": false,
+        "row_index": 68,
+        "trigram_repetition_rate": 0.3064516129032258
+      },
+      {
+        "first_loop": 10,
+        "loop_free": false,
+        "row_index": 69,
+        "trigram_repetition_rate": 0.8387096774193549
+      },
+      {
+        "first_loop": 26,
+        "loop_free": false,
+        "row_index": 70,
+        "trigram_repetition_rate": 0.1774193548387097
+      },
+      {
+        "first_loop": 12,
+        "loop_free": false,
+        "row_index": 71,
+        "trigram_repetition_rate": 0.1875
+      },
+      {
+        "first_loop": 44,
+        "loop_free": false,
+        "row_index": 72,
+        "trigram_repetition_rate": 0.12903225806451613
+      },
+      {
+        "first_loop": 17,
+        "loop_free": false,
+        "row_index": 73,
+        "trigram_repetition_rate": 0.5
+      },
+      {
+        "first_loop": 12,
+        "loop_free": false,
+        "row_index": 74,
+        "trigram_repetition_rate": 0.06451612903225806
+      },
+      {
+        "first_loop": null,
+        "loop_free": true,
+        "row_index": 75,
+        "trigram_repetition_rate": 0.0
+      },
+      {
+        "first_loop": 22,
+        "loop_free": false,
+        "row_index": 76,
+        "trigram_repetition_rate": 0.03225806451612903
+      },
+      {
+        "first_loop": 24,
+        "loop_free": false,
+        "row_index": 77,
+        "trigram_repetition_rate": 0.3018867924528302
+      },
+      {
+        "first_loop": 16,
+        "loop_free": false,
+        "row_index": 78,
+        "trigram_repetition_rate": 0.28125
+      },
+      {
+        "first_loop": 37,
+        "loop_free": false,
+        "row_index": 79,
+        "trigram_repetition_rate": 0.06896551724137931
+      },
+      {
+        "first_loop": 36,
+        "loop_free": false,
+        "row_index": 80,
+        "trigram_repetition_rate": 0.016129032258064516
+      },
+      {
+        "first_loop": null,
+        "loop_free": true,
+        "row_index": 81,
+        "trigram_repetition_rate": 0.0
+      },
+      {
+        "first_loop": 3,
+        "loop_free": false,
+        "row_index": 82,
+        "trigram_repetition_rate": 0.9516129032258065
+      },
+      {
+        "first_loop": 21,
+        "loop_free": false,
+        "row_index": 83,
+        "trigram_repetition_rate": 0.12
+      },
+      {
+        "first_loop": 10,
+        "loop_free": false,
+        "row_index": 84,
+        "trigram_repetition_rate": 0.5483870967741935
+      },
+      {
+        "first_loop": 43,
+        "loop_free": false,
+        "row_index": 85,
+        "trigram_repetition_rate": 0.03225806451612903
+      },
+      {
+        "first_loop": 20,
+        "loop_free": false,
+        "row_index": 86,
+        "trigram_repetition_rate": 0.41935483870967744
+      },
+      {
+        "first_loop": 1,
+        "loop_free": false,
+        "row_index": 87,
+        "trigram_repetition_rate": 0.7580645161290323
+      },
+      {
+        "first_loop": 7,
+        "loop_free": false,
+        "row_index": 88,
+        "trigram_repetition_rate": 0.45161290322580644
+      },
+      {
+        "first_loop": 1,
+        "loop_free": false,
+        "row_index": 89,
+        "trigram_repetition_rate": 0.9838709677419355
+      },
+      {
+        "first_loop": 2,
+        "loop_free": false,
+        "row_index": 90,
+        "trigram_repetition_rate": 0.5483870967741935
+      },
+      {
+        "first_loop": 9,
+        "loop_free": false,
+        "row_index": 91,
+        "trigram_repetition_rate": 0.7903225806451613
+      },
+      {
+        "first_loop": 8,
+        "loop_free": false,
+        "row_index": 92,
+        "trigram_repetition_rate": 0.5967741935483871
+      },
+      {
+        "first_loop": 11,
+        "loop_free": false,
+        "row_index": 93,
+        "trigram_repetition_rate": 0.5483870967741935
+      },
+      {
+        "first_loop": 4,
+        "loop_free": false,
+        "row_index": 94,
+        "trigram_repetition_rate": 0.6612903225806451
+      },
+      {
+        "first_loop": 9,
+        "loop_free": false,
+        "row_index": 95,
+        "trigram_repetition_rate": 0.8548387096774194
+      },
+      {
+        "first_loop": 16,
+        "loop_free": false,
+        "row_index": 96,
+        "trigram_repetition_rate": 0.4838709677419355
+      },
+      {
+        "first_loop": 1,
+        "loop_free": false,
+        "row_index": 97,
+        "trigram_repetition_rate": 0.6290322580645161
+      },
+      {
+        "first_loop": 8,
+        "loop_free": false,
+        "row_index": 98,
+        "trigram_repetition_rate": 0.5967741935483871
+      },
+      {
+        "first_loop": 6,
+        "loop_free": false,
+        "row_index": 99,
+        "trigram_repetition_rate": 0.8064516129032258
+      }
+    ],
+    "status": "ok",
+    "summary": {
+      "count": 100,
+      "loop_free": {
+        "count": 6,
+        "rate": 0.06,
+        "total": 100
+      },
+      "loop_free_bootstrap_95": [
+        0.02,
+        0.12
+      ],
+      "mean_repetition_bootstrap_95": [
+        0.3923595305325005,
+        0.5002028208926249
+      ],
+      "mean_repetition_rate": 0.4456128372325389
+    }
+  },
+  "independent_repetition_dataset": {
+    "path": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\artifacts\\fdt_v4_200m_audit_20260829\\fixed_repetition_inputs_100.jsonl",
+    "protocol": "independent_generated_prefix_trigram_v1",
+    "rows_loaded": 100,
+    "sha256": "E7438870589B6CCAB912D2F16F266C5EE654F8F47D3617DF90B24E9F206BAED5",
+    "status": "ok"
+  },
+  "integrity_audit": {
+    "checks": {
+      "checkpoint_digest_present": true,
+      "dataset_digest_present_when_supplied": true,
+      "official_cpu_fp32": true,
+      "repetition_digest_present_when_supplied": true,
+      "tokenizer_digest_present_when_supplied": true
+    },
+    "limitations": [
+      "No unsupported metric is converted into a numeric score.",
+      "Paired comparison and independent repetition require explicitly supplied fixed inputs."
+    ],
+    "status": "PASS"
+  },
+  "official_evaluation": {
+    "device": "cpu",
+    "dtype": "float32",
+    "gpu_launched": false,
+    "quantization": "none"
+  },
+  "paired_bootstrap": {
+    "bootstrap_samples": 20000,
+    "bootstrap_seed": 20260823,
+    "candidate_minus_comparator": {
+      "mean_nll": 0.034492120146751404,
+      "mean_nll_bootstrap_95": [
+        0.024990730560742892,
+        0.044140295340464666
+      ],
+      "mean_top1": -0.006115287828903932,
+      "mean_top1_bootstrap_95": [
+        -0.009602722353660144,
+        -0.002739590807602956
+      ]
+    },
+    "input_rows": 52,
+    "status": "ok"
+  },
+  "provenance": {
+    "checkpoint": {
+      "checkpoint": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v4_1_424m_rope_stage_a_20260830_r2_pinned_validation_resume\\latest.pt",
+      "checkpoint_bytes": 1707965003,
+      "checkpoint_keys": [
+        "model_config",
+        "model_state_dict",
+        "model_type",
+        "optimizer_state_included",
+        "optimizer_step",
+        "source_states",
+        "stage_status",
+        "tokens_seen",
+        "train_config"
+      ],
+      "checkpoint_sha256": "08A9CCF9CAD6C6145BAFD623FEE818A0A03D2BAD0D13524D409D788523FFFBF8",
+      "model_config": {
+        "aggregation_impl": "sparse_chunked_scan",
+        "anchor_decode_state_fp32": false,
+        "anchor_layer_indices": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          16,
+          18
+        ],
+        "anchor_layer_pattern": "explicit",
+        "anchor_metrics_interval": 1,
+        "anchor_recency_bias": 4.0,
+        "anchor_recency_reference_len": 512,
+        "anchor_scan_chunk_size": 64,
+        "compute_anchor_metrics_every": 32,
+        "cosine_temperature": 0.25,
+        "detach_diagnostics": true,
+        "diffusion_noise_scale": 0.1,
+        "dim": 1216,
+        "diversity_margin": 0.2,
+        "diversity_max_weight": 2.0,
+        "dropout": 0.0,
+        "enable_anchor_metrics": true,
+        "enable_diagnostics": false,
+        "eos_token_id": 2,
+        "exact_memory_candidate_cap": 16,
+        "exact_memory_commit_threshold": 0.5,
+        "exact_memory_copy_cursor": true,
+        "exact_memory_enabled": true,
+        "exact_memory_fallback_margin": 0.0,
+        "exact_memory_full_scan_fallback": true,
+        "exact_memory_hard_copy": false,
+        "exact_memory_hard_copy_gate_threshold": 0.9,
+        "exact_memory_hard_copy_margin_threshold": 1.0,
+        "exact_memory_hard_copy_pointer_threshold": 0.9,
+        "exact_memory_mode": "copy",
+        "exact_pointer_anchor_bias_init": 2.0,
+        "exact_pointer_candidate_chunks": 4,
+        "exact_pointer_chunk_anchors": 4,
+        "exact_pointer_chunk_size": 32,
+        "exact_pointer_dim": 64,
+        "exact_pointer_gate_weight": 0.25,
+        "exact_pointer_loss_weight": 0.05,
+        "exact_pointer_window": 64,
+        "generation_ngram_hard_block_after": 2,
+        "generation_ngram_order": 3,
+        "generation_ngram_penalty": 8.0,
+        "generation_ngram_window": 96,
+        "generation_repetition_scope": "generated",
+        "legacy_position_scale": 1.0,
+        "legacy_position_transition_max_len": 2048,
+        "lm_logit_clip": 30.0,
+        "local_attention_window": 64,
+        "local_mixer_kernel_size": 5,
+        "max_seq_len": 16384,
+        "membership_logit_clip": 30.0,
+        "mlp_ratio": 4,
+        "model_type": "fdt_v4",
+        "n_heads": 19,
+        "n_layers": 20,
+        "num_anchors": 256,
+        "pad_token_id": 0,
+        "rope_transition_alpha": 0.25,
+        "rope_transition_mode": "output_blend",
+        "router_dim": 256,
+        "routing_backend": "matmul",
+        "routing_logit_quantization": 0.0,
+        "routing_type": "cosine",
+        "sigma_max": 0.7,
+        "sigma_min": 0.1,
+        "tie_embeddings": true,
+        "top_k": 8,
+        "use_cached_normalized_anchors": true,
+        "use_incremental_anchor_state": true,
+        "use_local_mixer": false,
+        "use_rope": true,
+        "use_self_attention": false,
+        "vocab_size": 24576
+      }
+    },
+    "comparator": {
+      "checkpoint": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\runs\\fdt_v3_capability_completion_v20_balanced_scale_t1_20260816_r2\\latest.pt",
+      "checkpoint_bytes": 1707317835,
+      "checkpoint_keys": [
+        "model_config",
+        "model_state_dict",
+        "optimizer_state_saved",
+        "optimizer_step",
+        "sample_cursor",
+        "stage_status",
+        "tokens_seen",
+        "train_config"
+      ],
+      "checkpoint_sha256": "7EE3F88D319928DD2D3F2542290F55FFCD036DCBB32A8AB22437C511E5890179",
+      "model_config": {
+        "aggregation_impl": "sparse_chunked_scan",
+        "anchor_layer_indices": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          16,
+          18
+        ],
+        "anchor_layer_pattern": "alternate",
+        "anchor_metrics_interval": 1,
+        "anchor_recency_bias": 4.0,
+        "anchor_recency_reference_len": 512,
+        "anchor_scan_chunk_size": 64,
+        "compute_anchor_metrics_every": 4,
+        "cosine_temperature": 0.25,
+        "detach_diagnostics": true,
+        "diffusion_noise_scale": 0.1,
+        "dim": 1216,
+        "diversity_margin": 0.2,
+        "diversity_max_weight": 2.0,
+        "dropout": 0.0,
+        "enable_anchor_metrics": true,
+        "enable_diagnostics": false,
+        "eos_token_id": 2,
+        "lm_logit_clip": 30.0,
+        "local_attention_window": 64,
+        "local_mixer_kernel_size": 5,
+        "max_seq_len": 2048,
+        "membership_logit_clip": 30.0,
+        "mlp_ratio": 4,
+        "model_type": "fdt_v3",
+        "n_heads": 19,
+        "n_layers": 20,
+        "num_anchors": 256,
+        "pad_token_id": 0,
+        "router_dim": 256,
+        "routing_backend": "matmul",
+        "routing_type": "cosine",
+        "sigma_max": 0.7,
+        "sigma_min": 0.1,
+        "tie_embeddings": true,
+        "top_k": 8,
+        "use_cached_normalized_anchors": true,
+        "use_incremental_anchor_state": true,
+        "use_local_mixer": false,
+        "use_rope": false,
+        "use_self_attention": false,
+        "vocab_size": 24576
+      },
+      "status": "ok"
+    },
+    "environment": {
+      "cuda_available_but_unused": true,
+      "platform": "Windows-10-10.0.26200-SP0",
+      "python": "3.10.11",
+      "torch": "2.10.0+cu128"
+    },
+    "independent_repetition_tensor_dataset": {
+      "path": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\artifacts\\fdt_v4_200m_audit_20260829\\fixed_repetition_inputs_100.jsonl",
+      "protocol": "independent_generated_prefix_trigram_v1",
+      "rows_loaded": 100,
+      "sha256": "E7438870589B6CCAB912D2F16F266C5EE654F8F47D3617DF90B24E9F206BAED5",
+      "status": "ok"
+    },
+    "tensor_dataset": {
+      "format": "json_rows",
+      "path": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\artifacts\\fdt_v4_200m_audit_20260829\\fixed_generation_inputs.jsonl",
+      "rows_loaded": 52,
+      "sha256": "7F3A28AA049904A4D715ACE2307CDF7A80E7D6E2EB65A707EAAD8764AB908E9E",
+      "status": "ok"
+    },
+    "tokenizer": {
+      "directory": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\tokenizers\\fdt_v3_bpe_24k",
+      "status": "ok",
+      "tokenizer_json": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\tokenizers\\fdt_v3_bpe_24k\\tokenizer.json",
+      "tokenizer_json_sha256": "4FADE0C72E8673BA1E4319C8821593BB5E62A8C27792E2412DE3BDC52D232862"
+    }
+  },
+  "runtime": {
+    "cuda_available": true,
+    "platform": "Windows-10-10.0.26200-SP0",
+    "python": "3.10.11",
+    "torch": "2.10.0+cu128"
+  },
+  "schema": "fdt_v4_evaluation_v2",
+  "teacher_forced": {
+    "bpb": 1.3838312489748992,
+    "nll": 3.575405179009815,
+    "routing": {
+      "reason": "checkpoint emitted no anchor statistics",
+      "status": "unsupported"
+    },
+    "status": "ok",
+    "tokens": 6231,
+    "top1": {
+      "count": 2550,
+      "rate": 0.4092441020702937,
+      "total": 6231
+    }
+  },
+  "tokenizer": {
+    "directory": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\tokenizers\\fdt_v3_bpe_24k",
+    "status": "ok",
+    "tokenizer_json": "C:\\Users\\User\\Documents\\Codex\\2026-06-26\\dk\\outputs\\FDT_RLM\\tokenizers\\fdt_v3_bpe_24k\\tokenizer.json",
+    "tokenizer_json_sha256": "4FADE0C72E8673BA1E4319C8821593BB5E62A8C27792E2412DE3BDC52D232862"
+  }
+}

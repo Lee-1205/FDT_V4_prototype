@@ -80,6 +80,25 @@ def test_exact_ablation_semantics_do_not_mix_retrieve_logits():
     assert off == store
 
 
+def test_intermediate_output_blend_uses_full_recompute_generation():
+    module = load_module("evaluate_fdt_v4_output_blend_test", "scripts/evaluate_fdt_v4.py")
+    config = tiny_config()
+    config.rope_transition_mode = "output_blend"
+    config.rope_transition_alpha = 0.25
+    config.legacy_position_scale = 1.0
+    model = build_model(config).eval()
+    generated, trace = module.generate(model, config, [2, 3, 4], 3, "off")
+    assert generated
+    assert all(item["decode_backend"] == "full_recompute" for item in trace)
+    cache_result = module.cache_integrity(
+        model,
+        config,
+        [{"input_ids": [2, 3, 4, 5]}],
+    )
+    assert cache_result["status"] == "unsupported"
+    assert "alpha endpoints" in cache_result["reason"]
+
+
 def test_cpu_fp32_evaluation_writes_atomic_result(tmp_path):
     module = load_module("evaluate_fdt_v4_cpu_test", "scripts/evaluate_fdt_v4.py")
     checkpoint = tmp_path / "tiny.pt"
@@ -106,6 +125,38 @@ def test_cpu_fp32_evaluation_writes_atomic_result(tmp_path):
         "REPRODUCIBILITY",
     }
     assert result["audit_axes"]["PERFORMANCE"]["status"] == "NOT_TESTED"
+
+
+def test_json_dataset_without_tokenizer_cannot_silently_evaluate_zero_rows(tmp_path):
+    module = load_module("evaluate_fdt_v4_empty_rows_test", "scripts/evaluate_fdt_v4.py")
+    dataset = tmp_path / "rows.jsonl"
+    dataset.write_text(json.dumps({"prompt": "Question:", "target": " answer"}) + "\n", encoding="utf-8")
+    rows = module.load_dataset(dataset, tokenizer=None, limit=1)
+    assert rows == []
+    try:
+        module.require_nonempty_rows(rows, dataset, "evaluation")
+    except ValueError as exc:
+        assert "require --tokenizer" in str(exc)
+    else:
+        raise AssertionError("zero-row evaluation dataset unexpectedly accepted")
+
+
+def test_exact_memory_audit_can_be_explicitly_deferred(tmp_path):
+    module = load_module("evaluate_fdt_v4_deferred_exact_test", "scripts/evaluate_fdt_v4.py")
+    checkpoint = tmp_path / "tiny.pt"
+    dataset = tmp_path / "rows.pt"
+    output = tmp_path / "result.json"
+    make_checkpoint(checkpoint)
+    torch.save({"input_ids": torch.tensor([[2, 3, 4, 5]])}, dataset)
+    result = module.evaluate(
+        checkpoint,
+        output,
+        dataset_path=dataset,
+        dataset_limit=1,
+        run_exact_memory=False,
+    )
+    assert result["exact_memory"]["status"] == "unsupported"
+    assert "separately preserved" in result["exact_memory"]["reason"]
 
 
 def test_terra_handoff_checks_digest_and_emits_integrity(tmp_path):

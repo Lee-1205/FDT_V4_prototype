@@ -26,6 +26,20 @@ def test_explicit_span_map_is_loaded_without_heuristic_resegmentation(tmp_path):
     assert ends.tolist() == [[2, 2, 2, 4, 4]]
 
 
+def test_product_loop_penalty_uses_calibrated_floor_unless_explicitly_disabled():
+    module = load_module()
+    assert module.resolve_ngram_loop_penalty(8.0, None) == 13.0
+    assert module.resolve_ngram_loop_penalty(20.0, None) == 20.0
+    assert module.resolve_ngram_loop_penalty(8.0, 0.0) == 0.0
+
+
+def test_exact_copy_requires_an_explicit_span_contract():
+    module = load_module()
+    assert not module.exact_copy_contract_enabled(True, "copy", None)
+    assert not module.exact_copy_contract_enabled(False, "copy", torch.ones(1, 1))
+    assert module.exact_copy_contract_enabled(True, "copy", torch.ones(1, 1))
+
+
 def test_free_generation_receives_token_and_ngram_loop_controls():
     module = load_module()
     logits = torch.zeros(1, 20)

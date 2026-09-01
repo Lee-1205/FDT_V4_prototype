@@ -43,6 +43,7 @@ class RotaryEmbedding(nn.Module):
         if dim % 2 != 0:
             raise ValueError("RoPE head dimension must be even.")
         inv_freq = 1.0 / (base ** (torch.arange(0, dim, 2).float() / dim))
+        self.register_buffer("inv_freq", inv_freq, persistent=False)
         positions = torch.arange(max_seq_len).float()
         freqs = torch.einsum("n,d->nd", positions, inv_freq)
         emb = torch.cat((freqs, freqs), dim=-1)

@@ -1,0 +1,128 @@
+{
+  "schema": "fdt_v4_1_resume_repair_decision_v1",
+  "date": "2026-09-01",
+  "decision": "PRODUCT_RUNTIME_CANDIDATE_VALIDATED__HOLD_STAGE_B_RAW_GENERATION_GATE",
+  "best_checkpoint": {
+    "path": "runs/fdt_v4_1_exact_pointer_pilot_20260831_r3/latest.pt",
+    "sha256": "96439F598724C34F76270D614B43097547BD9E75D39D3659F62668BA5F541BFE",
+    "bytes": 1707955211,
+    "base_checkpoint": "runs/fdt_v4_1_424m_rope_stage_a_20260830_r2_pinned_validation_resume/latest.pt",
+    "base_sha256": "08A9CCF9CAD6C6145BAFD623FEE818A0A03D2BAD0D13524D409D788523FFFBF8",
+    "state_difference": {
+      "same_key_set": true,
+      "changed_tensor_count": 8,
+      "changed_tensors": [
+        "exact_pointer.logit_scale",
+        "exact_pointer.anchor_match_bias",
+        "exact_pointer.q_proj.weight",
+        "exact_pointer.k_proj.weight",
+        "exact_pointer.gate_proj.weight",
+        "exact_pointer.gate_proj.bias",
+        "exact_pointer.commit_proj.weight",
+        "exact_pointer.commit_proj.bias"
+      ],
+      "base_language_tensors_changed": 0
+    }
+  },
+  "stage_a_official_evidence": {
+    "paired_nll_relative_regression_vs_v20": 0.00974,
+    "penalty_off_loop_free": "6/100",
+    "interpretation": "RoPE transition is controlled but autonomous raw generation remains unusable."
+  },
+  "cache": {
+    "status": "PASS",
+    "scope": [
+      "63/64/65",
+      "511/512/513",
+      "2K",
+      "4K",
+      "8K",
+      "16K"
+    ],
+    "runtime_fix": "Intermediate output-blend alpha uses full recompute in the release generator."
+  },
+  "exact_memory": {
+    "isolated_status": "PASS",
+    "sealed_audit": "artifacts/fdt_v4_1_exact_pointer_pilot_20260831_r3_payload_sealed_audit_20260902/fdt_v4_exact_copy_audit.json",
+    "sealed_audit_sha256": "DB1ACBD2A5010ACBF5E8218C83ECE2A9FA445504A10C2E7845C1B28C839DD506",
+    "tested_cells": 60,
+    "retrieval_success_rate": 1.0,
+    "whole_string_exact_rate": 1.0,
+    "generic_prompt_failure": "Unconditional pointer copy changed 100/100 natural outputs and visibly corrupted some text.",
+    "repair": "Release generation activates Exact copy only with an explicit span contract; verified copy bypasses loop control."
+  },
+  "free_run_training_diagnostics": {
+    "full_model_counterfactual_ul": {
+      "run": "runs/fdt_v4_1_counterfactual_ul_16m_20260901_r1",
+      "checkpoint_sha256": "7717EE29C3F745FC91DBDCA519814520B330837856A91F21C58771C0A16B373A",
+      "tokens": 16154624,
+      "validation_loss": 2.0898058488965034,
+      "loop_free": "8/100",
+      "verdict": "REJECT"
+    },
+    "counterfactual_state_audit": {
+      "artifact": "artifacts/fdt_v4_1_counterfactual_ul_16m_counterfactual_audit_512_20260901_r1/audit.json",
+      "sha256": "261D28B6C33F212222B5D59480DA21F87D5A6DD84A4A25AE6776CD448E0EEAC3",
+      "rows": 512,
+      "mean_negative_probability_before": 0.5053132677476242,
+      "mean_negative_probability_after": 0.45776271941031155,
+      "negative_top1_before": 512,
+      "negative_top1_after": 506,
+      "conclusion": "Single-token unlikelihood lowers probability but almost never changes the selected token."
+    },
+    "loop_controller_overlay": {
+      "architecture_parameter_count": 428615128,
+      "added_parameters": 1650688,
+      "run": "runs/fdt_v4_1_loop_controller_escape_8m_20260901_r3",
+      "stage_status": "SAFETY_STOP",
+      "tokens": 6704800,
+      "validation_loss": 2.102209433913231,
+      "loop_free": "9/100",
+      "overlay_sha256": "E7C180D589AE83B231A550DD2964668EA47E8562C621281BD5D22016420F71BD",
+      "verdict": "REJECT"
+    }
+  },
+  "release_generation_policy": {
+    "external_repetition_penalty_required": false,
+    "generated_only_ngram_order": 3,
+    "calibrated_ngram_loop_penalty": 13.0,
+    "hard_block_after_prior_closures": 2,
+    "exact_copy_exemption": "Only while a verified explicit copy cursor is active.",
+    "penalty_8_result": {
+      "loop_free": "79/100",
+      "mean_repetition_rate": 0.007428160919540227,
+      "artifact_sha256": "A61DC2B7D54AA9BEB4BE7719161FF243FBFCE87E91D398E7F58C383D5122C44E"
+    },
+    "penalty_13_result": {
+      "loop_free": "100/100",
+      "mean_repetition_rate": 0.0,
+      "artifact_sha256": "90EFFC23A213F936B0E206FBCAF9B4A266B0B5783575922E40D3738CA94BD3D2"
+    },
+    "exact_checkpoint_penalty_13_result": {
+      "loop_free": "100/100",
+      "mean_repetition_rate": 0.0,
+      "artifact_sha256": "F5221351A86B05E0D9E92E92D8BB077726565B937BD7A00A9536FCECA4832131"
+    }
+  },
+  "implementation_hashes": {
+    "src/fdt_rlm/config.py": "F7607F3A1002F9FCC16A63C2431BA29CE10ED5FE69560DE3652AEF3789F0CC8E",
+    "src/fdt_rlm/models/fdt_v4.py": "0E881F62219210F555BBEB7E65F39BF235B634DB5B89395D9590DB79B28E4270",
+    "scripts/evaluate_fdt_v4.py": "0BD36B7078DED96C3EE1FBE2C796647DA23E889AFFBC986B575A8893B13AA5D3",
+    "scripts/generate_fdt_v4.py": "199E59DC9481535DF8CB47F22A2E6B318113FAA2995ED9DE22A493A1E5C68E0A",
+    "scripts/train_fdt_v4_curriculum_bridge.py": "434E36562C5A7483250D8396764C36215AABFB5F8BEB96937EDB26A42224E12C",
+    "scripts/audit_fdt_v4_loop_counterfactuals.py": "46680A7CEFD9241B9B72BF8E4CF94A3ECE92F426AC1FCB254FB4D65E8EF4F039",
+    "scripts/prepare_fdt_v4_1_loop_escape_contrast.py": "83ED10DD7E048F44DAC579470314C32323831BE35F491AA182D2775465806596"
+  },
+  "tests": {
+    "focused_passed": 110,
+    "focused_failed": 0,
+    "warnings": 2
+  },
+  "promotion": {
+    "product_runtime_candidate": true,
+    "raw_model_promotion": false,
+    "stage_b_launch": false,
+    "large_curriculum_launch": false,
+    "reason": "Transparent runtime controls are validated, but raw autonomous generation and the paired V20 capability gate remain unresolved."
+  }
+}

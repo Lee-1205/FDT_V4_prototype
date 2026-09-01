@@ -89,6 +89,21 @@ def test_masked_cached_step_matches_full_attention():
     torch.testing.assert_close(cached, full, atol=2e-6, rtol=2e-6)
 
 
+def test_prefix_stable_group_keeps_completed_local_prefix_exact():
+    torch.manual_seed(20260830)
+    attention = RotaryCausalWindowAttention(
+        attention_config(
+            max_seq_len=128,
+            local_attention_window=4,
+            inference_prefix_stable_group_size=4,
+        )
+    ).eval()
+    values = torch.randn(1, 9, 32)
+    prefix = attention(values[:, :8], torch.ones(1, 8, dtype=torch.bool))
+    extended = attention(values, torch.ones(1, 9, dtype=torch.bool))
+    assert torch.equal(prefix, extended[:, :8])
+
+
 def test_rope_accepts_final_16k_position_and_rejects_overflow():
     attention = RotaryCausalWindowAttention(
         attention_config(max_seq_len=16_384)

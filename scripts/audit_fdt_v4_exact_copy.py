@@ -227,6 +227,11 @@ def compact_trace(diagnostics: dict[str, Any], selected_id: int, copy_active: bo
         "selected_id": selected_id,
         "gate": diagnostics.get("gate"),
         "mix_gate": diagnostics.get("mix_gate"),
+        "pointer_confidence": diagnostics.get("pointer_confidence"),
+        "score_margin": diagnostics.get("score_margin"),
+        "commit_confidence": diagnostics.get("commit_confidence"),
+        "span_end_source": diagnostics.get("span_end_source"),
+        "hard_copy_eligible": bool(diagnostics.get("hard_copy_eligible", False)),
         "source_positions": positions,
         "candidate_count": _candidate_count(diagnostics),
         "used_full_scan_fallback": bool(diagnostics.get("used_full_scan_fallback", False)),
@@ -260,19 +265,86 @@ def _prepare_step(model: torch.nn.Module, config: ModelConfig, output: dict[str,
         anchor_memory=memory,
         query_anchor_ids=query,
         max_candidate_chunks=config.exact_pointer_candidate_chunks,
+        full_scan_fallback=config.exact_memory_full_scan_fallback,
+        fallback_margin=config.exact_memory_fallback_margin,
+        candidate_cap=config.exact_memory_candidate_cap,
+        commit_threshold=config.exact_memory_commit_threshold,
+        hard_copy=config.exact_memory_hard_copy,
+        hard_copy_gate_threshold=config.exact_memory_hard_copy_gate_threshold,
+        hard_copy_pointer_threshold=config.exact_memory_hard_copy_pointer_threshold,
+        hard_copy_margin_threshold=config.exact_memory_hard_copy_margin_threshold,
     )
     selected_logits, copy_active, penalty_applied = copy_safe_logits(base, proposed, generated_only, diagnostics)
     return selected_logits, diagnostics, copy_active, penalty_applied
 
 
+def supports_incremental_cache(config: ModelConfig) -> bool:
+    return not (
+        getattr(config, "rope_transition_mode", "lerp") == "output_blend"
+        and 0.0 < float(getattr(config, "rope_transition_alpha", 1.0)) < 1.0
+    )
+
+
 @torch.inference_mode()
-def free_generate(model: torch.nn.Module, config: ModelConfig, prompt_ids: list[int], max_new_tokens: int) -> tuple[list[int], list[dict[str, Any]]]:
+def exact_span_metadata(
+    prompt_length: int,
+    source_key_position: int,
+    target_ids: list[int],
+    device: torch.device,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Declare the immutable source span registered with Exact Memory."""
+    ends = torch.arange(prompt_length, dtype=torch.long, device=device).view(1, -1)
+    source_start = source_key_position + 1
+    source_end = source_start + len(target_ids) - 1
+    if source_key_position < 0 or source_end >= prompt_length:
+        raise ValueError("declared Exact Memory span is outside the prompt")
+    ends[:, source_start : source_end + 1] = source_end
+    registered_keys = torch.zeros(
+        (1, prompt_length), dtype=torch.bool, device=device
+    )
+    registered_keys[:, source_key_position] = True
+    key_positions = torch.tensor(
+        [[source_key_position]], dtype=torch.long, device=device
+    )
+    payload_ids = torch.tensor([[target_ids]], dtype=torch.long, device=device)
+    payload_lengths = torch.tensor(
+        [[len(target_ids)]], dtype=torch.long, device=device
+    )
+    return ends, registered_keys, key_positions, payload_ids, payload_lengths
+
+
+def free_generate(
+    model: torch.nn.Module,
+    config: ModelConfig,
+    prompt_ids: list[int],
+    target_ids: list[int],
+    source_key_position: int,
+) -> tuple[list[int], list[dict[str, Any]]]:
     device = next(model.parameters()).device
     prompt = torch.tensor([prompt_ids], dtype=torch.long, device=device)
     generated = prompt.clone()
     generated_only = generated[:, :0]
-    output, cache = model.prefill(prompt, torch.ones_like(prompt))
-    memory = model.build_exact_memory(output["hidden"], prompt, torch.ones_like(prompt), source_length=len(prompt_ids))
+    cached = supports_incremental_cache(config)
+    if cached:
+        output, cache = model.prefill(prompt, torch.ones_like(prompt))
+    else:
+        output = model(prompt, attention_mask=torch.ones_like(prompt))
+        cache = None
+    span_ends, registered_keys, key_positions, payload_ids, payload_lengths = exact_span_metadata(
+        len(prompt_ids), source_key_position, target_ids, device
+    )
+    memory = model.build_exact_memory(
+        output["hidden"],
+        prompt,
+        torch.ones_like(prompt),
+        source_length=len(prompt_ids),
+        span_end_positions=span_ends,
+        registered_key_mask=registered_keys,
+        registered_key_positions=key_positions,
+        registered_payload_ids=payload_ids,
+        registered_payload_lengths=payload_lengths,
+    )
+    max_new_tokens = len(target_ids)
     state = LexicalPointerDecodeState(source_length=len(prompt_ids), max_activation_steps=max_new_tokens, max_copy_tokens=max_new_tokens)
     selected_ids: list[int] = []
     trace: list[dict[str, Any]] = []
@@ -287,18 +359,45 @@ def free_generate(model: torch.nn.Module, config: ModelConfig, prompt_ids: list[
         token = torch.tensor([[selected]], dtype=torch.long, device=device)
         generated = torch.cat((generated, token), dim=1)
         generated_only = torch.cat((generated_only, token), dim=1)
-        output, cache = model.decode_step(token, cache)
+        if cached:
+            output, cache = model.decode_step(token, cache)
+        else:
+            output = model(generated, attention_mask=torch.ones_like(generated))
     return selected_ids, trace
 
 
 @torch.inference_mode()
-def teacher_forced(model: torch.nn.Module, config: ModelConfig, prompt_ids: list[int], target_ids: list[int]) -> dict[str, Any]:
+def teacher_forced(
+    model: torch.nn.Module,
+    config: ModelConfig,
+    prompt_ids: list[int],
+    target_ids: list[int],
+    source_key_position: int,
+) -> dict[str, Any]:
     device = next(model.parameters()).device
     prompt = torch.tensor([prompt_ids], dtype=torch.long, device=device)
     generated = prompt.clone()
     generated_only = generated[:, :0]
-    output, cache = model.prefill(prompt, torch.ones_like(prompt))
-    memory = model.build_exact_memory(output["hidden"], prompt, torch.ones_like(prompt), source_length=len(prompt_ids))
+    cached = supports_incremental_cache(config)
+    if cached:
+        output, cache = model.prefill(prompt, torch.ones_like(prompt))
+    else:
+        output = model(prompt, attention_mask=torch.ones_like(prompt))
+        cache = None
+    span_ends, registered_keys, key_positions, payload_ids, payload_lengths = exact_span_metadata(
+        len(prompt_ids), source_key_position, target_ids, device
+    )
+    memory = model.build_exact_memory(
+        output["hidden"],
+        prompt,
+        torch.ones_like(prompt),
+        source_length=len(prompt_ids),
+        span_end_positions=span_ends,
+        registered_key_mask=registered_keys,
+        registered_key_positions=key_positions,
+        registered_payload_ids=payload_ids,
+        registered_payload_lengths=payload_lengths,
+    )
     state = LexicalPointerDecodeState(source_length=len(prompt_ids), max_activation_steps=len(target_ids), max_copy_tokens=len(target_ids))
     ranks: list[int] = []
     probabilities: list[float] = []
@@ -313,7 +412,10 @@ def teacher_forced(model: torch.nn.Module, config: ModelConfig, prompt_ids: list
         token = torch.tensor([[gold]], dtype=torch.long, device=device)
         generated = torch.cat((generated, token), dim=1)
         generated_only = torch.cat((generated_only, token), dim=1)
-        output, cache = model.decode_step(token, cache)
+        if cached:
+            output, cache = model.decode_step(token, cache)
+        else:
+            output = model(generated, attention_mask=torch.ones_like(generated))
     return {
         "gold_ranks": ranks,
         "gold_probabilities": probabilities,
@@ -369,12 +471,20 @@ def evaluate_cell(model: torch.nn.Module, config: ModelConfig, tokenizer: Any, s
         return base | {"status": "NOT TESTED", "reason": f"requires {len(prompt_ids) + len(target_ids)} tokens but max_seq_len is {config.max_seq_len}"}
     source_key_position = _source_key_position(tokenizer, case["prompt"], case["target"])
     alignment = prompt_target_token_alignment(prompt_ids, target_ids, source_key_position)
-    free_ids, free_trace = free_generate(model, config, prompt_ids, len(target_ids))
+    free_ids, free_trace = free_generate(
+        model, config, prompt_ids, target_ids, source_key_position
+    )
     free_text = tokenizer.decode(free_ids, skip_special_tokens=True)
-    forced = teacher_forced(model, config, prompt_ids, target_ids)
+    forced = teacher_forced(
+        model, config, prompt_ids, target_ids, source_key_position
+    )
     all_traces = free_trace + forced["trace"]
     first_positions = free_trace[0].get("source_positions", []) if free_trace else []
-    flat_first_positions = [int(value) for row in first_positions for value in row] if first_positions else []
+    top1_source_position = (
+        int(first_positions[0][0])
+        if first_positions and first_positions[0]
+        else None
+    )
     return base | text_metrics(free_text, case["target"], free_ids, target_ids) | {
         "status": "ok",
         "source_key_position": source_key_position,
@@ -386,7 +496,8 @@ def evaluate_cell(model: torch.nn.Module, config: ModelConfig, tokenizer: Any, s
         "teacher_forced_mean_gold_rank": forced["mean_gold_rank"],
         "teacher_forced_mean_gold_probability": forced["mean_gold_probability"],
         "teacher_forced_top1_rate": forced["top1_rate"],
-        "exact_retrieval_success": source_key_position in flat_first_positions,
+        "exact_retrieval_success": top1_source_position == source_key_position,
+        "source_top1_position": top1_source_position,
         "copy_gate_activated": any(trace["copy_active"] for trace in all_traces),
         "max_copy_gate": max((float(trace.get("mix_gate") or 0.0) for trace in all_traces), default=0.0),
         "max_candidate_count": max((trace["candidate_count"] for trace in all_traces), default=0),
@@ -478,7 +589,7 @@ def run_audit(
         "evaluator": {"path": str(Path(__file__).resolve()), "sha256": sha256_file(Path(__file__).resolve()), "git_commit": git_commit or "UNKNOWN"},
         "checkpoint": checkpoint_info,
         "tokenizer": {"path": str(tokenizer_dir), "tokenizer_json_sha256": sha256_file(tokenizer_json), "vocab_size": len(tokenizer)},
-        "protocol": {"seed": seed, "matrix_cells": 60, "lengths_chars": list(LENGTHS), "positions": list(POSITIONS), "distractors": list(DISTRACTORS), "string_kinds": list(STRING_KINDS), "exact_mode": "copy", "repetition_penalty": REPETITION_PENALTY, "repetition_scope": "generated", "copy_repetition_exemption": True, "temperature": 0.0, "decoding": "greedy"},
+        "protocol": {"seed": seed, "matrix_cells": 60, "lengths_chars": list(LENGTHS), "positions": list(POSITIONS), "distractors": list(DISTRACTORS), "string_kinds": list(STRING_KINDS), "exact_mode": "copy", "memory_contract": "explicit_registered_span_with_standalone_payload", "retrieval_criterion": "registered_source_top1", "repetition_penalty": REPETITION_PENALTY, "repetition_scope": "generated", "copy_repetition_exemption": True, "temperature": 0.0, "decoding": "greedy", "model_runtime": "cached" if supports_incremental_cache(config) else "full_recompute_transition"},
         "summary": {"tested_cells": len(tested), "not_tested_cells": 60 - len(tested), "whole_string_exact_rate": sum(bool(cell.get("whole_string_exact")) for cell in tested) / max(len(tested), 1), "retrieval_success_rate": sum(bool(cell.get("exact_retrieval_success")) for cell in tested) / max(len(tested), 1), "copy_gate_activation_rate": sum(bool(cell.get("copy_gate_activated")) for cell in tested) / max(len(tested), 1), "max_full_scan_count": max((int(cell.get("full_scan_count", 0)) for cell in tested), default=0)},
         "audit_axes": {
             "EXACT_MEMORY": {

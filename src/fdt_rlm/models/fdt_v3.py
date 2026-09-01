@@ -587,6 +587,40 @@ def sparse_chunked_prefix_summaries(
     )
 
 
+def _fixed_token_linear(
+    module: nn.Linear,
+    x: torch.Tensor,
+    group_size: int,
+) -> torch.Tensor:
+    if group_size <= 0 or x.size(1) <= 1:
+        return module(x)
+    rows = []
+    for start in range(0, x.size(1), group_size):
+        current = x[:, start : start + group_size]
+        count = current.size(1)
+        if count < group_size:
+            current = F.pad(current, (0, 0, 0, group_size - count))
+        rows.append(module(current)[:, :count])
+    return torch.cat(rows, dim=1)
+
+
+def _fixed_token_anchor_matmul(
+    q: torch.Tensor,
+    anchor_keys: torch.Tensor,
+    group_size: int,
+) -> torch.Tensor:
+    if group_size <= 0 or q.size(1) <= 1:
+        return torch.matmul(q, anchor_keys.t())
+    rows = []
+    for start in range(0, q.size(1), group_size):
+        current = q[:, start : start + group_size]
+        count = current.size(1)
+        if count < group_size:
+            current = F.pad(current, (0, 0, 0, group_size - count))
+        rows.append(torch.matmul(current, anchor_keys.t())[:, :count])
+    return torch.cat(rows, dim=1)
+
+
 class CausalWindowAttention(nn.Module):
     """Chunked local causal attention with O(N W) score storage and compute."""
 
@@ -602,10 +636,18 @@ class CausalWindowAttention(nn.Module):
         self.qkv = nn.Linear(config.dim, 3 * config.dim, bias=False)
         self.out_proj = nn.Linear(config.dim, config.dim, bias=False)
         self.dropout = nn.Dropout(config.dropout)
+        self.inference_group_size = int(
+            getattr(config, "inference_prefix_stable_group_size", 0)
+        )
+        if self.inference_group_size < 0:
+            raise ValueError("inference prefix stable group size cannot be negative")
 
     def _project(self, x: torch.Tensor):
         bsz, seq_len, _ = x.shape
-        qkv = self.qkv(x).view(bsz, seq_len, 3, self.n_heads, self.head_dim)
+        group_size = self.inference_group_size if not self.training else 0
+        qkv = _fixed_token_linear(self.qkv, x, group_size).view(
+            bsz, seq_len, 3, self.n_heads, self.head_dim
+        )
         q, k, v = qkv.unbind(dim=2)
         return q.transpose(1, 2), k.transpose(1, 2), v.transpose(1, 2)
 
@@ -636,7 +678,19 @@ class CausalWindowAttention(nn.Module):
         v_windows = v.unfold(2, 2 * self.window, self.window).permute(0, 1, 2, 4, 3)
         mask_windows = padded_mask.unfold(1, 2 * self.window, self.window)
 
-        scores = torch.matmul(q_chunks, k_windows.transpose(-2, -1)) * (self.head_dim ** -0.5)
+        if self.inference_group_size > 0 and not self.training and seq_len > 1:
+            scores = torch.cat(
+                [
+                    torch.matmul(
+                        q_chunks[:, :, index : index + 1],
+                        k_windows[:, :, index : index + 1].transpose(-2, -1),
+                    )
+                    for index in range(chunks)
+                ],
+                dim=2,
+            ) * (self.head_dim ** -0.5)
+        else:
+            scores = torch.matmul(q_chunks, k_windows.transpose(-2, -1)) * (self.head_dim ** -0.5)
         query_offsets = torch.arange(self.window, device=x.device).view(self.window, 1)
         key_offsets = torch.arange(-self.window, self.window, device=x.device).view(1, 2 * self.window)
         local_causal = (key_offsets <= query_offsets) & ((query_offsets - key_offsets) < self.window)
@@ -651,7 +705,11 @@ class CausalWindowAttention(nn.Module):
         out = out * query_mask.view(bsz, 1, chunks, self.window, 1).to(dtype=out.dtype)
         out = out.reshape(bsz, self.n_heads, padded_len, self.head_dim)[:, :, :seq_len]
         out = out.transpose(1, 2).contiguous().view(bsz, seq_len, dim)
-        output = self.out_proj(out)
+        output = _fixed_token_linear(
+            self.out_proj,
+            out,
+            self.inference_group_size if not self.training else 0,
+        )
         if return_state:
             return output, self._state_from_projected(state_k, state_v, attention_mask)
         return output
@@ -733,9 +791,16 @@ class SwiGLU(nn.Module):
         self.up = nn.Linear(config.dim, hidden, bias=False)
         self.down = nn.Linear(hidden, config.dim, bias=False)
         self.dropout = nn.Dropout(config.dropout)
+        self.inference_group_size = int(
+            getattr(config, "inference_prefix_stable_group_size", 0)
+        )
 
     def forward(self, x: torch.Tensor):
-        return self.dropout(self.down(F.silu(self.gate(x)) * self.up(x)))
+        group_size = self.inference_group_size if not self.training else 0
+        gate = _fixed_token_linear(self.gate, x, group_size)
+        up = _fixed_token_linear(self.up, x, group_size)
+        hidden = F.silu(gate) * up
+        return self.dropout(_fixed_token_linear(self.down, hidden, group_size))
 
 
 class V3FuzzyAnchorLayer(CausalFuzzyAnchorLayer):
@@ -804,10 +869,13 @@ class V3FuzzyAnchorLayer(CausalFuzzyAnchorLayer):
 
     def route(self, x: torch.Tensor, return_distance: bool = True):
         bsz, seq_len, _ = x.shape
-        q = F.normalize(self.q_proj(x), dim=-1)
-        v = self.v_proj(x)
+        group_size = int(
+            getattr(self.config, "inference_prefix_stable_group_size", 0)
+        ) if not self.training else 0
+        q = F.normalize(_fixed_token_linear(self.q_proj, x, group_size), dim=-1)
+        v = _fixed_token_linear(self.v_proj, x, group_size)
         anchor_keys, anchor_values = self.normalized_anchors()
-        cosine = torch.matmul(q, anchor_keys.t())
+        cosine = _fixed_token_anchor_matmul(q, anchor_keys, group_size)
         if self.config.routing_type == "cosine":
             logits = cosine / max(self.config.cosine_temperature, 1e-5)
             full_distance = 1.0 - cosine if return_distance else None
@@ -822,7 +890,46 @@ class V3FuzzyAnchorLayer(CausalFuzzyAnchorLayer):
             -self.config.membership_logit_clip,
             self.config.membership_logit_clip,
         )
-        top_logits, indices = torch.topk(logits, k=self.top_k, dim=-1)
+        routing_logits = logits
+        quantum = float(getattr(self.config, "routing_logit_quantization", 0.0))
+        if quantum > 0.0:
+            quantized = torch.round(logits / quantum) * quantum
+            anchor_tie_break = -torch.arange(
+                self.num_anchors,
+                device=logits.device,
+                dtype=logits.dtype,
+            ) * (quantum / (2.0 * max(self.num_anchors, 1)))
+            stable_forward = quantized + anchor_tie_break.view(1, 1, -1)
+            routing_logits = logits + (stable_forward - logits).detach()
+        smoothing = float(
+            getattr(self.config, "routing_boundary_smoothing_epsilon", 0.0)
+        )
+        extra_candidates = int(
+            getattr(self.config, "routing_boundary_extra_candidates", 0)
+        )
+        if smoothing < 0.0 or extra_candidates < 0:
+            raise ValueError("routing boundary smoothing settings cannot be negative")
+        smooth_boundary = (
+            smoothing > 0.0
+            and extra_candidates > 0
+            and self.probe_mode == "learned"
+        )
+        candidate_count = min(
+            self.num_anchors,
+            self.top_k + extra_candidates if smooth_boundary else self.top_k,
+        )
+        ranked_logits, ranked_indices = torch.topk(
+            routing_logits, k=candidate_count, dim=-1
+        )
+        boundary_logit = ranked_logits[..., self.top_k - 1 : self.top_k]
+        if smooth_boundary:
+            # Canonical anchor order makes reductions independent of tiny score-order
+            # swaps. Candidates outside the original top-k enter continuously only
+            # when their score lies inside the declared boundary band.
+            indices = ranked_indices.sort(dim=-1).values
+        else:
+            indices = ranked_indices
+        top_logits = torch.gather(logits, 2, indices)
         if self.probe_mode == "random_topk":
             positions = torch.arange(seq_len, device=x.device, dtype=torch.float32).view(1, seq_len, 1)
             anchors = torch.arange(self.num_anchors, device=x.device, dtype=torch.float32).view(1, 1, -1)
@@ -830,7 +937,25 @@ class V3FuzzyAnchorLayer(CausalFuzzyAnchorLayer):
             scores = torch.sin((anchors + 1) * 12.9898 + (positions + 1) * 78.233 + (batches + 1) * 37.719)
             indices = torch.topk(scores, k=self.top_k, dim=-1).indices
             top_logits = torch.gather(logits, 2, indices)
-        membership = F.softmax(top_logits.float(), dim=-1).to(dtype=x.dtype)
+        if smooth_boundary:
+            candidate_gate = (
+                (top_logits - boundary_logit + smoothing) / smoothing
+            ).clamp(0.0, 1.0)
+            candidate_gate = torch.where(
+                top_logits >= boundary_logit,
+                torch.ones_like(candidate_gate),
+                candidate_gate,
+            )
+            shifted = top_logits.float() - top_logits.float().max(
+                dim=-1, keepdim=True
+            ).values
+            membership = shifted.exp() * candidate_gate.float()
+            membership = membership / membership.sum(
+                dim=-1, keepdim=True
+            ).clamp_min(1e-8)
+            membership = membership.to(dtype=x.dtype)
+        else:
+            membership = F.softmax(top_logits.float(), dim=-1).to(dtype=x.dtype)
         if self.probe_mode == "uniform_topk":
             membership = torch.full_like(membership, 1.0 / self.top_k)
         elif self.probe_mode == "shuffle_membership":
@@ -838,7 +963,27 @@ class V3FuzzyAnchorLayer(CausalFuzzyAnchorLayer):
         elif self.probe_mode == "onehot_top1":
             membership = torch.zeros_like(membership)
             membership[..., 0] = 1.0
-        membership = membership.clamp_min(1e-8)
+        membership_quantum = float(
+            getattr(self.config, "routing_membership_quantization", 0.0)
+        )
+        if membership_quantum < 0.0:
+            raise ValueError("routing membership quantization cannot be negative")
+        if membership_quantum > 0.0:
+            quantized_membership = (
+                torch.round(membership / membership_quantum) * membership_quantum
+            )
+            residual = 1.0 - quantized_membership.sum(dim=-1, keepdim=True)
+            maximum_index = membership.argmax(dim=-1, keepdim=True)
+            quantized_membership = quantized_membership.scatter_add(
+                -1,
+                maximum_index,
+                residual,
+            )
+            membership = membership + (
+                quantized_membership - membership
+            ).detach()
+        if not smooth_boundary:
+            membership = membership.clamp_min(1e-8)
         membership = membership / membership.sum(-1, keepdim=True).clamp_min(1e-8)
         if getattr(self, "capture_exact_route", False):
             self.last_exact_route_indices = indices.detach()
@@ -847,6 +992,22 @@ class V3FuzzyAnchorLayer(CausalFuzzyAnchorLayer):
     def recency_reference_len(self) -> int:
         configured = int(self.config.anchor_recency_reference_len)
         return configured if configured > 0 else int(self.config.max_seq_len)
+
+    def set_recency_bias(self, value: float) -> None:
+        value = float(value)
+        if not math.isfinite(value):
+            raise ValueError("anchor recency bias must be finite")
+        self.config.anchor_recency_bias = value
+        denominator = max(self.recency_reference_len() - 1, 1)
+        recency = [
+            math.exp(value * position / denominator)
+            for position in range(self.config.max_seq_len)
+        ]
+        self._decode_recency_scales = torch.tensor(
+            [[1.0, item] for item in recency],
+            dtype=torch.float32,
+            device=self._decode_recency_scales.device,
+        )
 
     def forward(
         self,
@@ -878,10 +1039,22 @@ class V3FuzzyAnchorLayer(CausalFuzzyAnchorLayer):
                     )
                 )
                 long_summary, recent_summary = summary[..., 0, :], summary[..., 1, :]
-                final_summary = final_numerator / final_mass.to(
-                    dtype=final_numerator.dtype
-                ).clamp_min(1e-6).unsqueeze(-1)
-                state = V3AnchorState(final_summary, final_mass, normalized=True)
+                if self.config.model_type == "fdt_v4":
+                    state = _normalized_anchor_state_from_route_online(
+                        self,
+                        v,
+                        indices,
+                        membership,
+                        token_mask,
+                    )
+                else:
+                    final_summary = final_numerator / final_mass.to(
+                        dtype=final_numerator.dtype
+                    ).clamp_min(1e-6).unsqueeze(-1)
+                    if bool(getattr(self.config, "anchor_decode_state_fp32", False)):
+                        final_summary = final_summary.float()
+                        final_mass = final_mass.double()
+                    state = V3AnchorState(final_summary, final_mass, normalized=True)
             else:
                 long_summary, recent_summary = sparse_chunked_prefix_summaries(
                     membership,
@@ -909,11 +1082,20 @@ class V3FuzzyAnchorLayer(CausalFuzzyAnchorLayer):
         structural = (1.0 - recent_mix) * long_context + recent_mix * recent_context
         latent = torch.einsum("bnk,bnkd->bnd", membership, anchor_values[indices])
         gate = torch.sigmoid(self.gate)
-        routed = self.out_proj(gate * structural + (1.0 - gate) * latent)
+        group_size = int(
+            getattr(self.config, "inference_prefix_stable_group_size", 0)
+        ) if not self.training else 0
+        routed = _fixed_token_linear(
+            self.out_proj,
+            gate * structural + (1.0 - gate) * latent,
+            group_size,
+        )
         if self.probe_mode == "zero_anchor":
             routed = torch.zeros_like(routed)
 
-        entropy_per_token = -(membership.float() * membership.float().log()).sum(-1)
+        entropy_per_token = -(
+            membership.float() * membership.float().clamp_min(1e-8).log()
+        ).sum(-1)
         selected_distance = torch.gather(full_distance, 2, indices)
         cluster_per_token = (membership.float() * selected_distance.float()).sum(-1)
         usage = torch.zeros(self.num_anchors, device=x.device)
@@ -921,14 +1103,17 @@ class V3FuzzyAnchorLayer(CausalFuzzyAnchorLayer):
         load = torch.zeros(self.num_anchors, device=x.device)
         load.scatter_add_(0, indices.reshape(-1), token_mask[:, :, None].float().expand_as(membership).reshape(-1))
         metrics_enabled = getattr(self, "runtime_anchor_metrics", self.config.enable_anchor_metrics)
-        top1 = masked_mean(membership[..., 0].float(), token_mask) if metrics_enabled else entropy_per_token.new_zeros(())
-        margin_values = membership[..., 0] - membership[..., 1] if self.top_k > 1 else membership[..., 0]
+        ordered_membership = membership.float().topk(
+            min(2, membership.size(-1)), dim=-1
+        ).values
+        top1 = masked_mean(ordered_membership[..., 0], token_mask) if metrics_enabled else entropy_per_token.new_zeros(())
+        margin_values = ordered_membership[..., 0] - ordered_membership[..., 1] if membership.size(-1) > 1 else ordered_membership[..., 0]
         margin = masked_mean(margin_values.float(), token_mask) if metrics_enabled else entropy_per_token.new_zeros(())
-        diagnostic_indices = indices.detach() if self.config.enable_diagnostics else indices.new_empty((0, 0, self.top_k))
+        diagnostic_indices = indices.detach() if self.config.enable_diagnostics else indices.new_empty((0, 0, indices.size(-1)))
         diagnostic_membership = (
             membership.detach() if self.config.enable_diagnostics and self.config.detach_diagnostics
             else membership if self.config.enable_diagnostics
-            else membership.new_empty((0, 0, self.top_k))
+            else membership.new_empty((0, 0, membership.size(-1)))
         )
         stats = AnchorStats(
             indices=diagnostic_indices,
@@ -1037,6 +1222,62 @@ def _anchor_state_from_route(
     return V3AnchorState(numerator, mass)
 
 
+def _normalized_anchor_state_from_route_online(
+    layer: V3FuzzyAnchorLayer,
+    values: torch.Tensor,
+    indices: torch.Tensor,
+    membership: torch.Tensor,
+    token_mask: torch.Tensor,
+) -> V3AnchorState:
+    """Build the prefill cache with the exact recurrence used by decode."""
+    bsz, seq_len, dim = values.shape
+    summary_dtype = (
+        torch.float32
+        if bool(getattr(layer.config, "anchor_decode_state_fp32", False))
+        else values.dtype
+    )
+    summary = torch.zeros(
+        bsz,
+        layer.num_anchors,
+        2,
+        dim,
+        device=values.device,
+        dtype=summary_dtype,
+    )
+    mass = torch.zeros(
+        bsz,
+        layer.num_anchors,
+        2,
+        device=values.device,
+        dtype=torch.float64,
+    )
+    for position in range(seq_len):
+        selected = indices[:, position]
+        weights = membership[:, position] * token_mask[:, position, None].to(
+            dtype=membership.dtype
+        )
+        scales = layer._decode_recency_scales[position].to(dtype=weights.dtype)
+        stacked_weights = weights.unsqueeze(-1) * scales
+        expanded = selected.unsqueeze(-1).unsqueeze(-1).expand(-1, -1, 2, dim)
+        mass_index = selected.unsqueeze(-1).expand(-1, -1, 2)
+        previous_summary = torch.gather(summary, 1, expanded)
+        previous_mass = torch.gather(mass, 1, mass_index)
+        mass_weights = stacked_weights.to(dtype=previous_mass.dtype)
+        next_mass = previous_mass + mass_weights
+        interpolation = (mass_weights / next_mass.clamp_min(1e-6)).to(
+            dtype=previous_summary.dtype
+        )
+        incoming = values[:, position, None, None, :].to(
+            dtype=previous_summary.dtype
+        ).expand_as(previous_summary)
+        next_summary = previous_summary + interpolation.unsqueeze(-1) * (
+            incoming - previous_summary
+        )
+        summary.scatter_(1, expanded, next_summary)
+        mass.scatter_(1, mass_index, next_mass)
+    return V3AnchorState(summary, mass, normalized=True)
+
+
 def _single_anchor_step(
     layer: V3FuzzyAnchorLayer,
     x: torch.Tensor,
@@ -1077,7 +1318,9 @@ def _single_anchor_step(
         interpolation = (mass_weights / next_mass.clamp_min(1e-6)).to(
             dtype=previous_summary.dtype
         )
-        incoming = v[:, 0, None, None, :].expand_as(previous_summary)
+        incoming = v[:, 0, None, None, :].to(
+            dtype=previous_summary.dtype
+        ).expand_as(previous_summary)
         summaries = previous_summary + interpolation.unsqueeze(-1) * (
             incoming - previous_summary
         )
@@ -1090,7 +1333,10 @@ def _single_anchor_step(
         selected_num = torch.gather(state.numerator, 1, expanded)
         selected_mass = torch.gather(state.mass, 1, mass_index).clamp_min(1e-6)
         summaries = selected_num / selected_mass.unsqueeze(-1)
-    contexts = torch.einsum("bk,bkmd->bmd", membership[:, 0], summaries)
+    context_membership = membership[:, 0].to(dtype=summaries.dtype)
+    contexts = torch.einsum("bk,bkmd->bmd", context_membership, summaries).to(
+        dtype=x.dtype
+    )
     long_context, recent_context = contexts.unbind(dim=1)
     gate, recent_mix = layer.runtime_gates()
     structural = (1.0 - recent_mix) * long_context + recent_mix * recent_context
@@ -1115,9 +1361,12 @@ def _single_anchor_step(
         usage_prob=usage / usage.sum().clamp_min(1e-8),
         load_prob=(load / load.sum().clamp_min(1e-8)).detach(),
         cluster_loss=masked_mean(cluster_values, mask),
-        top1_membership=masked_mean(membership[..., 0].float(), mask).detach(),
+        top1_membership=masked_mean(membership.float().max(dim=-1).values, mask).detach(),
         membership_margin=masked_mean(
-            (membership[..., 0] - membership[..., 1]).float() if layer.top_k > 1 else membership[..., 0].float(),
+            (
+                membership.float().topk(2, dim=-1).values[..., 0]
+                - membership.float().topk(2, dim=-1).values[..., 1]
+            ) if membership.size(-1) > 1 else membership[..., 0].float(),
             mask,
         ).detach(),
     )

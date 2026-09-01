@@ -388,11 +388,176 @@ def test_generated_prefix_contract_and_unlikelihood_loss(tmp_path):
         eos_weight=2.0,
         recovery_weight=0.01,
         unlikelihood_weight=0.01,
+        logit_margin_weight=0.25,
+        logit_margin=1.0,
     )
     assert torch.isfinite(total)
     assert torch.isfinite(metrics["recovery_lm"])
     assert torch.isfinite(metrics["loop_unlikelihood"])
+    assert torch.isfinite(metrics["loop_logit_margin"])
+    assert metrics["loop_logit_margin"].item() == pytest.approx(1.0)
+    assert metrics["loop_clean_minus_negative_logit"].item() == pytest.approx(0.0)
     total.backward()
+
+
+def test_generated_prefix_logit_margin_rewards_clean_token_ranking():
+    ids = torch.tensor([[4, 5, 7, 1]])
+    labels = torch.tensor([[-100, -100, 7, 1]])
+    negative_ids = torch.tensor([[-1, -1, 6, -1]])
+    negative_mask = torch.tensor([[0, 0, 1, 0]])
+    payload = {
+        "input_ids": ids,
+        "attention_mask": torch.ones_like(ids),
+        "labels": labels,
+        "loop_negative_ids": negative_ids,
+        "loop_negative_mask": negative_mask,
+    }
+
+    class RankedModel:
+        def __call__(self, input_ids, attention_mask):
+            logits = torch.zeros(input_ids.size(0), input_ids.size(1), 11)
+            logits[:, 1, 7] = 2.0
+            logits[:, 1, 6] = 0.0
+            logits.requires_grad_()
+            return {"logits": logits}
+
+    _, metrics = trainer.generated_prefix_recovery_objective(
+        RankedModel(),
+        payload,
+        pad_token_id=0,
+        eos_token_id=1,
+        eos_weight=2.0,
+        recovery_weight=0.0,
+        unlikelihood_weight=0.0,
+        logit_margin_weight=1.0,
+        logit_margin=1.0,
+    )
+    assert metrics["loop_logit_margin"].item() == pytest.approx(0.0)
+    assert metrics["loop_clean_minus_negative_logit"].item() == pytest.approx(2.0)
+
+
+def test_trajectory_unlikelihood_has_no_arbitrary_recovery_or_margin_target():
+    ids = torch.tensor([[4, 5, 6, 4, 5, 6, 1]])
+    negative_ids = torch.full_like(ids, -1)
+    negative_mask = torch.zeros_like(ids)
+    negative_ids[:, 5] = 6
+    negative_mask[:, 5] = 1
+    payload = {
+        "input_ids": ids,
+        "attention_mask": torch.ones_like(ids),
+        "labels": torch.full_like(ids, -100),
+        "loop_negative_ids": negative_ids,
+        "loop_negative_mask": negative_mask,
+        "loop_negative_prior_occurrences": negative_mask * 2,
+        "loop_unlikelihood_only": torch.ones(1, dtype=torch.uint8),
+    }
+
+    class LoopModel:
+        def __call__(self, input_ids, attention_mask):
+            logits = torch.zeros(input_ids.size(0), input_ids.size(1), 11)
+            logits[:, 4, 6] = 3.0
+            logits.requires_grad_()
+            return {"logits": logits}
+
+    total, metrics = trainer.generated_prefix_recovery_objective(
+        LoopModel(),
+        payload,
+        pad_token_id=0,
+        eos_token_id=1,
+        eos_weight=2.0,
+        recovery_weight=1.0,
+        unlikelihood_weight=1.0,
+        logit_margin_weight=1.0,
+        logit_margin=1.0,
+    )
+    assert torch.isfinite(total)
+    assert metrics["recovery_lm"].item() == pytest.approx(0.0)
+    assert metrics["loop_logit_margin"].item() == pytest.approx(0.0)
+    assert metrics["loop_unlikelihood"].item() > 0.0
+
+
+def test_counterfactual_unlikelihood_ignores_clean_suffix_and_trims_forward():
+    ids = torch.tensor([[4, 5, 7, 8, 9, 1]])
+    labels = torch.tensor([[-100, -100, 7, 8, 9, 1]])
+    negative_ids = torch.tensor([[-1, -1, 6, -1, -1, -1]])
+    negative_mask = torch.tensor([[0, 0, 1, 0, 0, 0]])
+    seen_lengths = []
+
+    class CounterfactualModel:
+        def __call__(self, input_ids, attention_mask):
+            seen_lengths.append(int(input_ids.size(1)))
+            logits = torch.zeros(input_ids.size(0), input_ids.size(1), 11)
+            logits[:, 1, 6] = 3.0
+            logits.requires_grad_()
+            return {"logits": logits}
+
+    total, metrics = trainer.generated_prefix_recovery_objective(
+        CounterfactualModel(),
+        {
+            "input_ids": ids,
+            "attention_mask": torch.ones_like(ids),
+            "labels": labels,
+            "loop_negative_ids": negative_ids,
+            "loop_negative_mask": negative_mask,
+        },
+        pad_token_id=0,
+        eos_token_id=1,
+        eos_weight=2.0,
+        recovery_weight=1.0,
+        unlikelihood_weight=1.0,
+        logit_margin_weight=1.0,
+        force_unlikelihood_only=True,
+    )
+    assert seen_lengths == [3]
+    assert torch.isfinite(total)
+    assert metrics["recovery_lm"].item() == pytest.approx(0.0)
+    assert metrics["loop_logit_margin"].item() == pytest.approx(0.0)
+
+
+def test_loop_candidate_contrast_promotes_parent_selected_nonloop_escape():
+    ids = torch.tensor([[4, 5, 6, 4, 5, 6, 6]])
+    negative_ids = torch.full_like(ids, -1)
+    negative_mask = torch.zeros_like(ids)
+    negative_ids[:, 6] = 6
+    negative_mask[:, 6] = 1
+
+    class ContrastModel:
+        def __call__(self, input_ids, attention_mask):
+            logits = torch.zeros(input_ids.size(0), input_ids.size(1), 12)
+            logits[:, 5, 6] = 3.0
+            logits[:, 5, 7] = 2.0
+            logits[:, 5, 8] = 1.5
+            logits.requires_grad_()
+            return {"logits": logits}
+
+    total, metrics = trainer.generated_prefix_recovery_objective(
+        ContrastModel(),
+        {
+            "input_ids": ids,
+            "attention_mask": torch.ones_like(ids),
+            "labels": torch.full_like(ids, -100),
+            "loop_negative_ids": negative_ids,
+            "loop_negative_mask": negative_mask,
+            "loop_negative_prior_occurrences": negative_mask * 2,
+            "loop_unlikelihood_only": torch.ones(1, dtype=torch.uint8),
+            "loop_candidate_ids": torch.tensor([[6, 8]]),
+            "loop_candidate_mask": torch.tensor([[1, 1]]),
+            "loop_escape_ids": torch.tensor([7]),
+            "loop_contrast_position": torch.tensor([6]),
+        },
+        pad_token_id=0,
+        eos_token_id=1,
+        eos_weight=2.0,
+        recovery_weight=0.0,
+        unlikelihood_weight=1.0,
+        logit_margin_weight=1.0,
+        logit_margin=0.5,
+    )
+    assert torch.isfinite(total)
+    assert metrics["loop_candidate_probability_mass"].item() > 0.0
+    assert metrics["loop_unlikelihood"].item() > 0.0
+    assert metrics["loop_clean_minus_negative_logit"].item() == pytest.approx(-1.0)
+    assert metrics["loop_logit_margin"].item() == pytest.approx(1.5)
 
 
 def test_main_architecture_validator_rejects_probe_shape():

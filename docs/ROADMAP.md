@@ -1,17 +1,16 @@
-# FDT v4 Roadmap
+# FDT v4.1 Roadmap
 
-1. Freeze the repaired 424,474,072-parameter implementation in the private
-   repository with hashes and a clean commit.
-2. Complete CPU architecture, causal, RoPE, fuzzy-state, exact-memory, cursor,
-   repetition-scope, checkpoint, and handoff regression tests.
-3. Build fresh C-only tensor datasets with explicit labels, pinned tokenizer,
-   source provenance, licenses, revisions, overlap audit, and fixed validation.
-4. Run bounded current-GPU memory and FP32 correctness/performance audits at
-   increasing context lengths. Do not start long training if checkpoint safety
-   or 8K integrity fails.
-5. Train the single 426M-class lineage under Luna supervision. Terra evaluates
-   verified checkpoints. Major architecture/objective/data-contract changes
-   require Sol; bounded operational repairs may be applied directly.
+1. Preserve Stage A, the selected Exact Pointer checkpoint, and both rejected
+   loop-training interventions as immutable evidence.
+2. Keep the repaired generator contract fixed: explicit-only Exact copy,
+   generated-only loop control, and full recompute at intermediate RoPE blend.
+3. Design one fresh isolated raw-generation objective pilot. It must target
+   actual model-generated failure trajectories and pass penalty-off generation,
+   V20 paired capability, validation, routing, cache, and Exact Memory gates.
+4. Do not resume the rejected unlikelihood checkpoint or learned controller.
+5. Advance staged RoPE and the token-normalized 512/2K/4K/8K/16K curriculum
+   only after the isolated raw-generation gate passes.
 6. Keep natural language and factual knowledge primary, retrieval substantial,
-   and code/JSON auxiliary. No 116M lineage, conversational SFT, or quantized
-   official evaluation.
+   and code/JSON auxiliary. Official evaluation remains unquantized FP32.
+7. Treat conversational training and fuzzy-space reasoning as later stages after
+   the base model is materially usable.

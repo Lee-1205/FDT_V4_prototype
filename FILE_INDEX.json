@@ -1,9 +1,10 @@
 {
-  "schema_version": 1,
-  "generated_at": "2026-08-27T17:26:55.4337010+09:00",
-  "snapshot": "fdt_v4_step3000_20260827",
-  "file_count": 346,
-  "total_bytes": 6128904.0,
+  "schema_version": 2,
+  "generated_at": "2026-09-01T20:36:25.9653738+09:00",
+  "snapshot": "fdt_v4_1_runtime_candidate_20260901",
+  "decision": "PRODUCT_RUNTIME_CANDIDATE_VALIDATED__HOLD_STAGE_B_RAW_GENERATION_GATE",
+  "file_count": 392,
+  "total_bytes": 10860747,
   "files": [
     {
       "path": ".gitignore",
@@ -41,9 +42,59 @@
       "sha256": "1BDB69E0585BCECFB7B32B4E05ABDAEAC8C14FAC7B800FA874419A0CE4FE8D45"
     },
     {
+      "path": "configs/fdt_v4_1_424m_counterfactual_ul_16m_20260901.yaml",
+      "bytes": 5006,
+      "sha256": "94D805B8A185DE4E75358EF5E7A3726EECD4609C9DEFE6391DA09D47A60F1992"
+    },
+    {
+      "path": "configs/fdt_v4_1_424m_free_run_diverse_pilot_16m_20260901.yaml",
+      "bytes": 4920,
+      "sha256": "E6C9C1C7FC180ACF8140CEF8A3182167EA6049A97F0D041D8D1F54AFECF326C3"
+    },
+    {
+      "path": "configs/fdt_v4_1_424m_free_run_margin_pilot_8m_20260901.yaml",
+      "bytes": 4875,
+      "sha256": "ABA3E4BD706FF505178877D195B20E2EC6E08E39C145BA800BA083AFF634C1FA"
+    },
+    {
+      "path": "configs/fdt_v4_1_424m_free_run_recovery_pilot_2m_20260901.yaml",
+      "bytes": 4797,
+      "sha256": "5CFB67D841D83786411CB3B7256B78328F9A8A3F979C0E3A446782A72B23ECA8"
+    },
+    {
+      "path": "configs/fdt_v4_1_424m_rope_output_blend_stage_a_20m.yaml",
+      "bytes": 4520,
+      "sha256": "8A6CCDD995D24551473095FEC45EE761E71C8DF5D52368FDF22CC43B1956C657"
+    },
+    {
+      "path": "configs/fdt_v4_1_424m_trajectory_ul_smoke_1m_20260901.yaml",
+      "bytes": 4736,
+      "sha256": "1B874FC60117F36164393271D2FDBE56DEF9F395D9E4FF71B08F6999B7E6E940"
+    },
+    {
+      "path": "configs/fdt_v4_1_424m_transition_20m.yaml",
+      "bytes": 4026,
+      "sha256": "BE10A2957653FA67FB383F3AAAED65EFFDE5FBC246AB6714B8090456834EB5D9"
+    },
+    {
+      "path": "configs/fdt_v4_1_428m_loop_controller_escape_8m_20260901.yaml",
+      "bytes": 5129,
+      "sha256": "E23441FAED8B2FEC592427C2F9E8897C6F9204225BA34E3BFC928FE62B090DEC"
+    },
+    {
       "path": "configs/fdt_v4_main_426m_speed_r1.yaml",
       "bytes": 4489,
       "sha256": "44058EDF7A338B7E0572A097B5F728C7B121ED5D3D86636538DE83954165D8FA"
+    },
+    {
+      "path": "configs/fdt_v4_main_426m_speed_r2_batch4.yaml",
+      "bytes": 4489,
+      "sha256": "69E8C585B062054D9B73506E68B99663CB8A2A5D8113C06589327C4ECB31DC71"
+    },
+    {
+      "path": "configs/fdt_v4_main_426m_speed_r3_bridge.yaml",
+      "bytes": 4678,
+      "sha256": "E80BA6D964F389D50ED16C400B07B2C645278477D50A39BC83047458FCBF5181"
     },
     {
       "path": "configs/fdt_v4_main_426m.yaml",
@@ -52,8 +103,8 @@
     },
     {
       "path": "CURRENT_STATUS.md",
-      "bytes": 1553,
-      "sha256": "07EABF2ED1E615CA8A0BA1463E0EC437C414053D6BFF97B58320D05CBCBD62FB"
+      "bytes": 2465,
+      "sha256": "2A120915E1313EAFC4B3954ACD5ADB83519E5896336D26ADC740E9C6131A1F3A"
     },
     {
       "path": "DATASETS.md",
@@ -91,6 +142,16 @@
       "sha256": "019BD947BB7461668654B58DA49A0DD56F6266D4D2DD4B975B4BDA2C4C92FDB5"
     },
     {
+      "path": "datasets/manifests/v4_1_loop_escape/manifest.json",
+      "bytes": 5185,
+      "sha256": "E6D33DF2F748D339D7706F812847F15284E4D67609639355DD98C2A8EAFBCC44"
+    },
+    {
+      "path": "datasets/manifests/v4_1_loop_escape/sha256.json",
+      "bytes": 277,
+      "sha256": "B8DFBA24C2492A2782CBDA497D8E39F0CD8645ADF89FB72257261A996852AEDE"
+    },
+    {
       "path": "datasets/manifests/validation/manifest.json",
       "bytes": 587,
       "sha256": "5435D6CADC2F9810E10A260F51CB1A8FD1D4F0354FC7D892C913D0AB0A345EA3"
@@ -117,8 +178,8 @@
     },
     {
       "path": "docs/ROADMAP.md",
-      "bytes": 1026,
-      "sha256": "EC967EE25F80F63337179A75E8289D55494AE78C478D76BFBCD84B9429B2A661"
+      "bytes": 1020,
+      "sha256": "067ACB49BCE5488CFDAC439EB372322117CCEC7192C3F0A69FE2412BF04778DD"
     },
     {
       "path": "evidence/artifacts/fdt_426m_strict_base_eval_latest_520m_retention_alignment_v4_standard_20260810.json",
@@ -1096,49 +1157,89 @@
       "sha256": "C281256C7BD0287C7397E2EE190B37190859F301BF9365C5188A8AFE8AEC0769"
     },
     {
+      "path": "evidence/v4_1_20260901/artifacts__fdt_v4_1_counterfactual_ul_16m_20260901_dev_repetition_r1__development_repetition.json",
+      "bytes": 173324,
+      "sha256": "EBC8913FC3E9F517305ED27CFEFB26D66F0383320684FCA3EE149EDF8F61440F"
+    },
+    {
+      "path": "evidence/v4_1_20260901/artifacts__fdt_v4_1_counterfactual_ul_16m_counterfactual_audit_512_20260901_r1__audit.json",
+      "bytes": 343365,
+      "sha256": "261D28B6C33F212222B5D59480DA21F87D5A6DD84A4A25AE6776CD448E0EEAC3"
+    },
+    {
+      "path": "evidence/v4_1_20260901/artifacts__fdt_v4_1_exact_pointer_product_loop_guard_p13_20260901_r1__development_repetition.json",
+      "bytes": 169166,
+      "sha256": "F5221351A86B05E0D9E92E92D8BB077726565B937BD7A00A9536FCECA4832131"
+    },
+    {
+      "path": "evidence/v4_1_20260901/artifacts__fdt_v4_1_loop_controller_escape_6m7_20260901_dev_repetition_r1__development_repetition.json",
+      "bytes": 173572,
+      "sha256": "867A3CF1AA89871A8EEB2C6F837BB73CAC965762F2CF3B6AE10B28150F89B694"
+    },
+    {
+      "path": "evidence/v4_1_20260901/artifacts__fdt_v4_1_resume_repair_decision_20260901.json",
+      "bytes": 5639,
+      "sha256": "3C47B74228B9FD84F8F7FEE5D5A53EC752CA9F03564A6E4CB3BC5A82DAEC42EF"
+    },
+    {
+      "path": "evidence/v4_1_20260901/artifacts__FDT_V4_1_RESUME_REPAIR_DECISION_20260901.md",
+      "bytes": 4764,
+      "sha256": "E9DE9F98FD184CD00BDF1CFA6F19D430005300216D6100ECD4C858FDDB59CBE7"
+    },
+    {
+      "path": "evidence/v4_1_20260901/artifacts__fdt_v4_1_resume_repair_decision_20260901.sha256.json",
+      "bytes": 239,
+      "sha256": "FCED15B30944A13CC356447C99E65AEBE9AF12030FA62483436AA30174C53A76"
+    },
+    {
+      "path": "evidence/v4_1_20260901/artifacts__fdt_v4_1_stage_a_final_audit_20260830_r3__FDT_V4_1_STAGE_A_FINAL_CROSS_EVALUATION_20260830.md",
+      "bytes": 4574,
+      "sha256": "D3924F8129F8F43EBCE692C43A6B41A7108BC87AFE3D5398C64AB0ADDCEB40C8"
+    },
+    {
+      "path": "evidence/v4_1_20260901/artifacts__fdt_v4_1_stage_a_final_audit_20260830_r3__fdt_v4_1_stage_a_official_fp32_eval.json",
+      "bytes": 176861,
+      "sha256": "FA61659B8C526D5E637848C786C6F971B8AA8498D153E8F05C2B39D2B9E6DF93"
+    },
+    {
+      "path": "evidence/v4_1_20260901/artifacts__fdt_v4_1_stage_a_product_loop_guard_20260901_r1__development_repetition.json",
+      "bytes": 169455,
+      "sha256": "A61DC2B7D54AA9BEB4BE7719161FF243FBFCE87E91D398E7F58C383D5122C44E"
+    },
+    {
+      "path": "evidence/v4_1_20260901/artifacts__fdt_v4_1_stage_a_product_loop_guard_p13_20260901_r1__development_repetition.json",
+      "bytes": 168723,
+      "sha256": "90EFFC23A213F936B0E206FBCAF9B4A266B0B5783575922E40D3738CA94BD3D2"
+    },
+    {
+      "path": "evidence/v4_1_20260901/exact_memory_sealed/fdt_v4_exact_copy_audit.json",
+      "bytes": 1791520,
+      "sha256": "DB1ACBD2A5010ACBF5E8218C83ECE2A9FA445504A10C2E7845C1B28C839DD506"
+    },
+    {
+      "path": "evidence/v4_1_20260901/exact_memory_sealed/fdt_v4_exact_copy_matrix.csv",
+      "bytes": 1106691,
+      "sha256": "6A77E07D19584AFA94DF6B508902D0C6A39438058BB2CE007392A3EB101D57AB"
+    },
+    {
+      "path": "evidence/v4_1_20260901/exact_memory_sealed/sha256.json",
+      "bytes": 211,
+      "sha256": "92F1B34A70BDB08698C06120CCFEB5F1BF33226B070370456781442DEBF75792"
+    },
+    {
       "path": "pyproject.toml",
       "bytes": 240,
       "sha256": "07CD7042066BF361E5C414FDB16986C192E459D4E3BDC8A8C06289585C77BE75"
     },
     {
       "path": "README.md",
-      "bytes": 2965,
-      "sha256": "297ACD79EDB777B29F0D8ABED3FAFD4594D9EB4DEF067F1DE7C09BA3FF80012D"
+      "bytes": 2480,
+      "sha256": "7518DA8F4DC896E86BE7FD828AAB600BFA1775471412D334D2597E8C97DB07D3"
     },
     {
       "path": "references/README.md",
       "bytes": 684,
       "sha256": "D23894699A380EDD71A00B274C63F4C5F939A32377BBE52C9C0422F2F52E76C6"
-    },
-    {
-      "path": "references/reviews/01_PureFDT-리뷰-20260822_0-먼저읽기.md",
-      "bytes": 6628,
-      "sha256": "41CA7AA30C29EE92674A55502EC0DFF6D69740B446D1EE8A89A8E689A8D8016D"
-    },
-    {
-      "path": "references/reviews/02_PureFDT-리뷰-20260822_changes.diff",
-      "bytes": 32045,
-      "sha256": "640660E4279E855A6F9B9F5423BD7B04EE77361FF861496185D0DCE34F97CEA5"
-    },
-    {
-      "path": "references/reviews/03_PureFDT-리뷰-20260822_PureFDT-V20-T1-R2-LLM평가.md",
-      "bytes": 9308,
-      "sha256": "C1A48310821B2539E82CEF51D66B7D96D1118B77DA52C46960360CF46A5EC6FD"
-    },
-    {
-      "path": "references/reviews/04_PureFDT-리뷰-20260822_PureFDT-V20-T1-R2-검수리포트.md",
-      "bytes": 12377,
-      "sha256": "0E4FD8CC4775B35CEE72F4AB4F9A4533DCDA780738B31BE5632F9B2BAB59A2AF"
-    },
-    {
-      "path": "references/reviews/05_PureFDT-리뷰-20260822_PureFDT-V20-T1-R2-수정내역.md",
-      "bytes": 12267,
-      "sha256": "C5E38920C38BBFDECF802EB6E99A261E5F55BA3A5EFC512B49DC028959011C98"
-    },
-    {
-      "path": "references/reviews/06_PureFDT-리뷰-20260822_PureFDT-다음버전-권고안.md",
-      "bytes": 9863,
-      "sha256": "CB42367432EAA849AEC4185D46BE6E93211886EBA69309B5B4F6D6D756CE2463"
     },
     {
       "path": "references/reviews/07_e92fc6c6-890f-46fe-a5f4-0116001f3c0e_pasted-text.txt",
@@ -1216,19 +1317,34 @@
       "sha256": "104DDF6B4BA04233D26FB18E7875E9B67DD38B7E8729B4CBCD0695B3937877B8"
     },
     {
+      "path": "scripts/audit_fdt_v4_1_behavior_transition.py",
+      "bytes": 21713,
+      "sha256": "C86C7403B25247902748EE1579E471C275EF8DFE7198A9F340869B88C1F822B6"
+    },
+    {
       "path": "scripts/audit_fdt_v4_cache_integrity.py",
-      "bytes": 20334,
-      "sha256": "0625FD3878D249F837AF66E705B76182F9FC1D5FF7F293D0D81D06DFB5AC4A38"
+      "bytes": 20776,
+      "sha256": "1043BFAB2E868F2471938ECCD5A9D08CB879CF3109D9E047DB6B01945FBD6285"
     },
     {
       "path": "scripts/audit_fdt_v4_cache_rollout.py",
-      "bytes": 7111,
-      "sha256": "C8C69A67D0FF4406C89994D93BCFFD1AC55A7CF88D9197BC7B342297560841D6"
+      "bytes": 7553,
+      "sha256": "14639DF5432C4C93C6FA8CB52E288F0CBD55688DDC42343139BD4937CA71C456"
     },
     {
       "path": "scripts/audit_fdt_v4_exact_copy.py",
-      "bytes": 25837,
-      "sha256": "2E178E15EB184C2BFDF9333A6417B4416ABE75AF0F407B82E941009D3A4BCDF6"
+      "bytes": 30086,
+      "sha256": "08F0165FD1DE0DC9EAC9BBD65EB24A929E67A93F7AD24DD3400F77A6B7D5D952"
+    },
+    {
+      "path": "scripts/audit_fdt_v4_loop_counterfactuals.py",
+      "bytes": 7436,
+      "sha256": "46680A7CEFD9241B9B72BF8E4CF94A3ECE92F426AC1FCB254FB4D65E8EF4F039"
+    },
+    {
+      "path": "scripts/audit_fdt_v4_repetition_development.py",
+      "bytes": 4413,
+      "sha256": "0D31371623205EB5C2AEB5CF061CEAF35AD2A0290422DDB1F9DE1755D37AB1AF"
     },
     {
       "path": "scripts/audit_fdt_v4_speed_routing_window.py",
@@ -1236,9 +1352,24 @@
       "sha256": "2C64586523E8F76D60D450F69F27403076244976C29E46CDE0B3D675CDC59B7D"
     },
     {
+      "path": "scripts/benchmark_fdt_v4_acceleration_candidates.py",
+      "bytes": 9600,
+      "sha256": "BA0242981461ECADB22065BE74A7F9755931B871AA46D96E9461E018F91E2296"
+    },
+    {
+      "path": "scripts/benchmark_fdt_v4_bridge_safety.py",
+      "bytes": 5460,
+      "sha256": "963C3B7A715292CC7CE7F747941F3F844F8696D071B343F5A614954FD498C0CB"
+    },
+    {
       "path": "scripts/benchmark_fdt_v4_training_speed.py",
       "bytes": 19494,
       "sha256": "3A993660AD7B11C92EA10E8DDBABBB8F8EA594F68D6207D2488CD8BC4D64ACA7"
+    },
+    {
+      "path": "scripts/build_fdt_v4_context_bridge.py",
+      "bytes": 9349,
+      "sha256": "58209758CA4216E3EC7CCC9DFE0B96BA884FDAF315E4D499AE4B41BB18C83A88"
     },
     {
       "path": "scripts/build_fdt_v4_contract_sources.py",
@@ -1251,9 +1382,14 @@
       "sha256": "409D2B8FF7BC8F0AAC8185B9ECAA28604590231D139A45F43AA9B329F3F6B605"
     },
     {
+      "path": "scripts/diagnose_fdt_v4_1_transition_controls.py",
+      "bytes": 8631,
+      "sha256": "BB1856D0B0E22920E2DC7DD62A872595490F33FC5B2FCB8A60F264464DCEB319"
+    },
+    {
       "path": "scripts/diagnose_fdt_v4_cache_route_drift.py",
-      "bytes": 6204,
-      "sha256": "3B1A5C8CBE1EC13F50BD8E9815982A90040688F613B6B2233B5A37B8D4C69626"
+      "bytes": 10247,
+      "sha256": "941C9820091F6F9255D24482FA89E6C82C8CA56635DA8B6B8B834EE9D37ABF55"
     },
     {
       "path": "scripts/diagnose_fdt_v4_determinism_throughput.py",
@@ -1272,8 +1408,8 @@
     },
     {
       "path": "scripts/evaluate_fdt_v4.py",
-      "bytes": 43433,
-      "sha256": "0D8E0CFD668A4C5F0BE01752DAB265BAD8DE04846CE5F4201576F3EC62F77C72"
+      "bytes": 49186,
+      "sha256": "0BD36B7078DED96C3EE1FBE2C796647DA23E889AFFBC986B575A8893B13AA5D3"
     },
     {
       "path": "scripts/final_audit_fdt_v4.py",
@@ -1282,8 +1418,8 @@
     },
     {
       "path": "scripts/generate_fdt_v4.py",
-      "bytes": 9496,
-      "sha256": "C9232FDEAC5BB56661785A8E7A463812734DCED2A7CA42854A4C0493FB43F22D"
+      "bytes": 10897,
+      "sha256": "199E59DC9481535DF8CB47F22A2E6B318113FAA2995ED9DE22A493A1E5C68E0A"
     },
     {
       "path": "scripts/luna_fdt_v4_attach_monitor.py",
@@ -1301,6 +1437,21 @@
       "sha256": "D9DDF9FB6B4E6D82353A267E9C157169290AF4087D7507B15BB85818707E0403"
     },
     {
+      "path": "scripts/migrate_fdt_v4_1_pinned_validation_seed.py",
+      "bytes": 6969,
+      "sha256": "0CC5E044ED49792462C72670A4382D7D59787E2F168683D949CF73AD8D7F5BAE"
+    },
+    {
+      "path": "scripts/migrate_fdt_v4_batch4_checkpoint.py",
+      "bytes": 8352,
+      "sha256": "A3CC0759C355D2AB0930343292BCF64D83D28FD7A0AF468F9FDC44E7554B0D90"
+    },
+    {
+      "path": "scripts/migrate_fdt_v4_bridge_checkpoint.py",
+      "bytes": 8460,
+      "sha256": "DF3A8CAC74F0D25B16C4A49480702ACDEF67015DF7F597F94A2E6B27E0FF23A2"
+    },
+    {
       "path": "scripts/migrate_fdt_v4_overfit_gate_v2.py",
       "bytes": 5029,
       "sha256": "3619A2D6CECE3EECB668A8BB4174C1D19C5CD8FE63EE3388CEBD388D1A916F26"
@@ -1314,6 +1465,16 @@
       "path": "scripts/migrate_fdt_v4_syncfix_checkpoint.py",
       "bytes": 7409,
       "sha256": "7D71D853BC2B2327F80F08AA28C20381DA058B7C3A6ACE693D49654878EC26DC"
+    },
+    {
+      "path": "scripts/prepare_fdt_v4_1_generated_prefix_recovery.py",
+      "bytes": 34266,
+      "sha256": "F70532A139AC0E91170FF5C53570357E27974046D812CE76E7BA101941FEB41A"
+    },
+    {
+      "path": "scripts/prepare_fdt_v4_1_loop_escape_contrast.py",
+      "bytes": 12359,
+      "sha256": "83ED10DD7E048F44DAC579470314C32323831BE35F491AA182D2775465806596"
     },
     {
       "path": "scripts/prepare_fdt_v4_curriculum.py",
@@ -1331,6 +1492,16 @@
       "sha256": "C71666114994E3970AF436F49A4B43DF29F326E732BE81055D01AA78B885AC92"
     },
     {
+      "path": "scripts/resume_fdt_v4_1_rope_stage_a_20260830_r2.ps1",
+      "bytes": 4422,
+      "sha256": "004545A6E018A542EC0553B10A8BA69A9C14FF5B082F286720ED99061FBFA2CE"
+    },
+    {
+      "path": "scripts/run_fdt_v4_capability_trajectory_audit.ps1",
+      "bytes": 2099,
+      "sha256": "3931CD4986963DD15D327895769C4D28AD7BF0CBA87A014C359D558DAF959623"
+    },
+    {
       "path": "scripts/smoke_fdt_v4_cuda.py",
       "bytes": 5325,
       "sha256": "14537D11869E3FC9A3CA6D47545082AF78E4FA19A9667E5B51728A01B0EEAF5E"
@@ -1339,6 +1510,26 @@
       "path": "scripts/smoke_fdt_v4_main_training.py",
       "bytes": 5908,
       "sha256": "963932C24A1E2AED2C2428527BAC93437D594FCF33A24463A5A1C03BD1C19DE0"
+    },
+    {
+      "path": "scripts/start_fdt_v4_1_rope_stage_a_20260830_r1.ps1",
+      "bytes": 5499,
+      "sha256": "2E8977F3EE836AE300FBE569348074C7A85C56ACAAA2C66B410259F7B5391261"
+    },
+    {
+      "path": "scripts/start_fdt_v4_1_transition_20260829_r2.ps1",
+      "bytes": 3799,
+      "sha256": "931F45C510807FDF535DDD8A07130CB6E72D37A60D3C21020913E3199CF66324"
+    },
+    {
+      "path": "scripts/start_fdt_v4_1_transition_20260829.ps1",
+      "bytes": 3504,
+      "sha256": "C7778C972376B75FFDA21C8C79661A4C5EB5D858517508B60AA91A47C2D69872"
+    },
+    {
+      "path": "scripts/start_fdt_v4_bridge_resume_20260827_r10.ps1",
+      "bytes": 2127,
+      "sha256": "3E83F44477928B91B73D60C273834F582B1AC75851AC20B4A345D599724F27F3"
     },
     {
       "path": "scripts/start_fdt_v4_console.ps1",
@@ -1386,6 +1577,16 @@
       "sha256": "D5CEE61C360BF943A5B3CBEC3DDADE06890D1B63BFA3BDDB8E5EFEC2629C34B7"
     },
     {
+      "path": "scripts/start_fdt_v4_speed_resume_20260827_r9_batch4.ps1",
+      "bytes": 2181,
+      "sha256": "663319C071719FBDEB33B8F270C86FCB025C925F85FCB75FAFD67D154D563D6E"
+    },
+    {
+      "path": "scripts/summarize_fdt_v4_capability_trajectory.py",
+      "bytes": 8097,
+      "sha256": "66AA1C999E19B86781EFAC0E00BEA209C30DB270C663F1F474567E33350A5368"
+    },
+    {
       "path": "scripts/terra_fdt_v4_evaluator.py",
       "bytes": 10286,
       "sha256": "E86671445718A0242650F5AD5EE76DBD9614DE22CC636015D34F80FDCEDFBA35"
@@ -1396,14 +1597,29 @@
       "sha256": "9544769D322C855E8660F4EB7F9B42DE0814EDED911BF0FFEDB666FA0E8AEB52"
     },
     {
+      "path": "scripts/train_fdt_v4_1_exact_pointer_pilot.py",
+      "bytes": 17434,
+      "sha256": "55D33D4C29627492F564C9416488E0668BB491ABE1A1772BBE16759E5E9B4744"
+    },
+    {
+      "path": "scripts/train_fdt_v4_curriculum_bridge.py",
+      "bytes": 111389,
+      "sha256": "434E36562C5A7483250D8396764C36215AABFB5F8BEB96937EDB26A42224E12C"
+    },
+    {
+      "path": "scripts/train_fdt_v4_curriculum_speed_observable.py",
+      "bytes": 79475,
+      "sha256": "938EF8553A3CA9CE3CF54F3A1EBABA7D3E84152F0123FC3510AFA007D0BB8B9E"
+    },
+    {
       "path": "scripts/train_fdt_v4_curriculum_speed.py",
       "bytes": 76610,
       "sha256": "B351DF0B9B6CDB9E20B0858897F5849647E281110B71A96B6CF83708D5E6C547"
     },
     {
       "path": "scripts/train_fdt_v4_curriculum.py",
-      "bytes": 65255,
-      "sha256": "478FA68BD977860B8D4B9CB65603DA0EE26881E3CEB15F7EBE5FA4AD8186BAF9"
+      "bytes": 70947,
+      "sha256": "FBD35EEA775B2228781C6D304FFF6E51E14A6B3686EE2022A8A0B2B5A9DAA725"
     },
     {
       "path": "src/fdt_rlm/__init__.py",
@@ -1422,8 +1638,8 @@
     },
     {
       "path": "src/fdt_rlm/config.py",
-      "bytes": 4179,
-      "sha256": "9C13FCFC9FC4EB4F43E357E26A38D067D6882CB0EC8F8EB7280335C3178D4BDC"
+      "bytes": 5157,
+      "sha256": "F7607F3A1002F9FCC16A63C2431BA29CE10ED5FE69560DE3652AEF3789F0CC8E"
     },
     {
       "path": "src/fdt_rlm/data/__init__.py",
@@ -1537,8 +1753,8 @@
     },
     {
       "path": "src/fdt_rlm/lexical_pointer.py",
-      "bytes": 73182,
-      "sha256": "65D392DD32447279674CEB2D7298E669A99FFA35D9953228A2F323C763608BB8"
+      "bytes": 84870,
+      "sha256": "BFDE00DAEFA121B59E6280DF97641774C6DD42C6DC7873F3B13BC2341E42E3A0"
     },
     {
       "path": "src/fdt_rlm/model_growth.py",
@@ -1552,18 +1768,18 @@
     },
     {
       "path": "src/fdt_rlm/models/causal_lm.py",
-      "bytes": 28103,
-      "sha256": "437F64BA417979B5CEA76A31256D0509D99C681178ED023F30A1B7AA5AF0CC20"
+      "bytes": 28172,
+      "sha256": "E2A3F879EECB286FE1A49DFC98E26D909AB91F6C8E13878193F26CCE79923CD3"
     },
     {
       "path": "src/fdt_rlm/models/fdt_v3.py",
-      "bytes": 55586,
-      "sha256": "18182400B53D12AD0C0E30B6EEB856E1972C2E0657C248D8BA29DB5843018B26"
+      "bytes": 65491,
+      "sha256": "81FE7B06DCBF9E44AD56700AC6BA1B3FE6BA17C801BBF7C0295A7B47E2014832"
     },
     {
       "path": "src/fdt_rlm/models/fdt_v4.py",
-      "bytes": 17340,
-      "sha256": "E890F109661B2E309CF4E8CA452734D17C76A77ADCFA0428DEA1C46D9EDF0190"
+      "bytes": 27652,
+      "sha256": "0E881F62219210F555BBEB7E65F39BF235B634DB5B89395D9590DB79B28E4270"
     },
     {
       "path": "src/fdt_rlm/models/next_causal_lm.py",
@@ -1651,6 +1867,11 @@
       "sha256": "AF324C361395CDACB7EBAB704B6C745977C42F4419D647FC9A9D4FE4E5C17ED6"
     },
     {
+      "path": "tests/test_fdt_v4_1.py",
+      "bytes": 25174,
+      "sha256": "7AA6A18710115C61D146D5753CE7C0D618350CB32C89D9B2F92F24143436241C"
+    },
+    {
       "path": "tests/test_fdt_v4_cache_audit.py",
       "bytes": 7101,
       "sha256": "713445CCBB02E036F343B6BF7825EC450FD4161C4FA42ACCF32AB3AF3EE631F7"
@@ -1661,9 +1882,14 @@
       "sha256": "A209CDEC3A9A93C96C56610AA6EA5F21EDE80FC55225E3E56FEB3109A0263DEB"
     },
     {
+      "path": "tests/test_fdt_v4_context_bridge.py",
+      "bytes": 2301,
+      "sha256": "67801A90E6BC7BAF15CA1E3A8510C867E804D07668E7B1AEB3F8A6999BEC593E"
+    },
+    {
       "path": "tests/test_fdt_v4_evaluation.py",
-      "bytes": 7996,
-      "sha256": "F139291A4E8290F3AAA65CEEB9E2FEE8AF37070FD76467E4AE936132C5BCA38C"
+      "bytes": 10070,
+      "sha256": "5B0749520DD25E6029476456D0FE511421EB1A40AFB95C6052289698DA851FD1"
     },
     {
       "path": "tests/test_fdt_v4_exact_copy_audit.py",
@@ -1682,13 +1908,13 @@
     },
     {
       "path": "tests/test_fdt_v4_generation_policy.py",
-      "bytes": 3591,
-      "sha256": "1518D7F42430055E006B5103FE385C232172B6409CBE9A6B3290163105AA9653"
+      "bytes": 4211,
+      "sha256": "999BAEEB1B17CA5D6CE41C8EDB13BFEA44428A0BBCFCBEB452FEEFDDDF86EF46"
     },
     {
       "path": "tests/test_fdt_v4_local_attention_numerics.py",
-      "bytes": 3847,
-      "sha256": "F186139F5C9B5E7812E77D77CFA177365F59774741D1AB966CB721C5EBA665F4"
+      "bytes": 4385,
+      "sha256": "F438AB1F3235053A4A9957C0B06004FF6E940432BDE0121F1B51DD96EDB4A948"
     },
     {
       "path": "tests/test_fdt_v4_profile.py",
@@ -1701,14 +1927,19 @@
       "sha256": "02310E771315ECF9789936D2E257F3233E76DB0B228C686F7B1B51F44FB99955"
     },
     {
+      "path": "tests/test_fdt_v4_training_observability.py",
+      "bytes": 4371,
+      "sha256": "408B235F5E374019FC6987A99BBFF4EAFA017C641F64A641F99429B6015D4E2D"
+    },
+    {
       "path": "tests/test_fdt_v4_training_speed.py",
       "bytes": 9578,
       "sha256": "F195CF04C7B7347879A71CC3070830483C674E6BB4C2045E132AD28B10329479"
     },
     {
       "path": "tests/test_fdt_v4_training.py",
-      "bytes": 19531,
-      "sha256": "55DD78399E2E492FCBD67EB4B887C658E9A1EF70153F5A2E59159E559C56FA39"
+      "bytes": 25613,
+      "sha256": "6DFCAFBA4A9CD8A1D806E4B9B87D5E422F7469A63EA86E0D09F00C6A6F7F7C1B"
     },
     {
       "path": "tests/test_fdt_v4.py",

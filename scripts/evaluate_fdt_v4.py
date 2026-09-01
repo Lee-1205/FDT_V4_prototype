@@ -34,6 +34,7 @@ if str(ROOT / "src") not in sys.path:
 from fdt_rlm.config import ModelConfig
 from fdt_rlm.lexical_pointer import LexicalPointerDecodeState
 from fdt_rlm.models import build_model
+from fdt_rlm.next_tools import apply_ngram_loop_penalty_
 from fdt_rlm.tokenization import load_tokenizer
 
 
@@ -252,13 +253,39 @@ def decode_tokens(tokenizer: Any | None, ids: Iterable[int]) -> str | None:
     return tokenizer.decode(list(ids), skip_special_tokens=True)
 
 
-def load_checkpoint(checkpoint: Path) -> tuple[torch.nn.Module, ModelConfig, dict[str, Any]]:
+def load_checkpoint(
+    checkpoint: Path, *, require_v4: bool = True
+) -> tuple[torch.nn.Module, ModelConfig, dict[str, Any]]:
     payload = torch.load(checkpoint, map_location="cpu", weights_only=True, mmap=True)
     config = ModelConfig(**payload["model_config"])
-    if config.model_type != "fdt_v4":
+    if require_v4 and config.model_type != "fdt_v4":
         raise ValueError(f"checkpoint model_type must be fdt_v4, received {config.model_type!r}")
     model = build_model(config).to(device="cpu", dtype=torch.float32).eval()
-    model.load_state_dict(payload["model_state_dict"], strict=True)
+    if payload.get("checkpoint_format") == "fdt_v4_adapter_overlay_v1":
+        parent = Path(payload["parent_checkpoint"]).resolve()
+        if sha256_file(parent) != str(payload["parent_checkpoint_sha256"]).upper():
+            raise ValueError("adapter overlay parent checkpoint hash mismatch")
+        parent_payload = torch.load(
+            parent, map_location="cpu", weights_only=True, mmap=True
+        )
+        incompatible = model.load_state_dict(
+            parent_payload["model_state_dict"], strict=False
+        )
+        expected_adapter = {
+            name for name in model.state_dict() if name.startswith("loop_controller.")
+        }
+        if set(incompatible.missing_keys) != expected_adapter or incompatible.unexpected_keys:
+            raise ValueError("adapter overlay parent state is not structurally compatible")
+        adapter_state = payload.get("adapter_state_dict")
+        if not isinstance(adapter_state, dict) or set(adapter_state) != expected_adapter:
+            raise ValueError("adapter overlay state is incomplete")
+        incompatible = model.load_state_dict(adapter_state, strict=False)
+        if incompatible.unexpected_keys or expected_adapter.intersection(
+            incompatible.missing_keys
+        ):
+            raise ValueError("adapter overlay could not be applied")
+    else:
+        model.load_state_dict(payload["model_state_dict"], strict=True)
     metadata = {
         "checkpoint": str(checkpoint.resolve()),
         "checkpoint_sha256": sha256_file(checkpoint),
@@ -266,12 +293,20 @@ def load_checkpoint(checkpoint: Path) -> tuple[torch.nn.Module, ModelConfig, dic
         "model_config": payload["model_config"],
         "checkpoint_keys": sorted(payload.keys()),
     }
+    if payload.get("checkpoint_format") == "fdt_v4_adapter_overlay_v1":
+        metadata["checkpoint_format"] = payload["checkpoint_format"]
+        metadata["parent_checkpoint"] = str(Path(payload["parent_checkpoint"]).resolve())
+        metadata["parent_checkpoint_sha256"] = payload["parent_checkpoint_sha256"]
     return model, config, metadata
 
 
 @torch.inference_mode()
 def forward_row(model: torch.nn.Module, ids: list[int]) -> tuple[torch.Tensor, dict[str, Any]]:
-    tensor = torch.tensor([ids], dtype=torch.long)
+    tensor = torch.tensor(
+        [ids],
+        dtype=torch.long,
+        device=next(model.parameters()).device,
+    )
     output = model(tensor, attention_mask=torch.ones_like(tensor))
     return output["logits"], output
 
@@ -312,6 +347,16 @@ def retrieve_proposal_diagnostics(
 
 
 @torch.inference_mode()
+def requires_full_recompute_generation(config: ModelConfig) -> bool:
+    alpha = float(getattr(config, "rope_transition_alpha", 1.0))
+    return bool(
+        getattr(config, "use_rope", False)
+        and getattr(config, "rope_transition_mode", "lerp") == "output_blend"
+        and 0.0 < alpha < 1.0
+    )
+
+
+@torch.inference_mode()
 def generate(
     model: torch.nn.Module,
     config: ModelConfig,
@@ -319,15 +364,25 @@ def generate(
     max_new_tokens: int,
     exact_mode: str,
     min_gate: float = 0.0,
+    ngram_loop_penalty: float = 0.0,
 ) -> tuple[list[int], list[dict[str, Any]]]:
     if exact_mode not in EXACT_MODES:
         raise ValueError(f"unknown exact ablation mode: {exact_mode}")
     if not prompt_ids:
         raise ValueError("generation prompt must contain at least one token")
-    prompt = torch.tensor([prompt_ids], dtype=torch.long)
+    prompt = torch.tensor(
+        [prompt_ids],
+        dtype=torch.long,
+        device=next(model.parameters()).device,
+    )
     generated = prompt.clone()
     generated_only = generated[:, :0]
-    output, cache = model.prefill(prompt, torch.ones_like(prompt))
+    full_recompute = requires_full_recompute_generation(config)
+    if full_recompute:
+        output = model(prompt, attention_mask=torch.ones_like(prompt))
+        cache = None
+    else:
+        output, cache = model.prefill(prompt, torch.ones_like(prompt))
     memory = None
     state = None
     exact_available = model.exact_pointer is not None and exact_mode in {"store", "retrieve", "copy"}
@@ -346,6 +401,7 @@ def generate(
             "ablation": exact_mode,
             "exact_memory_built": memory is not None,
             "logits_mixed": False,
+            "decode_backend": "full_recompute" if full_recompute else "incremental_cache",
         }
         mixed = logits
         if exact_mode == "retrieve" and memory is not None:
@@ -365,6 +421,14 @@ def generate(
                 anchor_memory=memory,
                 query_anchor_ids=query,
                 max_candidate_chunks=config.exact_pointer_candidate_chunks,
+                full_scan_fallback=config.exact_memory_full_scan_fallback,
+                fallback_margin=config.exact_memory_fallback_margin,
+                candidate_cap=config.exact_memory_candidate_cap,
+                commit_threshold=config.exact_memory_commit_threshold,
+                hard_copy=config.exact_memory_hard_copy,
+                hard_copy_gate_threshold=config.exact_memory_hard_copy_gate_threshold,
+                hard_copy_pointer_threshold=config.exact_memory_hard_copy_pointer_threshold,
+                hard_copy_margin_threshold=config.exact_memory_hard_copy_margin_threshold,
             )
             diagnostics.update(pointer_diagnostics)
             diagnostics["ablation"] = exact_mode
@@ -373,6 +437,22 @@ def generate(
             if exact_mode == "copy":
                 mixed = proposed
                 diagnostics["logits_mixed"] = True
+        copy_active = diagnostics.get("mode") in {"hard_copy", "cursor"}
+        if float(ngram_loop_penalty) > 0.0 and not copy_active:
+            mixed = mixed.clone()
+            apply_ngram_loop_penalty_(
+                mixed,
+                generated_only,
+                ngram_order=int(config.generation_ngram_order),
+                penalty=float(ngram_loop_penalty),
+                window=int(config.generation_ngram_window),
+                hard_block_after=int(config.generation_ngram_hard_block_after),
+            )
+            diagnostics["ngram_loop_penalty"] = float(ngram_loop_penalty)
+            diagnostics["ngram_loop_control_applied"] = True
+        else:
+            diagnostics["ngram_loop_penalty"] = 0.0
+            diagnostics["ngram_loop_control_applied"] = False
         selected = int(mixed.argmax(dim=-1).item())
         # Retrieval measures proposal quality only.  It must not activate the
         # cursor or force a token; only copy commits cursor state.
@@ -383,10 +463,13 @@ def generate(
         trace.append(diagnostics)
         if selected == config.eos_token_id:
             break
-        next_id = torch.tensor([[selected]], dtype=torch.long)
+        next_id = torch.tensor([[selected]], dtype=torch.long, device=generated.device)
         generated = torch.cat((generated, next_id), dim=1)
         generated_only = torch.cat((generated_only, next_id), dim=1)
-        output, cache = model.decode_step(next_id, cache)
+        if full_recompute:
+            output = model(generated, attention_mask=torch.ones_like(generated))
+        else:
+            output, cache = model.decode_step(next_id, cache)
     return selected_ids, trace
 
 
@@ -486,6 +569,15 @@ def load_dataset(path: Path, tokenizer: Any | None, limit: int) -> list[dict[str
     return rows
 
 
+def require_nonempty_rows(rows: list[dict[str, Any]], path: Path, purpose: str) -> None:
+    if rows:
+        return
+    raise ValueError(
+        f"{purpose} dataset produced zero usable rows: {path}. "
+        "JSON prompt/text rows require --tokenizer; tensor rows require input_ids."
+    )
+
+
 def tokenizer_json_path(path: Path) -> Path:
     path = path.resolve()
     if path.is_dir():
@@ -518,7 +610,11 @@ def per_row_teacher_forced(model: torch.nn.Module, config: ModelConfig, rows: li
         ids = row["input_ids"][: config.max_seq_len]
         if len(ids) < 2 or any(token < 0 or token >= config.vocab_size for token in ids):
             continue
-        tensor = torch.tensor([ids], dtype=torch.long)
+        tensor = torch.tensor(
+            [ids],
+            dtype=torch.long,
+            device=next(model.parameters()).device,
+        )
         logits = model(tensor, attention_mask=torch.ones_like(tensor))["logits"][:, :-1].float()
         labels = tensor[:, 1:]
         losses = F.cross_entropy(logits.reshape(-1, logits.size(-1)), labels.reshape(-1), reduction="none")
@@ -628,7 +724,11 @@ def evaluate_teacher_forced(model: torch.nn.Module, config: ModelConfig, tokeniz
         ids = row["input_ids"][: config.max_seq_len]
         if len(ids) < 2:
             continue
-        tensor = torch.tensor([ids], dtype=torch.long)
+        tensor = torch.tensor(
+            [ids],
+            dtype=torch.long,
+            device=next(model.parameters()).device,
+        )
         output = model(tensor, attention_mask=torch.ones_like(tensor))
         logits = output["logits"][:, :-1].float()
         labels = tensor[:, 1:]
@@ -673,11 +773,20 @@ def evaluate_teacher_forced(model: torch.nn.Module, config: ModelConfig, tokeniz
 
 @torch.inference_mode()
 def cache_integrity(model: torch.nn.Module, config: ModelConfig, rows: list[dict[str, Any]]) -> dict[str, Any]:
+    if requires_full_recompute_generation(config):
+        return unsupported(
+            "intermediate output-blend transition intentionally has no single-KV "
+            "cache state; cache integrity must be audited at alpha endpoints"
+        )
     eligible = next((row["input_ids"] for row in rows if len(row["input_ids"]) >= 3), None)
     if eligible is None:
         return unsupported("requires a dataset row with at least three tokens")
     prompt = eligible[: min(len(eligible) - 1, max(2, config.max_seq_len // 2))]
-    full = torch.tensor([prompt], dtype=torch.long)
+    full = torch.tensor(
+        [prompt],
+        dtype=torch.long,
+        device=next(model.parameters()).device,
+    )
     output, cache = model.prefill(full, torch.ones_like(full))
     max_error = 0.0
     token_identity = True
@@ -725,8 +834,14 @@ def category_generation(
                 continue
             generated, _ = generate(model, config, prompt, min(128, config.max_seq_len - len(prompt)), "off")
             completion = decode_tokens(tokenizer, generated) or ""
-            record: dict[str, Any] = {"loop": loop_metrics(generated)}
             target = str(row.get("target", ""))
+            record: dict[str, Any] = {
+                "prompt": str(row["prompt"]),
+                "target": target,
+                "completion": completion,
+                "generated_tokens": len(generated),
+                "loop": loop_metrics(generated),
+            }
             if category == "json":
                 record["json"] = json_metrics(completion, row.get("schema"), target)
             elif category in {"python", "python_code"}:
@@ -839,6 +954,7 @@ def evaluate(
     comparator_checkpoint: Path | None = None,
     repetition_dataset_path: Path | None = None,
     bootstrap_samples: int = 2000,
+    run_exact_memory: bool = True,
 ) -> dict[str, Any]:
     started = time.time()
     checkpoint = checkpoint.resolve()
@@ -849,18 +965,22 @@ def evaluate(
     if dataset_path is not None:
         dataset_path = dataset_path.resolve()
         rows = load_dataset(dataset_path, tokenizer, dataset_limit)
+        require_nonempty_rows(rows, dataset_path, "evaluation")
         dataset_metadata = {"status": "ok", "path": str(dataset_path), "sha256": sha256_file(dataset_path), "rows_loaded": len(rows), "format": "fixed_tensor" if dataset_path.suffix.lower() not in {".json", ".jsonl"} else "json_rows"}
     comparator_model = None
     comparator_config = None
     comparator_metadata: dict[str, Any] = {"status": "not_supplied"}
     if comparator_checkpoint is not None:
-        comparator_model, comparator_config, metadata = load_checkpoint(comparator_checkpoint.resolve())
+        comparator_model, comparator_config, metadata = load_checkpoint(
+            comparator_checkpoint.resolve(), require_v4=False
+        )
         comparator_metadata = {"status": "ok", **metadata}
     repetition_rows: list[dict[str, Any]] = []
     repetition_metadata: dict[str, Any] = {"status": "not_supplied"}
     if repetition_dataset_path is not None:
         repetition_dataset_path = repetition_dataset_path.resolve()
         repetition_rows = load_dataset(repetition_dataset_path, tokenizer, 100)
+        require_nonempty_rows(repetition_rows, repetition_dataset_path, "repetition")
         repetition_metadata = {
             "status": "ok",
             "path": str(repetition_dataset_path),
@@ -880,6 +1000,7 @@ def evaluate(
         },
         "generation_protocol": {
             "decoder": "greedy",
+            "transition_decode_contract": "full_recompute_for_intermediate_output_blend",
             "repetition_control": {
                 "repetition_penalty": 1.0,
                 "scope": "generated_only_when_enabled",
@@ -893,7 +1014,11 @@ def evaluate(
         "comparator": comparator_metadata,
         "teacher_forced": evaluate_teacher_forced(model, config, tokenizer, rows) if rows else unsupported("no dataset supplied"),
         "paired_bootstrap": paired_bootstrap(model, config, comparator_model, comparator_config, rows, bootstrap_samples) if rows else unsupported("no fixed evaluation dataset supplied"),
-        "exact_memory": evaluate_exact_memory(model, config, tokenizer),
+        "exact_memory": (
+            evaluate_exact_memory(model, config, tokenizer)
+            if run_exact_memory
+            else unsupported("deferred to the separately preserved Exact Memory pilot")
+        ),
         "free_generation": category_generation(model, config, tokenizer, rows, allow_python_unit_exec) if rows else unsupported("no dataset supplied"),
         "independent_repetition": independent_repetition_protocol(model, config, repetition_rows) if repetition_rows else unsupported("no independent repetition dataset supplied"),
         "independent_repetition_dataset": repetition_metadata,
@@ -933,6 +1058,7 @@ def main() -> None:
     parser.add_argument("--comparator-checkpoint", type=Path)
     parser.add_argument("--repetition-dataset", type=Path)
     parser.add_argument("--bootstrap-samples", type=int, default=2000)
+    parser.add_argument("--skip-exact-memory", action="store_true", help="Record Exact Memory as deferred instead of rerunning its separate pilot.")
     parser.add_argument("--device", default="cpu", choices=["cpu"], help="Official evaluation is CPU FP32 only.")
     args = parser.parse_args()
     report = evaluate(
@@ -945,6 +1071,7 @@ def main() -> None:
         args.comparator_checkpoint,
         args.repetition_dataset,
         args.bootstrap_samples,
+        not args.skip_exact_memory,
     )
     print(json.dumps({"output": report["output"], "official_evaluation": report["official_evaluation"]}, ensure_ascii=False))
 

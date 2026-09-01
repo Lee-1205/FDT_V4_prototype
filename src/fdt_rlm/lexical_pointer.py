@@ -85,6 +85,10 @@ class AnchorIndexedExactMemory:
     chunk_size: int
     key_vectors: torch.Tensor | None = None
     span_end_positions: torch.Tensor | None = None
+    registered_key_mask: torch.Tensor | None = None
+    registered_key_positions: torch.Tensor | None = None
+    registered_payload_ids: torch.Tensor | None = None
+    registered_payload_lengths: torch.Tensor | None = None
 
     @classmethod
     def from_prompt(
@@ -98,6 +102,10 @@ class AnchorIndexedExactMemory:
         commit_scores: torch.Tensor | None = None,
         key_vectors: torch.Tensor | None = None,
         span_end_positions: torch.Tensor | None = None,
+        registered_key_mask: torch.Tensor | None = None,
+        registered_key_positions: torch.Tensor | None = None,
+        registered_payload_ids: torch.Tensor | None = None,
+        registered_payload_lengths: torch.Tensor | None = None,
     ) -> "AnchorIndexedExactMemory":
         base = ExactTokenMemory.from_prompt(input_ids, attention_mask, source_length)
         end = base.source_length
@@ -141,6 +149,60 @@ class AnchorIndexedExactMemory:
             positions = torch.arange(end, device=stored_span_ends.device).view(1, -1)
             if bool((stored_span_ends < positions).any()) or bool((stored_span_ends >= end).any()):
                 raise ValueError("span_end_positions must be monotonic bounds within the source")
+        stored_registered_keys = None
+        if registered_key_mask is not None:
+            if registered_key_mask.shape != input_ids.shape:
+                raise ValueError("registered_key_mask must match input_ids")
+            stored_registered_keys = (
+                registered_key_mask[:, : max(end - 1, 0)]
+                .bool()
+                .contiguous()
+                .clone()
+            )
+            transition_valid = base.valid_mask[:, :-1] & base.valid_mask[:, 1:]
+            if bool((stored_registered_keys & ~transition_valid).any()):
+                raise ValueError("registered Exact Memory keys must precede valid values")
+            if not bool(stored_registered_keys.any()):
+                raise ValueError("registered_key_mask must declare at least one Exact Memory span")
+        payload_fields = (
+            registered_key_positions,
+            registered_payload_ids,
+            registered_payload_lengths,
+        )
+        if any(value is not None for value in payload_fields):
+            if not all(value is not None for value in payload_fields):
+                raise ValueError("registered payload positions, ids, and lengths are required together")
+            if registered_key_positions.ndim != 2:
+                raise ValueError("registered_key_positions must have shape [batch, records]")
+            if registered_payload_ids.ndim != 3:
+                raise ValueError("registered_payload_ids must have shape [batch, records, tokens]")
+            if registered_payload_lengths.shape != registered_key_positions.shape:
+                raise ValueError("registered_payload_lengths must match registered_key_positions")
+            if registered_payload_ids.shape[:2] != registered_key_positions.shape:
+                raise ValueError("registered payload record dimensions must match")
+            if registered_key_positions.size(0) != input_ids.size(0):
+                raise ValueError("registered payload batch dimension must match input_ids")
+            if bool((registered_key_positions < 0).any()) or bool(
+                (registered_key_positions >= max(end - 1, 1)).any()
+            ):
+                raise ValueError("registered payload key position is out of bounds")
+            if bool((registered_payload_lengths < 1).any()) or bool(
+                (registered_payload_lengths > registered_payload_ids.size(-1)).any()
+            ):
+                raise ValueError("registered payload length is invalid")
+            declared = torch.zeros_like(base.valid_mask[:, :-1])
+            declared.scatter_(1, registered_key_positions.long(), True)
+            if stored_registered_keys is None:
+                stored_registered_keys = declared
+            elif not torch.equal(stored_registered_keys, declared):
+                raise ValueError("registered payload keys must equal registered_key_mask")
+            stored_key_positions = registered_key_positions.to(dtype=torch.int32).contiguous().clone()
+            stored_payload_ids = registered_payload_ids.long().contiguous().clone()
+            stored_payload_lengths = registered_payload_lengths.to(dtype=torch.int32).contiguous().clone()
+        else:
+            stored_key_positions = None
+            stored_payload_ids = None
+            stored_payload_lengths = None
         return cls(
             token_ids=base.token_ids,
             valid_mask=base.valid_mask,
@@ -152,6 +214,10 @@ class AnchorIndexedExactMemory:
             chunk_size=chunk_size,
             key_vectors=stored_keys,
             span_end_positions=stored_span_ends,
+            registered_key_mask=stored_registered_keys,
+            registered_key_positions=stored_key_positions,
+            registered_payload_ids=stored_payload_ids,
+            registered_payload_lengths=stored_payload_lengths,
         )
 
     @property
@@ -179,6 +245,8 @@ class AnchorIndexedExactMemory:
         positions = positions.clamp(max=max(self.source_length - 2, 0))
         valid &= self.valid_mask.gather(1, positions)
         valid &= self.valid_mask.gather(1, positions + 1)
+        if self.registered_key_mask is not None:
+            valid &= self.registered_key_mask.gather(1, positions)
         return positions, valid
 
     def storage_bytes(self) -> int:
@@ -196,7 +264,55 @@ class AnchorIndexedExactMemory:
             total += self.key_vectors.numel() * self.key_vectors.element_size()
         if self.span_end_positions is not None:
             total += self.span_end_positions.numel() * self.span_end_positions.element_size()
+        if self.registered_key_mask is not None:
+            total += self.registered_key_mask.numel() * self.registered_key_mask.element_size()
+        for tensor in (
+            self.registered_key_positions,
+            self.registered_payload_ids,
+            self.registered_payload_lengths,
+        ):
+            if tensor is not None:
+                total += tensor.numel() * tensor.element_size()
         return total
+
+    def payload_first_tokens(
+        self, key_positions: torch.Tensor, fallback: torch.Tensor
+    ) -> torch.Tensor:
+        if self.registered_key_positions is None:
+            return fallback
+        matches = key_positions.unsqueeze(-1).eq(
+            self.registered_key_positions.long().unsqueeze(1)
+        )
+        found = matches.any(dim=-1)
+        record_indices = matches.to(dtype=torch.int32).argmax(dim=-1)
+        batch = torch.arange(key_positions.size(0), device=key_positions.device).view(-1, 1)
+        first = self.registered_payload_ids[batch, record_indices, 0].long()
+        return torch.where(found, first, fallback)
+
+    def payloads_for_key_positions(
+        self, key_positions: torch.Tensor
+    ) -> list[list[list[int]]]:
+        if self.registered_key_positions is None:
+            return []
+        result: list[list[list[int]]] = []
+        for batch_index in range(key_positions.size(0)):
+            batch_payloads = []
+            declared = self.registered_key_positions[batch_index].long()
+            for position in key_positions[batch_index].long():
+                match = declared.eq(position).nonzero(as_tuple=False).flatten()
+                if match.numel() == 0:
+                    batch_payloads.append([])
+                    continue
+                record = int(match[0])
+                length = int(self.registered_payload_lengths[batch_index, record])
+                batch_payloads.append(
+                    self.registered_payload_ids[batch_index, record, :length]
+                    .detach()
+                    .cpu()
+                    .tolist()
+                )
+            result.append(batch_payloads)
+        return result
 
     def inferred_span_end_positions(
         self,
@@ -241,6 +357,8 @@ class LexicalPointerDecodeState:
     cached_indexed_candidates: tuple[torch.Tensor, torch.Tensor] | None = None
     full_scan_attempted: bool = False
     full_scan_count: int = 0
+    payload_token_ids: list[int] | None = None
+    payload_cursor: int = 0
 
     def candidate_commit_eligible(self, diagnostics: dict, index: int = 0) -> bool:
         candidates = diagnostics.get("candidate_ids") or []
@@ -272,6 +390,10 @@ class LexicalPointerDecodeState:
         fallback_margin: float = 0.0,
         candidate_cap: int = 16,
         commit_threshold: float = 0.5,
+        hard_copy: bool = False,
+        hard_copy_gate_threshold: float = 0.9,
+        hard_copy_pointer_threshold: float = 0.9,
+        hard_copy_margin_threshold: float = 1.0,
     ):
         if input_ids.size(0) != 1:
             raise ValueError("LexicalPointerDecodeState currently requires batch size 1")
@@ -289,6 +411,26 @@ class LexicalPointerDecodeState:
                 )
         elif self.exact_memory.source_length != self.source_length:
             raise ValueError("exact-memory source length changed during decoding")
+
+        if self.payload_token_ids is not None:
+            if self.payload_cursor < len(self.payload_token_ids):
+                candidate_id = int(self.payload_token_ids[self.payload_cursor])
+                forced_logits = torch.full_like(base_logits, -1e4)
+                forced_logits[0, candidate_id] = 0.0
+                return forced_logits, {
+                    "mode": "cursor",
+                    "gate": 1.0,
+                    "mix_gate": 1.0,
+                    "source_positions": [[]],
+                    "candidate_ids": [[candidate_id]],
+                    "candidate_payload_ids": [[self.payload_token_ids]],
+                    "span_end_source": "explicit_payload",
+                    "full_scan_attempted": False,
+                    "full_scan_count": self.full_scan_count,
+                }
+            self.payload_token_ids = None
+            self.payload_cursor = 0
+            self.completed = True
 
         if self.source_token_position is not None:
             next_position = self.source_token_position + 1
@@ -381,15 +523,64 @@ class LexicalPointerDecodeState:
         diagnostics["full_scan_attempted"] = allow_full_scan
         diagnostics["full_scan_count"] = self.full_scan_count
         diagnostics["mode"] = "mixed"
+        explicit_span = diagnostics.get("span_end_source") in {
+            "explicit",
+            "explicit_payload",
+        }
+        hard_copy_eligible = (
+            bool(hard_copy)
+            and float(diagnostics.get("gate", 0.0))
+            >= float(hard_copy_gate_threshold)
+            and float(diagnostics.get("pointer_confidence", 0.0))
+            >= float(hard_copy_pointer_threshold)
+            and float(diagnostics.get("score_margin", 0.0))
+            >= float(hard_copy_margin_threshold)
+            and (
+                explicit_span
+                or float(diagnostics.get("commit_confidence", 0.0))
+                >= float(commit_threshold)
+            )
+            and (explicit_span or self.candidate_commit_eligible(diagnostics))
+        )
+        if hard_copy_eligible:
+            candidate_id = int(diagnostics["candidate_ids"][0][0])
+            forced_logits = torch.full_like(base_logits, -1e4)
+            forced_logits[0, candidate_id] = 0.0
+            diagnostics["mode"] = "hard_copy"
+            diagnostics["mix_gate"] = 1.0
+            diagnostics["hard_copy_eligible"] = True
+            return forced_logits, diagnostics
+        diagnostics["hard_copy_eligible"] = False
         return mixed_logits, diagnostics
 
     def commit(self, selected_id: int, diagnostics: dict, boundary: bool = False):
         mode = diagnostics.get("mode", "base")
         candidates = diagnostics.get("candidate_ids") or []
         positions = diagnostics.get("source_positions") or []
-        occurrence_ok = self.candidate_commit_eligible(diagnostics)
+        if mode == "cursor" and self.payload_token_ids is not None:
+            expected = int(self.payload_token_ids[self.payload_cursor])
+            if int(selected_id) == expected:
+                self.payload_cursor += 1
+                self.copied_tokens += 1
+            else:
+                self.payload_token_ids = None
+                self.payload_cursor = 0
+                self.completed = True
+            self.generated_tokens += 1
+            if (
+                self.payload_token_ids is not None
+                and self.payload_cursor >= len(self.payload_token_ids)
+            ):
+                self.payload_token_ids = None
+                self.payload_cursor = 0
+                self.completed = True
+            return
+        occurrence_ok = (
+            diagnostics.get("span_end_source") in {"explicit", "explicit_payload"}
+            or self.candidate_commit_eligible(diagnostics)
+        )
         followed_pointer = (
-            mode in {"mixed", "cursor"}
+            mode in {"mixed", "hard_copy", "cursor"}
             and float(diagnostics.get("mix_gate", 0.0)) > 0.0
             and candidates
             and positions
@@ -397,10 +588,16 @@ class LexicalPointerDecodeState:
             and int(selected_id) == int(candidates[0][0])
         )
         if followed_pointer:
-            self.source_token_position = int(positions[0][0]) + 1
-            span_ends = diagnostics.get("span_end_positions") or []
-            if span_ends:
-                self.source_span_end_position = int(span_ends[0][0])
+            payloads = diagnostics.get("candidate_payload_ids") or []
+            selected_payload = payloads[0][0] if payloads and payloads[0] else []
+            if selected_payload:
+                self.payload_token_ids = [int(value) for value in selected_payload]
+                self.payload_cursor = 1
+            else:
+                self.source_token_position = int(positions[0][0]) + 1
+                span_ends = diagnostics.get("span_end_positions") or []
+                if span_ends:
+                    self.source_span_end_position = int(span_ends[0][0])
             self.copied_tokens += 1
         elif mode == "cursor":
             self.source_token_position = None
@@ -413,6 +610,13 @@ class LexicalPointerDecodeState:
             and self.source_span_end_position is not None
             and self.source_token_position >= self.source_span_end_position
         )
+        if (
+            self.payload_token_ids is not None
+            and self.payload_cursor >= len(self.payload_token_ids)
+        ):
+            self.payload_token_ids = None
+            self.payload_cursor = 0
+            self.completed = True
         heuristic_boundary = (
             self.source_span_end_position is None
             and boundary
@@ -1413,7 +1617,10 @@ class SparseLexicalPointer(nn.Module):
                 gather_hidden = positions.unsqueeze(-1).expand(-1, -1, hidden.size(-1))
                 source_hidden = hidden.gather(1, gather_hidden).float()
                 keys = F.normalize(self.project_keys(source_hidden), dim=-1)
-            candidate_ids = anchor_memory.token_ids.long().gather(1, positions + 1)
+            prompt_candidate_ids = anchor_memory.token_ids.long().gather(1, positions + 1)
+            candidate_ids = anchor_memory.payload_first_tokens(
+                positions, prompt_candidate_ids
+            )
             source_mask = indexed_mask
             start = 0
         else:
@@ -1439,6 +1646,8 @@ class SparseLexicalPointer(nn.Module):
                 anchor_memory.valid_mask[:, :-1]
                 & anchor_memory.valid_mask[:, 1:]
             )
+            if anchor_memory.registered_key_mask is not None:
+                full_mask &= anchor_memory.registered_key_mask
             full_scores = torch.einsum("bd,bnd->bn", query, full_keys) * self.logit_scale.exp().clamp(max=50.0)
             full_scores = full_scores.masked_fill(~full_mask, -1e4)
             indexed_best = scores.max(dim=-1).values
@@ -1448,7 +1657,12 @@ class SparseLexicalPointer(nn.Module):
                 positions = full_scores.topk(cap, dim=-1).indices
                 source_mask = full_mask.gather(1, positions)
                 scores = full_scores.gather(1, positions).masked_fill(~source_mask, -1e4)
-                candidate_ids = anchor_memory.token_ids.long().gather(1, positions + 1)
+                prompt_candidate_ids = anchor_memory.token_ids.long().gather(
+                    1, positions + 1
+                )
+                candidate_ids = anchor_memory.payload_first_tokens(
+                    positions, prompt_candidate_ids
+                )
                 used_full_scan_fallback = True
         pointer_weights = torch.softmax(scores, dim=-1)
         pointer_vocab = torch.zeros_like(base_logits)
@@ -1461,12 +1675,18 @@ class SparseLexicalPointer(nn.Module):
             base_probs = torch.softmax(base_logits.float(), dim=-1)
             mixed = (1.0 - gate) * base_probs + gate * pointer_vocab
             mixed_logits = mixed.clamp_min(1e-12).log()
-        top_offsets = scores.topk(min(4, scores.size(-1)), dim=-1).indices
+        top_count = min(4, scores.size(-1))
+        top_scores, top_offsets = scores.topk(top_count, dim=-1)
         top_candidate_ids = candidate_ids.gather(1, top_offsets)
         top_positions = positions.gather(1, top_offsets) if anchor_memory is not None else top_offsets + start
         top_span_ends = None
         span_end_source = "none"
-        if anchor_memory is not None and anchor_memory.span_end_positions is not None:
+        if (
+            anchor_memory is not None
+            and anchor_memory.registered_payload_ids is not None
+        ):
+            span_end_source = "explicit_payload"
+        elif anchor_memory is not None and anchor_memory.span_end_positions is not None:
             top_span_ends = anchor_memory.span_end_positions.long().gather(
                 1,
                 top_positions + 1,
@@ -1478,6 +1698,18 @@ class SparseLexicalPointer(nn.Module):
                 min_commit=commit_threshold,
             )
             span_end_source = "learned_commit"
+        top_pointer_confidence = pointer_weights.gather(1, top_offsets)[:, 0]
+        score_margin = (
+            top_scores[:, 0] - top_scores[:, 1]
+            if top_count > 1
+            else torch.full_like(top_scores[:, 0], float("inf"))
+        )
+        if anchor_memory is not None:
+            top_commit_confidence = anchor_memory.commit_scores.float().gather(
+                1, top_positions
+            )[:, 0]
+        else:
+            top_commit_confidence = self.commit_scores(hidden).float()[:, -1]
         source_tokens = (
             anchor_memory.token_ids.long()
             if anchor_memory is not None
@@ -1529,6 +1761,14 @@ class SparseLexicalPointer(nn.Module):
             ),
             "span_end_source": span_end_source,
             "candidate_ids": top_candidate_ids.detach().cpu().tolist(),
+            "candidate_payload_ids": (
+                anchor_memory.payloads_for_key_positions(top_positions)
+                if anchor_memory is not None
+                else []
+            ),
+            "pointer_confidence": float(top_pointer_confidence.detach().mean()),
+            "score_margin": float(score_margin.detach().mean()),
+            "commit_confidence": float(top_commit_confidence.detach().mean()),
             "candidate_occurrences": candidate_occurrences,
             "cursor_continuation_supported": cursor_continuation_supported,
             "search_span": int(source_mask.sum(dim=1).max()),

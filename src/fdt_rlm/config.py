@@ -20,6 +20,11 @@ class ModelConfig:
     dropout: float = 0.1
     tie_embeddings: bool = True
     use_rope: bool = True
+    rope_transition_alpha: float = 1.0
+    rope_transition_mode: str = "lerp"  # "lerp", "phase", or "output_blend"
+    legacy_position_transition_max_len: int = 0
+    # Negative preserves the legacy coupling: scale = 1 - RoPE alpha.
+    legacy_position_scale: float = -1.0
 
     # FDT anchor routing. These fields are ignored by the plain Transformer.
     use_self_attention: bool = False
@@ -32,6 +37,10 @@ class ModelConfig:
     membership_logit_clip: float = 30.0
     aggregation_impl: str = "dense_gather_first"
     routing_backend: str = "matmul"  # "cdist" or "matmul"
+    routing_logit_quantization: float = 0.0
+    routing_boundary_smoothing_epsilon: float = 0.0
+    routing_boundary_extra_candidates: int = 0
+    routing_membership_quantization: float = 0.0
     enable_anchor_metrics: bool = True
     anchor_metrics_interval: int = 1
     compute_anchor_metrics_every: int = 1
@@ -44,10 +53,12 @@ class ModelConfig:
     use_local_mixer: bool = False
     local_mixer_kernel_size: int = 5
     local_attention_window: int = 64
+    inference_prefix_stable_group_size: int = 0
     router_dim: int = 128
     anchor_scan_chunk_size: int = 64
     anchor_recency_bias: float = 4.0
     anchor_recency_reference_len: int = 0
+    anchor_decode_state_fp32: bool = False
     diversity_margin: float = 0.20
     diversity_max_weight: float = 2.0
 
@@ -72,11 +83,19 @@ class ModelConfig:
     exact_memory_fallback_margin: float = 0.0
     exact_memory_copy_cursor: bool = True
     exact_memory_commit_threshold: float = 0.5
+    exact_memory_hard_copy: bool = False
+    exact_memory_hard_copy_gate_threshold: float = 0.9
+    exact_memory_hard_copy_pointer_threshold: float = 0.9
+    exact_memory_hard_copy_margin_threshold: float = 1.0
     generation_repetition_scope: str = "generated"
     generation_ngram_order: int = 3
     generation_ngram_penalty: float = 8.0
     generation_ngram_window: int = 96
     generation_ngram_hard_block_after: int = 2
+    # Optional model-native correction head for self-generated loop states.
+    # Rank zero preserves every pre-v4.1 checkpoint exactly.
+    loop_controller_rank: int = 0
+    loop_controller_scale: float = 1.0
 
 
 @dataclass
