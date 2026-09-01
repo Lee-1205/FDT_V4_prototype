@@ -35,6 +35,9 @@ not promoted and large-scale Stage B training is not authorized.
 
 - Stage A paired FP32 NLL remains 0.974% worse than V20.
 - Raw generation with loop controls disabled is loop-free on only 6/100 prompts.
+- The same fixed 100-prompt audit also gives V20 6/100. The paired mean
+  repetition difference is +0.01887 with a 95% interval spanning zero, so a
+  v4.1 raw-generation regression is not confirmed.
 - Direct output review still finds generic, weakly grounded, and semantically
   repetitive natural-language continuations.
 - A 16.15M-token full-model unlikelihood intervention reached only 8/100
@@ -48,9 +51,12 @@ knowledge, factual correctness, or raw autonomous generation capability.
 ## Training Boundary
 
 Do not resume Stage B or a large curriculum from either rejected loop-training
-experiment. The next training step must be a fresh, isolated objective pilot
-that materially improves raw penalty-off natural generation while preserving
-the V20 loss, top-1, routing, cache, Exact Memory, and validation gates.
+experiment. Same-input evidence clears raw-generation non-regression as a
+transition blocker, but not the absolute usability problem. Stage B remains
+held because the +0.974% paired NLL result leaves almost no room under the 1%
+transition gate and local storage cannot currently fit an optimizer recovery.
+Any next stage must preserve V20 loss, top-1, routing, cache, Exact Memory, and
+validation gates in a fresh output path.
 
 The earlier step-3000 V4 release remains an immutable historical snapshot. The
 current v4.1 compact evidence is under `evidence/v4_1_20260901/`.

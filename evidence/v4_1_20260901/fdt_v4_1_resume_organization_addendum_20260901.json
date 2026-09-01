@@ -1,0 +1,47 @@
+{
+  "schema": "fdt_v4_1_resume_organization_addendum_v1",
+  "date": "2026-09-01",
+  "decision": "RAW_GENERATION_REGRESSION_NOT_CONFIRMED__STAGE_B_STILL_HELD_FOR_NLL_HEADROOM_AND_STORAGE",
+  "fixed_dataset": {
+    "path": "artifacts/fdt_v4_200m_audit_20260829/fixed_repetition_inputs_100.jsonl",
+    "sha256": "E7438870589B6CCAB912D2F16F266C5EE654F8F47D3617DF90B24E9F206BAED5",
+    "rows": 100
+  },
+  "v20": {
+    "checkpoint_sha256": "7EE3F88D319928DD2D3F2542290F55FFCD036DCBB32A8AB22437C511E5890179",
+    "artifact": "artifacts/fdt_v20_t1_v4_1_fixed100_raw_repetition_20260901_r2/development_repetition.json",
+    "artifact_sha256": "11798D2662D0745555BCE5B573698276703FDA228EB6A0660C176B1A5FC6B5BC",
+    "loop_free": 6,
+    "mean_repetition_rate": 0.4267473413613132
+  },
+  "v4_1_stage_a": {
+    "checkpoint_sha256": "08A9CCF9CAD6C6145BAFD623FEE818A0A03D2BAD0D13524D409D788523FFFBF8",
+    "loop_free": 6,
+    "mean_repetition_rate": 0.4456128372325389,
+    "paired_nll_relative_regression_vs_v20": 0.00974
+  },
+  "paired_repetition": {
+    "both_loop_free": 3,
+    "v20_only_loop_free": 3,
+    "v4_1_only_loop_free": 3,
+    "v4_1_minus_v20_mean_repetition_rate": 0.018865495871225768,
+    "bootstrap_samples": 20000,
+    "bootstrap_seed": 20260901,
+    "bootstrap_95": [-0.022644413264228346, 0.05991589671237736],
+    "regression_confirmed": false
+  },
+  "promotion": {
+    "product_runtime_candidate": true,
+    "raw_model_promoted": false,
+    "stage_b_raw_generation_non_regression_gate": true,
+    "stage_b_launch": false,
+    "large_training_launch": false,
+    "remaining_blockers": ["paired_nll_headroom", "storage_headroom"]
+  },
+  "release": {
+    "repository_commit": "abddcb6",
+    "tag": "v4.1-runtime-candidate-20260901",
+    "checkpoint_sha256": "96439F598724C34F76270D614B43097547BD9E75D39D3659F62668BA5F541BFE",
+    "server_digest_match": true
+  }
+}

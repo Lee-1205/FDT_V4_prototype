@@ -19,7 +19,8 @@ behavior-preserving FDT v4.1 repair program.
 The selected checkpoint passes the sealed Exact Memory matrix and repaired
 cache fixtures. It is not a final autonomous language-model release: paired NLL
 is still 0.974% worse than V20 and penalty-off raw generation is loop-free on
-only 6/100 prompts.
+only 6/100 prompts. V20 scores the same 6/100 on those exact inputs, so this is
+an inherited base limitation rather than a confirmed v4.1 transition regression.
 
 ## Layout
 

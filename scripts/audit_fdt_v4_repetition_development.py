@@ -37,6 +37,11 @@ def main() -> None:
     parser.add_argument("--limit", type=int, default=100)
     parser.add_argument("--ngram-loop-penalty", type=float, default=0.0)
     parser.add_argument("--exact-mode", choices=evaluator.EXACT_MODES, default="off")
+    parser.add_argument(
+        "--allow-v3-comparator",
+        action="store_true",
+        help="Allow an FDT v3 checkpoint for a same-input comparator audit.",
+    )
     args = parser.parse_args()
 
     started = time.time()
@@ -45,7 +50,9 @@ def main() -> None:
     tokenizer, tokenizer_info = evaluator.tokenizer_metadata(args.tokenizer)
     rows = evaluator.load_dataset(dataset, tokenizer, args.limit)
     evaluator.require_nonempty_rows(rows, dataset, "repetition")
-    model, config, metadata = evaluator.load_checkpoint(checkpoint)
+    model, config, metadata = evaluator.load_checkpoint(
+        checkpoint, require_v4=not args.allow_v3_comparator
+    )
     model = model.to(device=args.device, dtype=torch.float32).eval()
 
     records = []

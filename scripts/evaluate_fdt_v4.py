@@ -385,7 +385,11 @@ def generate(
         output, cache = model.prefill(prompt, torch.ones_like(prompt))
     memory = None
     state = None
-    exact_available = model.exact_pointer is not None and exact_mode in {"store", "retrieve", "copy"}
+    exact_available = getattr(model, "exact_pointer", None) is not None and exact_mode in {
+        "store",
+        "retrieve",
+        "copy",
+    }
     if exact_available:
         memory = model.build_exact_memory(output["hidden"], prompt, torch.ones_like(prompt), source_length=len(prompt_ids))
     if exact_available and exact_mode == "copy":

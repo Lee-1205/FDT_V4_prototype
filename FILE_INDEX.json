@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-01T20:41:07.5175742+09:00",
+  "generated_at": "2026-09-01T20:48:31.0532285+09:00",
   "snapshot": "fdt_v4_1_runtime_candidate_20260901",
-  "decision": "PRODUCT_RUNTIME_CANDIDATE_VALIDATED__HOLD_STAGE_B_RAW_GENERATION_GATE",
-  "file_count": 393,
-  "total_bytes": 10861823,
+  "decision": "RAW_GENERATION_REGRESSION_NOT_CONFIRMED__STAGE_B_STILL_HELD_FOR_NLL_HEADROOM_AND_STORAGE",
+  "file_count": 396,
+  "total_bytes": 11034672,
   "files": [
     {
       "path": ".gitignore",
@@ -103,8 +103,8 @@
     },
     {
       "path": "CURRENT_STATUS.md",
-      "bytes": 2465,
-      "sha256": "2A120915E1313EAFC4B3954ACD5ADB83519E5896336D26ADC740E9C6131A1F3A"
+      "bytes": 2864,
+      "sha256": "6580DCF6AED8B6AD8E0DC8A55A4A7F6067948694042DD965709B410A3083D775"
     },
     {
       "path": "DATASETS.md",
@@ -1227,9 +1227,24 @@
       "sha256": "92F1B34A70BDB08698C06120CCFEB5F1BF33226B070370456781442DEBF75792"
     },
     {
+      "path": "evidence/v4_1_20260901/fdt_v4_1_resume_organization_addendum_20260901.json",
+      "bytes": 1869,
+      "sha256": "7A2B8A334F6475257D741304150792533560CB59E3B5808FAC96A7433FE8CA13"
+    },
+    {
+      "path": "evidence/v4_1_20260901/FDT_V4_1_RESUME_ORGANIZATION_ADDENDUM_20260901.md",
+      "bytes": 2442,
+      "sha256": "7306311E630C3CAE4A82CCD5151713E73C5BBEDE93C0A5BFFD8646295AFCE886"
+    },
+    {
       "path": "evidence/v4_1_20260901/release_verification.json",
       "bytes": 1076,
       "sha256": "499BFC65277B2BC6B8D6D3C65B1A9629C7CC32FC931AFAFF42F6BB3ED1A2F47D"
+    },
+    {
+      "path": "evidence/v4_1_20260901/v20_same_input_raw_repetition.json",
+      "bytes": 167723,
+      "sha256": "11798D2662D0745555BCE5B573698276703FDA228EB6A0660C176B1A5FC6B5BC"
     },
     {
       "path": "pyproject.toml",
@@ -1238,8 +1253,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 2480,
-      "sha256": "7518DA8F4DC896E86BE7FD828AAB600BFA1775471412D334D2597E8C97DB07D3"
+      "bytes": 2621,
+      "sha256": "9375ABE7609FD5499683D3D3525CEB87C596182164CE29D85BB887806014A255"
     },
     {
       "path": "references/README.md",
@@ -1348,8 +1363,8 @@
     },
     {
       "path": "scripts/audit_fdt_v4_repetition_development.py",
-      "bytes": 4413,
-      "sha256": "0D31371623205EB5C2AEB5CF061CEAF35AD2A0290422DDB1F9DE1755D37AB1AF"
+      "bytes": 4639,
+      "sha256": "33BB96B3E30AA7F10BA6B395FF9CFD357BF204AF2C57FDB4F18B0380767BC599"
     },
     {
       "path": "scripts/audit_fdt_v4_speed_routing_window.py",
@@ -1413,8 +1428,8 @@
     },
     {
       "path": "scripts/evaluate_fdt_v4.py",
-      "bytes": 49186,
-      "sha256": "0BD36B7078DED96C3EE1FBE2C796647DA23E889AFFBC986B575A8893B13AA5D3"
+      "bytes": 49235,
+      "sha256": "542AE2D216F92473568BB6930C2392C0B53B6EAEBBA2FF58E5B2C327EA6708C0"
     },
     {
       "path": "scripts/final_audit_fdt_v4.py",
