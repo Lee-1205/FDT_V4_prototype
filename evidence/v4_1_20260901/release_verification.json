@@ -1,0 +1,24 @@
+{
+  "schema": "fdt_v4_1_release_verification_v1",
+  "timestamp_utc": "2026-09-01T11:39:57Z",
+  "repository": "https://github.com/Lee-1205/FDT_V4_prototype",
+  "visibility": "PUBLIC",
+  "commit": "98fdb86eacd15e118b7293290cd7800db829d228",
+  "release": {
+    "tag": "v4.1-runtime-candidate-20260901",
+    "url": "https://github.com/Lee-1205/FDT_V4_prototype/releases/tag/v4.1-runtime-candidate-20260901",
+    "title": "FDT v4.1 Runtime Candidate - Raw Model Not Promoted"
+  },
+  "asset": {
+    "name": "latest.pt",
+    "label": "Selected FDT v4.1 checkpoint",
+    "bytes": 1707955211,
+    "local_sha256": "96439F598724C34F76270D614B43097547BD9E75D39D3659F62668BA5F541BFE",
+    "server_digest": "sha256:96439f598724c34f76270d614b43097547bd9e75d39d3659f62668ba5f541bfe",
+    "digest_match": true,
+    "download_url": "https://github.com/Lee-1205/FDT_V4_prototype/releases/download/v4.1-runtime-candidate-20260901/latest.pt"
+  },
+  "decision": "PRODUCT_RUNTIME_CANDIDATE_VALIDATED__HOLD_STAGE_B_RAW_GENERATION_GATE",
+  "raw_model_promoted": false,
+  "stage_b_authorized": false
+}

@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-09-01T20:36:25.9653738+09:00",
+  "generated_at": "2026-09-01T20:41:07.5175742+09:00",
   "snapshot": "fdt_v4_1_runtime_candidate_20260901",
   "decision": "PRODUCT_RUNTIME_CANDIDATE_VALIDATED__HOLD_STAGE_B_RAW_GENERATION_GATE",
-  "file_count": 392,
-  "total_bytes": 10860747,
+  "file_count": 393,
+  "total_bytes": 10861823,
   "files": [
     {
       "path": ".gitignore",
@@ -1225,6 +1225,11 @@
       "path": "evidence/v4_1_20260901/exact_memory_sealed/sha256.json",
       "bytes": 211,
       "sha256": "92F1B34A70BDB08698C06120CCFEB5F1BF33226B070370456781442DEBF75792"
+    },
+    {
+      "path": "evidence/v4_1_20260901/release_verification.json",
+      "bytes": 1076,
+      "sha256": "499BFC65277B2BC6B8D6D3C65B1A9629C7CC32FC931AFAFF42F6BB3ED1A2F47D"
     },
     {
       "path": "pyproject.toml",
